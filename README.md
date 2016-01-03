@@ -2,7 +2,7 @@
 An addrees parser and standardizer in C++
 
 The goal is to be able to take an address string and parse it into tokens
-classify standardize the tokens using and appropriate lexicon, then map the
+classify and standardize the tokens using an appropriate lexicon, then map the
 tokens to specific output fields based on rules.
 
 The purpose of this code is to be used as part of a geocoding or record
