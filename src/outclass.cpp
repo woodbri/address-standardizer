@@ -3,7 +3,7 @@
 
 #include "outclass.h"
 
-std::string OutClass::typeToString(const OutClass::Type &t) {
+std::string OutClass::asString(const OutClass::Type &t) {
     std::string str;
     switch (t) {
         case STOP:      str = "STOP";       break;
@@ -31,7 +31,7 @@ std::string OutClass::typeToString(const OutClass::Type &t) {
 }
 
 
-OutClass::Type OutClass::stringToType(const std::string &s) {
+OutClass::Type OutClass::asType(const std::string &s) {
     OutClass::Type t;
     std::map<std::string, OutClass::Type> m;
     std::map<std::string, OutClass::Type>::iterator it;
@@ -67,7 +67,7 @@ OutClass::Type OutClass::stringToType(const std::string &s) {
 }
 
 
-OutClass::Type OutClass::intToType(const int i) {
+OutClass::Type OutClass::asType(const int i) {
     OutClass::Type t;
     switch (i) {
         case -1: t = STOP;      break;

@@ -22,7 +22,7 @@ Token::Token(std::string text) {
 }
 
 
-std::string Token::attachedToString() const {
+std::string Token::attachedAsString() const {
     switch (attached_) {
         case NO:     return "NO";     break;
         case PREFIX: return "PREFIX"; break;
@@ -33,8 +33,8 @@ std::string Token::attachedToString() const {
 }
 
 
-std::string Token::tclassToString() const {
-    return InClass::typeToString(tclass_);
+std::string Token::tclassAsString() const {
+    return InClass::asString(tclass_);
 }
 
 
@@ -43,8 +43,8 @@ void Token::classify(Lexicon lexicon) {
 
 
 void Token::dump() const {
-    std::string tclass = tclassToString();
-    std::string attached = attachedToString();
+    std::string tclass = tclassAsString();
+    std::string attached = attachedAsString();
 
     std::stringstream ss;
     ss << text_ << "\t"

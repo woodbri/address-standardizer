@@ -32,9 +32,9 @@ public:
         BADTOKEN = 99   ///< An bad token type
     } Type;
 
-    static std::string typeToString(const OutClass::Type &t);
-    static OutClass::Type stringToType(const std::string &s);
-    static OutClass::Type intToType(const int t);
+    static std::string asString(const OutClass::Type &t);
+    static OutClass::Type asType(const std::string &s);
+    static OutClass::Type asType(const int t);
 
 };
 

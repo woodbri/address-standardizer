@@ -120,13 +120,13 @@ public:
         UNKNOWN = -1    ///< UNKNOWN or UNDEFINED
     } Lang;
 
-    static std::string typeToString(const InClass::Type &t);
-    static InClass::Type stringToType(const std::string &s);
-    static InClass::Type intToType(const int i);
+    static std::string asString(const InClass::Type &t);
+    static InClass::Type asType(const std::string &s);
+    static InClass::Type asType(const int i);
 
-    static std::string langToString(const InClass::Lang &lang);
-    static std::string langToName(const InClass::Lang &lang);
-    static InClass::Lang stringToLang(const std::string &s);
+    static std::string asString(const InClass::Lang &lang);
+    static std::string asName(const InClass::Lang &lang);
+    static InClass::Lang asLang(const std::string &s);
 
 private:
 

@@ -30,8 +30,8 @@ public:
     InClass::Type tclass() const { return tclass_; };
     AttachType attached() const { return attached_; };
 
-    std::string attachedToString() const;
-    std::string tclassToString() const;
+    std::string attachedAsString() const;
+    std::string tclassAsString() const;
 
     // mutators
     void text(std::string text) { text_ = text; };

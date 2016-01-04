@@ -20,5 +20,9 @@ t4: t4.cpp
 t5: t5.cpp
 	g++ $(CPPFLAGS) -D_FORTIFY_SOURCE=2 -D_REENTRANT  -DU_HAVE_ELF_H=1 -DU_HAVE_ATOMIC=1 -L /usr/lib/x86_64-linux-gnu/ `pkg-config --libs --cflags icu-uc icu-io` -Wl,-Bsymbolic-functions -Wl,-z,relro -o t5 t5.cpp ../*.o -ldl -lm `pkg-config --libs --cflags icu-uc icu-io`
 
+test: t5
+	./t5 '11 radcliff rd, north chelmsford, ma 01863 usa'
+
+
 clean:
 	rm -f $(EXE)

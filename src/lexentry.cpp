@@ -9,8 +9,8 @@
 #include "inclass.h"
 
 void LexEntry::dump() const {
-    std::string type = InClass::typeToString(type_);
-    std::string lang = InClass::langToString(lang_);
+    std::string type = InClass::asString(type_);
+    std::string lang = InClass::asString(lang_);
 
     std::stringstream ss;
     ss << word_ << "\t"
@@ -55,7 +55,7 @@ LexEntry::LexEntry(const std::string &line)
 
     set_word( in_word );
     set_stdword( in_stdword );
-    set_type( InClass::stringToType( in_type ) );
-    set_lang( InClass::stringToLang( in_lang ) );
+    set_type( InClass::asType( in_type ) );
+    set_lang( InClass::asLang( in_lang ) );
 }
 

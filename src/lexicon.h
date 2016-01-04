@@ -25,8 +25,8 @@ public:
     // getters
     std::string name() const { return name_; };
     InClass::Lang lang() const { return lang_; };
-    std::string langAsString() const { return InClass::langToString(lang_); };
-    std::string langAsName() const { return InClass::langToName(lang_); };
+    std::string langAsString() const { return InClass::asString(lang_); };
+    std::string langAsName() const { return InClass::asName(lang_); };
     std::string locale() const { return locale_; };
 
     void dump() const;

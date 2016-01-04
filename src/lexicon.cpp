@@ -56,7 +56,6 @@ void Lexicon::dump() const {
 // mutators
 
 void Lexicon::langAsString( std::string lang ) {
-    lang_ = InClass::stringToLang( lang );
+    lang_ = InClass::asLang( lang );
 }
-
 

@@ -3,7 +3,7 @@
 
 #include "inclass.h"
 
-std::string InClass::typeToString(const InClass::Type &t) {
+std::string InClass::asString(const InClass::Type &t) {
     std::string str;
     switch (t) {
         case STOP:      str = "STOP";   break;
@@ -36,7 +36,7 @@ std::string InClass::typeToString(const InClass::Type &t) {
     return str;
 }
 
-InClass::Type InClass::stringToType(const std::string &s) {
+InClass::Type InClass::asType(const std::string &s) {
     InClass::Type t;
     std::map<std::string, InClass::Type> m;
     std::map<std::string, InClass::Type>::iterator it;
@@ -77,7 +77,7 @@ InClass::Type InClass::stringToType(const std::string &s) {
     return t;
 }
 
-InClass::Type InClass::intToType(const int i) {
+InClass::Type InClass::asType(const int i) {
     InClass::Type t;
     switch (i) {
         case -1: t = STOP;      break;
@@ -111,7 +111,7 @@ InClass::Type InClass::intToType(const int i) {
 }
 
 
-std::string InClass::langToString(const InClass::Lang &lang) {
+std::string InClass::asString(const InClass::Lang &lang) {
     std::string str;
     switch (lang) {
         case ALB:       str = "ALB"; break;
@@ -199,7 +199,7 @@ std::string InClass::langToString(const InClass::Lang &lang) {
 }
 
 
-std::string InClass::langToName(const InClass::Lang &lang) {
+std::string InClass::asName(const InClass::Lang &lang) {
     std::string str;
     switch (lang) {
         case ALB:       str = "ALBANIAN"; break;
@@ -287,7 +287,7 @@ std::string InClass::langToName(const InClass::Lang &lang) {
 }
 
 
-InClass::Lang InClass::stringToLang(const std::string &s) {
+InClass::Lang InClass::asLang(const std::string &s) {
     InClass::Lang lang;
     std::map<std::string, InClass::Lang> m;
     std::map<std::string, InClass::Lang>::iterator it;
