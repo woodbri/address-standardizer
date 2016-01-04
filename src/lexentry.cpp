@@ -8,21 +8,6 @@
 #include "lexentry.h"
 #include "inclass.h"
 
-void LexEntry::dump() const {
-    std::string type = InClass::asString(type_);
-    std::string lang = InClass::asString(lang_);
-
-    std::stringstream ss;
-    ss << word_ << "\t"
-       << stdword_ << "\t"
-       << type << "\t"
-       << lang;
-
-    // later we might want to output to a logger instead of cout
-    std::cout << "LexEntry: " << ss.str() << "\n";
-}
-
-
 LexEntry::LexEntry()
   : word_(""),
     stdword_(""),
@@ -58,4 +43,19 @@ LexEntry::LexEntry(const std::string &line)
     set_type( InClass::asType( in_type ) );
     set_lang( InClass::asLang( in_lang ) );
 }
+
+std::ostream &operator<<(std::ostream &ss, const LexEntry &le) {
+    std::string type = InClass::asString(le.type_);
+    std::string lang = InClass::asString(le.lang_);
+
+    ss << "LexEntry:" << "\t"
+       << le.word_ << "\t"
+       << le.stdword_ << "\t"
+       << type << "\t"
+       << lang;
+
+    return ss;
+}
+
+
 

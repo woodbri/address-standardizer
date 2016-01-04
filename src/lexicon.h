@@ -29,13 +29,14 @@ public:
     std::string langAsName() const { return InClass::asName(lang_); };
     std::string locale() const { return locale_; };
 
-    void dump() const;
-
     // mutators
     void name( const std::string name ) { name_ = name; };
     void lang( const InClass::Lang lang ) { lang_ = lang; };
     void langAsString( std::string lang );
     void locale( std::string locale ) { locale_ = locale; };
+
+    // operators
+    friend std::ostream &operator<<(std::ostream &ss, const Lexicon &lex);
 
 private:
     std::string name_;

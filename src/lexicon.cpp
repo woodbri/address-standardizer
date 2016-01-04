@@ -39,17 +39,19 @@ Lexicon::Lexicon(std::string name, std::string file) {
 // getters
 
 
-void Lexicon::dump() const {
-    std::stringstream ss;
-    ss << name_ << "\t"
-       << langAsString() << "\t"
-       << locale_;
+// operators
 
-    // later we might want to output to a logger instead of cout
-    std::cout << "Lexicon: " << ss.str() << "\n";
+std::ostream &operator<<(std::ostream &ss, const Lexicon &lex) {
+    ss << "Lexicon:" << "\t"
+       << lex.name_ << "\t"
+       << lex.langAsString() << "\t"
+       << lex.locale_ << "\t"
+       << lex.lex_.size() << "\n";
 
-    // TODO dump the lexicon entries
-    std::cout << "Lexicon Entries (TODO)" << "\n";
+    for (auto it = lex.lex_.begin(); it != lex.lex_.end(); it++)
+        ss << *it << "\n";
+
+    return ss;
 }
 
 

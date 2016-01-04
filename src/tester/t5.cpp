@@ -28,7 +28,7 @@ int main(int ac, char* av[]) {
     std::cout << "tok.size() = " << tok.size() << "\n";
 
     for (auto it = tok.begin(); it != tok.end(); it++) 
-        (*it).dump();
+        std::cout << *it << "\n";
 
     return EXIT_SUCCESS;
 }

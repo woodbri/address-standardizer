@@ -41,7 +41,10 @@ public:
 
     void classify(Lexicon lexicon);
 
-    void dump() const;
+    // operators
+
+    friend std::ostream &operator<<(std::ostream &ss, const Token &token);
+
 
 private:
     std::string text_;

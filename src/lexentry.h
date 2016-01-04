@@ -27,15 +27,16 @@ public:
     void set_lang(const InClass::Lang lang) { lang_=lang; };
     ///@}
 
-    // dump
-    void dump() const;
-
     /** @name constructors */
     ///@{
     LexEntry();
     LexEntry(const std::string &word, const std::string &stdword, const InClass::Type type, const InClass::Lang lang);
     explicit LexEntry(const std::string &line);
     ///@}
+
+    /** @name operators */
+    ///@{
+    friend std::ostream &operator<<(std::ostream &ss, const LexEntry &le);
 
     // ~LexEntry() {};
 

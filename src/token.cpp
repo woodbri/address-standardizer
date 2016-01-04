@@ -42,16 +42,15 @@ void Token::classify(Lexicon lexicon) {
 }
 
 
-void Token::dump() const {
-    std::string tclass = tclassAsString();
-    std::string attached = attachedAsString();
+std::ostream &operator<<(std::ostream &ss, const Token &token) {
+    std::string tclass = token.tclassAsString();
+    std::string attached = token.attachedAsString();
 
-    std::stringstream ss;
-    ss << text_ << "\t"
-       << stdtext_ << "\t"
+    ss << "Token:" << "\t"
+       << token.text_ << "\t"
+       << token.stdtext_ << "\t"
        << tclass << "\t"
        << attached;
 
-    std::cout << "Token: " << ss.str() << "\n";
+    return ss;
 }
-
