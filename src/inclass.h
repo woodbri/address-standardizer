@@ -120,13 +120,23 @@ public:
         UNKNOWN = -1    ///< UNKNOWN or UNDEFINED
     } Lang;
 
+    typedef enum {
+        NO      = 0,
+        PREFIX  = 1,
+        SUFFIX  = 2,
+        EITHER  = 3
+    } AttachType;
+
+
     static std::string asString(const InClass::Type &t);
     static InClass::Type asType(const std::string &s);
     static InClass::Type asType(const int i);
+    static InClass::AttachType asAttachType(const std::string &s);
 
     static std::string asString(const InClass::Lang &lang);
     static std::string asName(const InClass::Lang &lang);
     static InClass::Lang asLang(const std::string &s);
+    static std::string asString(const InClass::AttachType &t);
 
 private:
 

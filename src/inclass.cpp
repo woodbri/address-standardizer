@@ -457,3 +457,25 @@ InClass::Lang InClass::asLang(const std::string &s) {
 
     return lang;
 }
+
+
+InClass::AttachType InClass::asAttachType(const std::string &s) {
+    if (s == "NO") return NO;
+    else if (s == "PREFIX") return PREFIX;
+    else if (s == "SUFFIX") return SUFFIX;
+    else if (s == "EITHER") return EITHER;
+    else return NO;
+}
+
+std::string InClass::asString(const InClass::AttachType &t) {
+    std::string str;
+    switch (t) {
+        case NO: str = "NO"; break;
+        case PREFIX: str = "PREFIX"; break;
+        case SUFFIX: str = "SUFFIX"; break;
+        case EITHER: str = "EITHER"; break;
+    }
+
+    return str;
+}
+

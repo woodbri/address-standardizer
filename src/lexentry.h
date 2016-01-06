@@ -16,27 +16,36 @@ public:
     std::string stdword() const { return stdword_; };
     InClass::Type type() const { return type_; };
     InClass::Lang lang() const { return lang_; };
+    InClass::AttachType attached() const { return attached_; };
+    bool isAttached() const { return attached_ != InClass::NO; };
     ///@}
 
     /** @name mutators */
     ///@{
     void set(const std::string &word, const std::string &stdword, const InClass::Type &type);
-    void set_word(const std::string &word) { word_=word; };
-    void set_stdword(const std::string &stdword) { stdword_=stdword; };
-    void set_type(const InClass::Type type) { type_=type; };
-    void set_lang(const InClass::Lang lang) { lang_=lang; };
+    void word(const std::string &word) { word_=word; };
+    void stdword(const std::string &stdword) { stdword_=stdword; };
+    void type(const InClass::Type type) { type_=type; };
+    void lang(const InClass::Lang lang) { lang_=lang; };
+    void attached(const InClass::AttachType attached) { attached_=attached; };
     ///@}
 
     /** @name constructors */
     ///@{
     LexEntry();
-    LexEntry(const std::string &word, const std::string &stdword, const InClass::Type type, const InClass::Lang lang);
+    LexEntry(const std::string &word, const std::string &stdword, const InClass::Type type, const InClass::Lang lang, const InClass::AttachType attached);
     explicit LexEntry(const std::string &line);
     ///@}
 
     /** @name operators */
     ///@{
     friend std::ostream &operator<<(std::ostream &ss, const LexEntry &le);
+
+    inline bool operator==(const LexEntry &rhs) const {
+        return word_==rhs.word_ and stdword_==rhs.stdword_
+            and type_==rhs.type_ and lang_==rhs.lang_;
+    }
+
 
     // ~LexEntry() {};
 
@@ -45,6 +54,7 @@ private:
     std::string stdword_;
     InClass::Type type_;
     InClass::Lang lang_;
+    InClass::AttachType attached_;
 
 };
 
