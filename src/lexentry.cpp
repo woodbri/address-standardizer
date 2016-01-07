@@ -41,6 +41,8 @@ LexEntry::LexEntry(const std::string &line)
 
     std::stringstream buffer(line);
     std::getline(buffer, in_word, '\t');
+    if (in_word == "LexEntry:")
+        buffer >> in_word;
     buffer >> in_stdword >> in_type >> in_lang >> in_attached;
 
     word_ = in_word;

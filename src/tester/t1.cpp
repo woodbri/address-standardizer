@@ -1,18 +1,31 @@
-// char_sep_example_1.cpp
-#include <iostream>
-#include <boost/tokenizer.hpp>
-#include <string>
 
-int main()
-{
-  std::string str = ";;Hello|world||-foo--bar;yow;baz|";
-  typedef boost::tokenizer<boost::char_separator<char> > 
-    tokenizer;
-  boost::char_separator<char> sep("-;|");
-  tokenizer tokens(str, sep);
-  for (tokenizer::iterator tok_iter = tokens.begin();
-       tok_iter != tokens.end(); ++tok_iter)
-    std::cout << "<" << *tok_iter << "> ";
-  std::cout << "\n";
-  return EXIT_SUCCESS;
+
+#include "../inclass.h"
+#include "../lexentry.h"
+#include "../lexicon.h"
+#include "../outclass.h"
+#include "../token.h"
+#include "../tokenizer.h"
+#include "../utils.h"
+
+#include <iostream>
+#include <string>
+#include <deque>
+
+int main(int ac, char* av[]) {
+
+    if (ac != 2) {
+        std::cerr << "Usage: t1 lex.txt\n";
+        return EXIT_FAILURE;
+    }
+
+    std::string file = av[1];
+
+    std::cout << "file: '" << file << "'\n";
+
+    Lexicon lex("test-lex", file);
+
+    std::cout << lex << "\n\n";
+
+    return EXIT_SUCCESS;
 }

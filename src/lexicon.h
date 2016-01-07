@@ -34,8 +34,8 @@ public:
     // mutators
     void name( const std::string name ) { name_ = name; };
     void lang( const InClass::Lang lang ) { lang_ = lang; };
-    void langAsString( std::string lang );
-    void locale( std::string locale ) { locale_ = locale; };
+    void lang( const std::string lang ) { lang_ = InClass::asLang( lang ); };
+    void locale( const std::string locale ) { locale_ = locale; };
 
     void insert( const LexEntry &le );
     void remove( const LexEntry &le );
