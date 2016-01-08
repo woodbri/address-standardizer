@@ -4,6 +4,7 @@
 #define INCLASS_H
 
 #include <map>
+#include <set>
 #include <string>
 
 class InClass {
@@ -128,6 +129,7 @@ public:
     } AttachType;
 
 
+    static std::string asString(const std::set<InClass::Type> &t);
     static std::string asString(const InClass::Type &t);
     static InClass::Type asType(const std::string &s);
     static InClass::Type asType(const int i);

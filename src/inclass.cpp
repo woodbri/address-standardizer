@@ -77,6 +77,18 @@ InClass::Type InClass::asType(const std::string &s) {
     return t;
 }
 
+
+std::string InClass::asString(const std::set<InClass::Type> &t) {
+    std::string str;
+    for (auto it=t.begin(); it!=t.end(); it++) {
+        if (it!=t.begin())
+            str += ",";
+        str += asString(*it);
+    }
+    return str;
+}
+
+
 InClass::Type InClass::asType(const int i) {
     InClass::Type t;
     switch (i) {

@@ -1,6 +1,6 @@
 Lexicon:	lex-en	ENG		
-LexEntry:	ST	STREET	TYPE	ENG	NO
-LexEntry:	ST  SAINT	WORD	ENG	NO
-LexEntry:	RD	ROAD	TYPE	ENG	NO
-LexEntry:	STREET	STREET	TYPE	ENG	NO
+LexEntry:	ST	STREET	TYPE	NO
+LexEntry:	ST  SAINT	WORD	NO
+LexEntry:	RD	ROAD	TYPE	NO
+LexEntry:	STREET	STREET	TYPE	NO
 Lexicon.Attached:	

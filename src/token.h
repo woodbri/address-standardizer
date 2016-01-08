@@ -5,6 +5,7 @@
 #define TOKEN_H
 
 #include <string>
+#include <set>
 
 #include "inclass.h"
 #include "lexicon.h"
@@ -20,19 +21,17 @@ public:
     // getters
     std::string text() const { return text_; };
     std::string stdtext() const { return stdtext_; };
-    InClass::Type tclass() const { return tclass_; };
+    std::set<InClass::Type> tclass() const { return tclass_; };
     InClass::AttachType attached() const { return attached_; };
 
-    std::string attachedAsString() const;
-    std::string tclassAsString() const;
+    std::string attachedAsString() const { return InClass::asString( attached_ ); };
+    std::string tclassAsString() const { return InClass::asString( tclass_ ); };
 
     // mutators
     void text(std::string text) { text_ = text; };
     void stdtext(std::string stdtext) { stdtext_ = stdtext; };
-    void tclass(InClass::Type tclass) { tclass_ = tclass; };
+    void tclass(InClass::Type tclass) { tclass_.insert( tclass ); };
     void attached(InClass::AttachType attached) { attached_ = attached; };
-
-    void classify(Lexicon lexicon);
 
     // operators
 
@@ -42,7 +41,7 @@ public:
 private:
     std::string text_;
     std::string stdtext_;
-    InClass::Type tclass_;
+    std::set<InClass::Type> tclass_;
     InClass::AttachType attached_;
 
 };

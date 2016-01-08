@@ -32,6 +32,7 @@ std::deque<Token> Tokenizer::getTokens(std::string str) {
     for (tokenizer::iterator tok_iter = tokens.begin();
          tok_iter != tokens.end(); ++tok_iter) {
         Token tok(*tok_iter);
+        tok.tclass(InClass::WORD);
         outtokens.push_back(tok);
     }
 
