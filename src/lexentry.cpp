@@ -41,10 +41,13 @@ LexEntry::LexEntry(const std::string &line)
 
     word_ = in_word;
     stdword_ = in_stdword;
-    buffer.str(in_type);
-    while (!(std::getline(buffer, in_type, ',')).eof()) {
+    std::stringstream buffer2(in_type);
+    while (true) {
+        std::getline(buffer2, in_type, ',');
         if (in_type.length() > 0)
             type(InClass::asType( in_type ));
+        if (buffer2.eof())
+            break;
     }
     attached_ = InClass::asAttachType( in_attached );
 }

@@ -1,7 +1,7 @@
 
 CPPFLAGS = -O0 -g -Wall -std=c++0x -fPIC -frounding-math -Wno-deprecated -pedantic  -fmax-errors=10 -Wextra
 
-EXE = t1 t2 t3 t4 t5
+EXE = t1 t5
 
 all: $(EXE)
 
