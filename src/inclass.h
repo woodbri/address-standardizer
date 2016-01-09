@@ -36,7 +36,9 @@ public:
         PCH     = 27,   ///< A 3 character sequence of letter number letter. Identifies an FSA, the first 3 characters of a Canadian postal code.
         QUINT   = 28,   ///< A 5 digit number. Identifies a Zip Code
         QUAD    = 29,   ///< A 4 digit number. Identifies ZIP4.
-        BADTOKEN = 99    ///< A bad token type.
+        PUNCT   = 30,   ///< Punctuation character(s)
+        SPACE   = 31,   ///< whitespace
+        BADTOKEN = 99   ///< A bad token type.
     } Type;
 
     typedef enum {

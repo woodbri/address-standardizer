@@ -8,8 +8,10 @@
 #include <deque>
 #include <string>
 #include <iostream>
+#include <boost/regex.hpp>
 
 #include "inclass.h"
+#include "token.h"
 #include "lexentry.h"
 
 class Lexicon
@@ -40,8 +42,12 @@ public:
     void insert( const LexEntry &le );
     void remove( const LexEntry &le );
 
+    std::string regex();
+
     // operators
     friend std::ostream &operator<<(std::ostream &ss, const Lexicon &lex);
+
+    void classify( Token& token, InClass::Type typ );
 
 private:
 
@@ -60,6 +66,7 @@ private:
     std::string locale_;
     std::map <std::string, std::deque<LexEntry>, lexcomp> lex_;
     std::deque<std::string> attached_;
+    std::string regex_;
 
 
 };

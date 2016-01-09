@@ -31,6 +31,8 @@ std::string InClass::asString(const InClass::Type &t) {
         case PCH:       str = "PCH";    break;
         case QUINT:     str = "QUINT";  break;
         case QUAD:      str = "QUAD";   break;
+        case PUNCT:     str = "PUNCT";  break;
+        case SPACE:     str = "SPACE";  break;
         default:        str = "BADTOKEN"; break;
     };
     return str;
@@ -66,6 +68,8 @@ InClass::Type InClass::asType(const std::string &s) {
     m["PCH"]       = PCH;
     m["QUINT"]     = QUINT;
     m["QUAD"]      = QUAD;
+    m["PUNCT"]     = PUNCT;
+    m["SPACE"]     = SPACE;
     m["BADTOKEN"]  = BADTOKEN;
 
     it = m.find(s);
@@ -117,6 +121,8 @@ InClass::Type InClass::asType(const int i) {
         case 27: t = PCH;       break;
         case 28: t = QUINT;     break;
         case 29: t = QUAD;      break;
+        case 30: t = PUNCT;     break;
+        case 31: t = SPACE;     break;
         default: t = BADTOKEN;  break;
     }
     return t;

@@ -8,32 +8,45 @@
 #include "tokenizer.h"
 
 
-
-Tokenizer::Tokenizer() {
-    separatorsNoToken_ = " \t";
-    separatorsToken_   = "!@#$%^&*()-+={}|[]:\";'<>,.?/";
-}
-
-
-Tokenizer::Tokenizer(std::string separatorsNoToken, std::string separatorsToken) {
-    separatorsNoToken_ = separatorsNoToken;
-    separatorsToken_   = separatorsToken;
-}
-
-
 std::deque<Token> Tokenizer::getTokens(std::string str) {
-    typedef boost::tokenizer<boost::char_separator<char> >
-        tokenizer;
 
-    boost::char_separator<char> sep(separatorsNoToken_.c_str(), separatorsToken_.c_str());
+    std::string regex = "^(" + lex_.regex() + "\\d+/\\d+|\\d+|\\<[[:alpha:]]+\\>|\\w+)([-&\\s\\|[:punct:]]+|$)";
+    boost::regex expression( regex, boost::regex::icase );
 
-    tokenizer tokens(str, sep);
+    std::string::const_iterator start, end;
+    start = str.begin();
+    end = str.end();
+
+    boost::match_results<std::string::const_iterator> what;
+    boost::match_flag_type flags = boost::match_default;
+
     std::deque<Token> outtokens;
-    for (tokenizer::iterator tok_iter = tokens.begin();
-         tok_iter != tokens.end(); ++tok_iter) {
-        Token tok(*tok_iter);
-        tok.tclass(InClass::WORD);
-        outtokens.push_back(tok);
+
+    while(boost::regex_search(start, end, what, expression, flags)) {
+
+        // fetch and create the token for the word or phrase
+        if (what[1].first < what[1].second) {
+            Token tok( std::string(what[1].first, what[1].second) );
+            // token might classify as multiple types
+            // or none, in which case make it a word
+            lex_.classify(tok, InClass::WORD);
+            if (not tok.isInClass(filter_))
+                outtokens.push_back(tok);
+        }
+
+        // create a token for the punctuation
+        if (what[2].first < what[2].second) {
+            Token punct( std::string(what[2].first, what[2].second) );
+            lex_.classify(punct, InClass::PUNCT);
+            if (not punct.isInClass(filter_))
+                outtokens.push_back(punct);
+        }
+
+        // update search position
+        start = what[0].second;
+
+        // update flags
+        flags |= boost::match_not_bob;
     }
 
     return outtokens;

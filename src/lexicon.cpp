@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <algorithm>
 
 #include "lexentry.h"
 #include "inclass.h"
@@ -84,10 +85,10 @@ Lexicon::Lexicon(std::string name, std::string file) {
 
 
 std::deque<LexEntry> Lexicon::find( const std::string key ) {
-    std::map <std::string, std::deque<LexEntry>, lexcomp >::iterator it;
+
     std::deque<LexEntry> empty;
 
-    it = lex_.find( key );
+    auto it = lex_.find( key );
     if ( it != lex_.end() )
         return (*it).second;
     else
@@ -131,6 +132,80 @@ std::ostream &operator<<(std::ostream &ss, const Lexicon &lex) {
 }
 
 
+void Lexicon::classify( Token& token, InClass::Type typ ) {
+    
+    // fetch the entry from the lexicon
+    // we get an empty container if it is not found
+    std::string text = token.text();
+    std::deque<LexEntry> entries = find( text );
+
+    // append appropriate classes to token
+    for( auto entry = entries.begin(); entry != entries.end(); entry++ ) {
+        // for each entry add it to the token classification
+        std::set<InClass::Type> letype = (*entry).type();
+        for (auto it=letype.begin(); it!=letype.end(); it++)
+            token.inclass( *it );
+    }
+
+    boost::regex num_exp("^\\d+$");
+    boost::regex word_exp("^\\w+$");
+    boost::regex has_digit("^.*\\d.*$");
+    boost::regex dash_exp("^[-]+$");
+    boost::regex punct_exp("^[-&\\s\\|[:punct:]]+$");
+    boost::regex space_exp("^\\s+$");
+    boost::regex pch_exp("^[A-Z]{1,2}\\d{1,2}[A-Z]{0,1}$", boost::regex::icase);
+    boost::regex pct_exp("^(\\d[A-Z]\\d|\\d[A-Z]{2})$", boost::regex::icase);
+
+    // is it a number
+    if (boost::regex_match(text, num_exp, boost::match_default)) {
+        token.inclass( InClass::NUMBER );
+        if (text.length() == 4)
+            token.inclass( InClass::QUAD );
+        if (text.length() == 5)
+            token.inclass( InClass::QUINT );
+    }
+    // is it pch
+    else if (boost::regex_match(text, pch_exp, boost::match_default)) {
+        token.inclass( InClass::MIXED );
+        token.inclass( InClass::PCH );
+    }
+    // is it pct
+    else if (boost::regex_match(text, pct_exp, boost::match_default)) {
+        token.inclass( InClass::MIXED );
+        token.inclass( InClass::PCT );
+    }
+    // is it alpha
+    // is mixed alpha and digit
+    else if (boost::regex_match(text, word_exp, boost::match_default)) {
+        if (boost::regex_match(text, has_digit, boost::match_default))
+            token.inclass( InClass::MIXED );
+        else
+            token.inclass( InClass::WORD );
+    }
+    // is it dash
+    else if (boost::regex_match(text, dash_exp, boost::match_default)) {
+        token.inclass( InClass::DASH );
+        token.inclass( InClass::PUNCT );
+    }
+    // is it ampersand
+    else if (text == "&") {
+        token.inclass( InClass::AMPERS );
+        token.inclass( InClass::PUNCT );
+    }
+    // is it punct
+    else if (boost::regex_match(text, punct_exp, boost::match_default)) {
+        token.inclass( InClass::PUNCT );
+    }
+    // is it whitespace
+    else if (boost::regex_match(text, space_exp, boost::match_default)) {
+        token.inclass( InClass::SPACE );
+    }
+
+    if ( (token.inclass()).empty() )
+        token.inclass( typ );
+}
+
+
 // mutators
 
 void Lexicon::insert( const LexEntry &le ) {
@@ -140,7 +215,7 @@ void Lexicon::insert( const LexEntry &le ) {
 
     // fetch the entry from the lexicon
     // we get an empty container if it is not found
-    std::deque<LexEntry> entries = Lexicon::find( key );
+    std::deque<LexEntry> entries = find( key );
 
     // see if it is already here and do nothing if it is
     for( auto entry = entries.begin(); entry != entries.end(); entry++ ) {
@@ -153,6 +228,10 @@ void Lexicon::insert( const LexEntry &le ) {
 
     // save it back in the lexicon
     lex_[key] = entries;
+
+    // set cached regex string to empty
+    // so it will get regenerated
+    regex_ = "";
 }
 
 
@@ -184,7 +263,38 @@ void Lexicon::remove( const LexEntry &le ) {
                 lex_[key] = entries;
             }
         }
-    }       
+    }
+
+    // set cached regex string to empty
+    // so it will get regenerated
+    regex_ = "";
+}
+
+bool sortByStringLength(std::string a, std::string b) {
+    return a.length() > b.length();
+}
+
+std::string Lexicon::regex() {
+
+    // if the regex string is empty, regenerate it
+    if (regex_.length() == 0) {
+        // collect all lexicon keys in deque
+        std::deque<std::string> keys;
+        for (auto it=lex_.begin(); it!=lex_.end(); it++)
+            keys.push_back( (*it).first );
+
+        // sort them based on length desc
+        std::sort(keys.begin(), keys.end(), sortByStringLength);
+
+        // concat them into a regex fragment
+        std::string str;
+        for (auto it=keys.begin(); it!=keys.end(); it++)
+            str += *it + "|";
+
+        regex_ = str;
+    }
+    
+    return regex_;
 }
 
 

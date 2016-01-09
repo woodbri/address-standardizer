@@ -22,8 +22,11 @@ int main(int ac, char* av[]) {
 
     std::deque<Token> tok;
 
-    Tokenizer tokenizer;
-    tok = tokenizer.getTokens(str);
+    Lexicon lex;
+
+    Tokenizer tokenizer( lex );
+    tokenizer.addFilter( InClass::PUNCT );
+    tok = tokenizer.getTokens( str );
 
     std::cout << "tok.size() = " << tok.size() << "\n";
 
