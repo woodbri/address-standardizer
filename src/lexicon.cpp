@@ -98,8 +98,8 @@ std::deque<LexEntry> Lexicon::find( const std::string key ) {
 
 bool Lexicon::isInAttached( const std::string word ) const {
 
-    for (auto it = attached_.begin(); it != attached_.end(); it++)
-        if ( *it == word ) return true;
+    for ( const auto &e :attached_ )
+        if ( e == word ) return true;
 
     return false;
 }
@@ -115,16 +115,14 @@ std::ostream &operator<<(std::ostream &ss, const Lexicon &lex) {
        << lex.lex_.size() << "\n";
 
     // each lexicon entry is a deque of LexEntry objects
-    for (auto it = lex.lex_.begin(); it != lex.lex_.end(); it++) {
-        const std::deque<LexEntry> deq = (*it).second;
-        for (auto it2 = deq.begin(); it2 != deq.end(); it2++)
-            ss << *it2 << "\n";
-    }
+    for (const auto &l  : lex.lex_)
+        for (const auto &d : l.second)
+            ss << d << "\n";
 
     ss << "Lexicon.attached:";
 
-    for (auto it = lex.attached_.begin(); it != lex.attached_.end(); it++)
-        ss << "\t" << *it;
+    for (const auto &e : lex.attached_)
+        ss << "\t" << e;
 
     ss << "\n";
 
@@ -140,12 +138,14 @@ void Lexicon::classify( Token& token, InClass::Type typ ) {
     std::deque<LexEntry> entries = find( text );
 
     // append appropriate classes to token
-    for( auto entry = entries.begin(); entry != entries.end(); entry++ ) {
+    for( const auto &entry : entries ) {
         // for each entry add it to the token classification
-        std::set<InClass::Type> letype = (*entry).type();
-        for (auto it=letype.begin(); it!=letype.end(); it++)
-            token.inclass( *it );
+        std::set<InClass::Type> letype = entry.type();
+        for ( const auto &e : letype )
+            token.inclass( e );
     }
+
+    if ( not token.isInClassEmpty() ) return;
 
     boost::regex num_exp("^\\d+$");
     boost::regex word_exp("^\\w+$");
@@ -179,8 +179,14 @@ void Lexicon::classify( Token& token, InClass::Type typ ) {
     else if (boost::regex_match(text, word_exp, boost::match_default)) {
         if (boost::regex_match(text, has_digit, boost::match_default))
             token.inclass( InClass::MIXED );
-        else
+        else {
+            if (text.length() == 2)
+                token.inclass( InClass::DOUBLE );
+            else if (text.length() == 1)
+                token.inclass( InClass::SINGLE );
+
             token.inclass( InClass::WORD );
+        }
     }
     // is it dash
     else if (boost::regex_match(text, dash_exp, boost::match_default)) {
@@ -218,10 +224,9 @@ void Lexicon::insert( const LexEntry &le ) {
     std::deque<LexEntry> entries = find( key );
 
     // see if it is already here and do nothing if it is
-    for( auto entry = entries.begin(); entry != entries.end(); entry++ ) {
-        if ( *entry == le )
+    for( const auto &entry : entries )
+        if ( entry == le )
             return;
-    }
 
     // append the lexentry to the existing entries for this key
     entries.push_back( le );
@@ -245,7 +250,7 @@ void Lexicon::remove( const LexEntry &le ) {
     std::deque<LexEntry> entries = find( key );
 
     // see if it is already here and do nothing if it is
-    for( auto entry = entries.begin(); entry != entries.end(); entry++ ) {
+    for( auto entry=entries.begin(); entry!=entries.end(); entry++ ) {
         if ( *entry == le ) {
             entries.erase( entry );
             if ( le.isAttached() and not isInAttached( le.word() ) ) {
@@ -280,16 +285,16 @@ std::string Lexicon::regex() {
     if (regex_.length() == 0) {
         // collect all lexicon keys in deque
         std::deque<std::string> keys;
-        for (auto it=lex_.begin(); it!=lex_.end(); it++)
-            keys.push_back( (*it).first );
+        for ( const auto &e : lex_ )
+            keys.push_back( e.first );
 
         // sort them based on length desc
         std::sort(keys.begin(), keys.end(), sortByStringLength);
 
         // concat them into a regex fragment
         std::string str;
-        for (auto it=keys.begin(); it!=keys.end(); it++)
-            str += *it + "|";
+        for ( const auto &key : keys )
+            str += key + "|";
 
         regex_ = str;
     }

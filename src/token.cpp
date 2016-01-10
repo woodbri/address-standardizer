@@ -55,8 +55,8 @@ std::ostream &operator<<(std::ostream &ss, const Token &token) {
 
 
 bool Token::isInClass( std::set<InClass::Type> test ) const {
-    for (auto it=test.begin(); it!=test.end(); it++) {
-        if (inclass_.find( *it ) != inclass_.end())
+    for ( const auto &e : test ) {
+        if (inclass_.find( e ) != inclass_.end())
             return true;
     }
     return false;

@@ -29,6 +29,7 @@ public:
     std::string inclassAsString() const { return InClass::asString( inclass_ ); };
     std::string outclassAsString() const { return OutClass::asString( outclass_ ); };
     bool isInClass( std::set<InClass::Type> test ) const;
+    bool isInClassEmpty() const { return inclass_.empty(); };
 
     // mutators
     void text(std::string text) { text_ = text; };

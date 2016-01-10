@@ -13,14 +13,15 @@ std::deque<Token> Tokenizer::getTokens(std::string str) {
     std::string regex = "^(" + lex_.regex() + "\\d+/\\d+|\\d+|\\<[[:alpha:]]+\\>|\\w+)([-&\\s\\|[:punct:]]+|$)";
     boost::regex expression( regex, boost::regex::icase );
 
-    std::string::const_iterator start, end;
-    start = str.begin();
-    end = str.end();
-
     boost::match_results<std::string::const_iterator> what;
     boost::match_flag_type flags = boost::match_default;
 
     std::deque<Token> outtokens;
+
+    // could not get this to work with auto
+    std::string::const_iterator start, end;
+    start = str.begin();
+    end   = str.end();
 
     while(boost::regex_search(start, end, what, expression, flags)) {
 
