@@ -42,7 +42,7 @@ std::string Utils::upperCaseUTF8( const std::string &str, const std::string loc 
 }
 
 
-std::string normalizeUTF8( const std::string &str, UErrorCode &errorCode) {
+std::string Utils::normalizeUTF8( const std::string &str, UErrorCode &errorCode) {
     std::string result("ERROR");
 
     // UTF-8 std::string -> UTF-16 UnicodeString
@@ -63,6 +63,7 @@ std::string normalizeUTF8( const std::string &str, UErrorCode &errorCode) {
         return result;
 
     // UTF-16 UnicodeString -> UTF-8 std::string
+    result = "";
     source.toUTF8String(result);
 
     return result;

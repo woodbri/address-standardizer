@@ -20,6 +20,9 @@ public:
         STOPWORD = 7,   ///< A word with low lexical significance, that can be omitted in parsing. For example, 'THE'. STOPWORDS combine with WORDS. In rules a string of multiple WORDs and STOPWORDs will be represented by a single WORD token.
         RR      =  8,   ///< Words and abbreviations used to denote rural routes. 'RR'.
         DASH    =  9,   ///< A hyphen
+        CITY    = 10,   ///< City name
+        PROV    = 11,   ///< State, province, or region name or abbreviation
+        NATION  = 12,   ///< Nation name or abbreviation
         AMPERS  = 13,   ///< The ampersand (&) is frequently used to abbreviate the word 'and'.
         BOXH    = 14,   ///< Words used to denote post office boxes. For example 'Box' or 'PO Box'.
         ORD     = 15,   ///< Representations such as First or 1st. Often used in street. Are often standardized as numbers.

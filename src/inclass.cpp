@@ -15,6 +15,9 @@ std::string InClass::asString(const InClass::Type &t) {
         case STOPWORD:  str = "STOPWORD"; break;
         case RR:        str = "RR";     break;
         case DASH:      str = "DASH";   break;
+        case CITY:      str = "CITY";   break;
+        case PROV:      str = "PROV";   break;
+        case NATION:    str = "NATION"; break;
         case AMPERS:    str = "AMPERS"; break;
         case BOXH:      str = "BOXH";   break;
         case ORD:       str = "ORD";    break;
@@ -52,6 +55,9 @@ InClass::Type InClass::asType(const std::string &s) {
     m["STOPWORD"]  = STOPWORD;
     m["RR"]        = RR;
     m["DASH"]      = DASH;
+    m["CITY"]      = CITY;
+    m["PROV"]      = PROV;
+    m["NATION"]    = NATION;
     m["AMPERS"]    = AMPERS;
     m["BOXH"]      = BOXH;
     m["ORD"]       = ORD;
@@ -105,6 +111,9 @@ InClass::Type InClass::asType(const int i) {
         case  7: t = STOPWORD;  break;
         case  8: t = RR;        break;
         case  9: t = DASH;      break;
+        case 10: t = CITY;      break;
+        case 11: t = PROV;      break;
+        case 12: t = NATION;    break;
         case 13: t = AMPERS;    break;
         case 14: t = BOXH;      break;
         case 15: t = ORD;       break;

@@ -1,22 +1,37 @@
-// char_sep_example_2.cpp
-#include <iostream>
-#include <boost/tokenizer.hpp>
-#include <string>
 
-int main()
-{
-    //std::string str = "ABI�A AUZOA, Z/G  SUKARRIETA BIZKAIA  48395";
-    //std::string str = "Albert-Schweitzer-Weg, Süd II";
-    //std::string str = "Ahornstra▒~_e, Goldenst. Nord II";
-    std::string str = "Alte Bundestra▒~_e (Harpendorf)";
-    typedef boost::tokenizer<boost::char_separator<char> > 
-        tokenizer;
-    //boost::char_separator<char> sep(" ", ",-", boost::keep_empty_tokens);
-    boost::char_separator<char> sep(" \t", "!@#$%^&*()-+={}|[]:\";'<>,.?/");
-    tokenizer tokens(str, sep);
-    for (tokenizer::iterator tok_iter = tokens.begin();
-         tok_iter != tokens.end(); ++tok_iter)
-      std::cout << "<" << *tok_iter << "> ";
-    std::cout << "\n";
+
+#include "../inclass.h"
+#include "../lexentry.h"
+#include "../lexicon.h"
+#include "../outclass.h"
+#include "../token.h"
+#include "../tokenizer.h"
+#include "../utils.h"
+
+#include <iostream>
+#include <string>
+#include <deque>
+
+int main(int ac, char* av[]) {
+
+    std::string str("");
+    for(int i=1; i<ac; i++)
+        str += av[i];
+
+    std::cout << "str: '" << str << "'\n";
+
+    std::deque<Token> tok;
+
+    Lexicon lex;
+
+    Tokenizer tokenizer( lex );
+    tokenizer.addFilter( InClass::PUNCT );
+    tok = tokenizer.getTokens( str );
+
+    std::cout << "tok.size() = " << tok.size() << "\n";
+
+    for (auto it = tok.begin(); it != tok.end(); it++) 
+        std::cout << *it << "\n";
+
     return EXIT_SUCCESS;
 }
