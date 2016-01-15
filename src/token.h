@@ -22,7 +22,7 @@ public:
     std::string text() const { return text_; };
     std::string stdtext() const { return stdtext_; };
     std::set<InClass::Type> inclass() const { return inclass_; };
-    InClass::AttachType attached() const { return attached_; };
+    std::set<InClass::AttachType> attached() const { return attached_; };
     OutClass::Type outclass() const { return outclass_; };
 
     std::string attachedAsString() const { return InClass::asString( attached_ ); };
@@ -35,7 +35,9 @@ public:
     void text(std::string text) { text_ = text; };
     void stdtext(std::string stdtext) { stdtext_ = stdtext; };
     void inclass(InClass::Type inclass) { inclass_.insert( inclass ); };
-    void attached(InClass::AttachType attached) { attached_ = attached; };
+    void inclass(std::set<InClass::Type> inclass) { inclass_ = inclass; };
+    void attached(InClass::AttachType attached) { attached_.insert( attached ); };
+    void attached(std::set<InClass::AttachType> attached) { attached_ = attached; };
     void outclass(OutClass::Type outclass) { outclass_ = outclass; };
 
     // operators
@@ -48,7 +50,7 @@ private:
     std::string stdtext_;
     std::set<InClass::Type> inclass_;
     OutClass::Type outclass_;
-    InClass::AttachType attached_;
+    std::set<InClass::AttachType> attached_;
 
 };
 

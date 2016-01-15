@@ -7,6 +7,7 @@
 #include <string>
 #include <algorithm>
 
+#include "utils.h"
 #include "lexentry.h"
 #include "inclass.h"
 #include "lexicon.h"
@@ -35,7 +36,6 @@ Lexicon::Lexicon(std::string name, std::string file) {
     locale_ = "";
     lex_.clear();
 
-    // TODO read file and load lexicon
     std::string line;
     std::ifstream is (file.c_str(), std::ifstream::in|std::ifstream::binary);
     if (not is.is_open()) {
@@ -50,7 +50,7 @@ Lexicon::Lexicon(std::string name, std::string file) {
     std::stringstream buffer(line);
     std::string term;
     std::getline(buffer, term, '\t');
-    if (term != "Lexicon:") {
+    if (term != "LEXICON:" and term != "Lexicon:") {
         is.close();
         std::cout << "ERROR: file format error: '" << file << "'\n";
         //throw 1001;
@@ -64,13 +64,20 @@ Lexicon::Lexicon(std::string name, std::string file) {
     buffer >> locale_;                  // set the locale
                                         // ignore the count of keys
 
+    UErrorCode errorCode;
+
     // ret in the lexicon entries
     while (not is.eof()) {
         std::getline( is, line );
             std::cout << "\t" << line << "\n";
         if (line.length() == 0) continue;
 
-        if (line.compare(0, 9, "LexEntry:") == 0) {
+        if ( line.compare(0, 9, "LEXENTRY:") == 0 or
+             line.compare(0, 9, "LexEntry:") == 0 ) {
+            if (locale_ != "") {
+                std::string nstr = Utils::normalizeUTF8( line, errorCode );
+                line = Utils::upperCaseUTF8( nstr, locale_ );
+            }
             LexEntry le( line );
             insert( le );
         }
@@ -108,7 +115,7 @@ bool Lexicon::isInAttached( const std::string word ) const {
 // operators
 
 std::ostream &operator<<(std::ostream &ss, const Lexicon &lex) {
-    ss << "Lexicon:" << "\t"
+    ss << "LEXICON:" << "\t"
        << lex.name_ << "\t"
        << lex.langAsString() << "\t"
        << lex.locale_ << "\t"
@@ -119,7 +126,7 @@ std::ostream &operator<<(std::ostream &ss, const Lexicon &lex) {
         for (const auto &d : l.second)
             ss << d << "\n";
 
-    ss << "Lexicon.attached:";
+    ss << "LEXICON.ATTACHED:";
 
     for (const auto &e : lex.attached_)
         ss << "\t" << e;

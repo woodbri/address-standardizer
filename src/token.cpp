@@ -9,7 +9,6 @@
 Token::Token() {
     text_ = "";
     stdtext_ = "";
-    attached_ = InClass::NO;
 }
 
 
@@ -21,6 +20,8 @@ Token::Token(std::string text) {
 
     std::stringstream buffer(text);
     std::getline(buffer, in_word, '\t');
+    if (in_word == "TOKEN:")
+        std::getline(buffer, in_word, '\t');
     buffer >> in_stdword >> in_inclass >> in_attached;
 
     text_ = in_word;
@@ -43,7 +44,7 @@ std::ostream &operator<<(std::ostream &ss, const Token &token) {
     std::string attached = token.attachedAsString();
     std::string outclass = token.outclassAsString();
 
-    ss << "Token:" << "\t"
+    ss << "TOKEN:" << "\t"
        << token.text_ << "\t"
        << token.stdtext_ << "\t"
        << inclass << "\t"

@@ -16,8 +16,11 @@ public:
     std::string word() const { return word_; };
     std::string stdword() const { return stdword_; };
     std::set<InClass::Type> type() const { return type_; };
-    InClass::AttachType attached() const { return attached_; };
-    bool isAttached() const { return attached_ != InClass::NO; };
+    std::set<InClass::AttachType> attached() const { return attached_; };
+    bool isAttached() const { return isPrefixAttached() or isSuffixAttached(); };
+    bool isPrefixAttached() const;
+    bool isSuffixAttached() const;
+    bool isDettached() const;
     ///@}
 
     /** @name mutators */
@@ -25,14 +28,15 @@ public:
     void set(const std::string &word, const std::string &stdword, const InClass::Type &type);
     void word(const std::string &word) { word_=word; };
     void stdword(const std::string &stdword) { stdword_=stdword; };
-    void type(const InClass::Type type) { type_.insert(type); };
-    void attached(const InClass::AttachType attached) { attached_=attached; };
+    void type(const InClass::Type &type) { type_.insert(type); };
+    void type(const std::set<InClass::Type> &type) { type_ = type; };
+    void attached(const std::set<InClass::AttachType> &attached) { attached_=attached; };
     ///@}
 
     /** @name constructors */
     ///@{
     LexEntry();
-    LexEntry(const std::string &word, const std::string &stdword, const InClass::Type type, const InClass::AttachType attached);
+    LexEntry(const std::string &word, const std::string &stdword, const std::string &type, const std::string &attached);
     explicit LexEntry(const std::string &line);
     ///@}
 
@@ -52,7 +56,7 @@ private:
     std::string word_;
     std::string stdword_;
     std::set<InClass::Type> type_;
-    InClass::AttachType attached_;
+    std::set<InClass::AttachType> attached_;
 
 };
 

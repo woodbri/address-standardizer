@@ -1,6 +1,8 @@
 /*HEADER*
 *HEADER*/
 
+#include <sstream>
+
 #include "inclass.h"
 
 std::string InClass::asString(const InClass::Type &t) {
@@ -36,12 +38,14 @@ std::string InClass::asString(const InClass::Type &t) {
         case QUAD:      str = "QUAD";   break;
         case PUNCT:     str = "PUNCT";  break;
         case SPACE:     str = "SPACE";  break;
+        case PLACEN:    str = "PLACEN"; break;
         default:        str = "BADTOKEN"; break;
     };
     return str;
 }
 
-InClass::Type InClass::asType(const std::string &s) {
+std::set<InClass::Type> InClass::asType(const std::string &s) {
+    std::set<InClass::Type> ret;
     InClass::Type t;
     std::map<std::string, InClass::Type> m;
     std::map<std::string, InClass::Type>::iterator it;
@@ -76,15 +80,26 @@ InClass::Type InClass::asType(const std::string &s) {
     m["QUAD"]      = QUAD;
     m["PUNCT"]     = PUNCT;
     m["SPACE"]     = SPACE;
+    m["PLACEN"]    = PLACEN;
     m["BADTOKEN"]  = BADTOKEN;
 
-    it = m.find(s);
-    if (it == m.end())
-        t = BADTOKEN;
-    else
-        t = it->second;
+    std::stringstream buffer(s);
+    std::string word;
+    while (true) {
+        std::getline(buffer, word, ',');
+        if (word.length() > 0) {
+            it = m.find( word );
+            if (it == m.end())
+                t = BADTOKEN;
+            else
+                t = it->second;
 
-    return t;
+            ret.insert( t );
+        }
+        if (buffer.eof())
+            break;
+    }
+    return ret;
 }
 
 
@@ -132,6 +147,7 @@ InClass::Type InClass::asType(const int i) {
         case 29: t = QUAD;      break;
         case 30: t = PUNCT;     break;
         case 31: t = SPACE;     break;
+        case 32: t = PLACEN;    break;
         default: t = BADTOKEN;  break;
     }
     return t;
@@ -486,23 +502,42 @@ InClass::Lang InClass::asLang(const std::string &s) {
 }
 
 
-InClass::AttachType InClass::asAttachType(const std::string &s) {
-    if (s == "NO") return NO;
-    else if (s == "PREFIX") return PREFIX;
-    else if (s == "SUFFIX") return SUFFIX;
-    else if (s == "EITHER") return EITHER;
-    else return NO;
+std::set<InClass::AttachType> InClass::asAttachType(const std::string &s) {
+    std::set<InClass::AttachType> type;
+    std::stringstream buffer(s);
+    std::string word;
+    while (true) {
+        std::getline(buffer, word, ',');
+        if (word.length() > 0) {
+            if      ( word == "DETACH" ) type.insert( DETACH );
+            else if ( word == "PREFIX" ) type.insert( PREFIX );
+            else if ( word == "SUFFIX" ) type.insert( SUFFIX );
+            else type.insert( DETACH );
+        }
+        if (buffer.eof())
+            break;
+    }
+    return type;
 }
 
 std::string InClass::asString(const InClass::AttachType &t) {
     std::string str;
     switch (t) {
-        case NO: str = "NO"; break;
+        case DETACH: str = "DETACH"; break;
         case PREFIX: str = "PREFIX"; break;
         case SUFFIX: str = "SUFFIX"; break;
-        case EITHER: str = "EITHER"; break;
     }
 
     return str;
 }
 
+
+std::string InClass::asString(const std::set<InClass::AttachType> &t) {
+    std::string str;
+    for (auto it=t.begin(); it!=t.end(); it++) {
+        if (it!=t.begin())
+            str += ",";
+        str += asString(*it);
+    }
+    return str;
+}

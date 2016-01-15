@@ -8,25 +8,51 @@
 #include "lexentry.h"
 #include "inclass.h"
 
-LexEntry::LexEntry()
-  : word_(""),
-    stdword_(""),
-    attached_(InClass::NO) {
+
+bool LexEntry::isPrefixAttached() const {
+    auto it = attached_.find( InClass::PREFIX );
+    if (it == attached_.end())
+        return false;
+    else
+        return true;
 }
 
 
-LexEntry::LexEntry(const std::string &in_word, const std::string &in_stdword, const InClass::Type in_type, const InClass::AttachType in_attached)
+bool LexEntry::isSuffixAttached() const {
+    auto it = attached_.find( InClass::SUFFIX );
+    if (it == attached_.end())
+        return false;
+    else
+        return true;
+}
+
+
+bool LexEntry::isDettached() const {
+    auto it = attached_.find( InClass::DETACH );
+    if (it == attached_.end())
+        return false;
+    else
+        return true;
+}
+
+
+LexEntry::LexEntry()
+  : word_(""),
+    stdword_("") {
+}
+
+
+LexEntry::LexEntry(const std::string &in_word, const std::string &in_stdword, const std::string &in_type, const std::string &in_attached)
   : word_(in_word),
-    stdword_(in_stdword),
-    attached_(in_attached) {
-    type(in_type);
+    stdword_(in_stdword) {
+    type(InClass::asType(in_type));
+    attached(InClass::asAttachType(in_attached));
 }
 
 
 LexEntry::LexEntry(const std::string &line)
   : word_(""),
-    stdword_(""),
-    attached_(InClass::NO)
+    stdword_("")
 {
     std::string in_word;
     std::string in_stdword;
@@ -35,20 +61,13 @@ LexEntry::LexEntry(const std::string &line)
 
     std::stringstream buffer(line);
     std::getline(buffer, in_word, '\t');
-    if (in_word == "LexEntry:")
+    if (in_word == "LEXENTRY:")
         buffer >> in_word;
     buffer >> in_stdword >> in_type >> in_attached;
 
-    word_ = in_word;
-    stdword_ = in_stdword;
-    std::stringstream buffer2(in_type);
-    while (true) {
-        std::getline(buffer2, in_type, ',');
-        if (in_type.length() > 0)
-            type(InClass::asType( in_type ));
-        if (buffer2.eof())
-            break;
-    }
+    word_     = in_word;
+    stdword_  = in_stdword;
+    type_     = InClass::asType( in_type );
     attached_ = InClass::asAttachType( in_attached );
 }
 
@@ -56,17 +75,12 @@ std::ostream &operator<<(std::ostream &ss, const LexEntry &le) {
     std::string type = InClass::asString(le.type_);
     std::string attached = InClass::asString(le.attached_);
 
-    ss << "LexEntry:" << "\t"
+    ss << "LEXENTRY:" << "\t"
        << le.word_ << "\t"
        << le.stdword_ << "\t";
 
-    std::set<InClass::Type> typ = le.type();
-    for (auto it=typ.begin(); it!=typ.end(); it++) {
-        if (it!=typ.begin())
-            ss << ",";
-        ss << InClass::asString(*it);
-    }
-    ss << "\t" << attached;
+    ss << InClass::asString(le.type()) << "\t";
+    ss << InClass::asString(le.attached());
 
     return ss;
 }

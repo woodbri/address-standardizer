@@ -41,6 +41,7 @@ public:
         QUAD    = 29,   ///< A 4 digit number. Identifies ZIP4.
         PUNCT   = 30,   ///< Punctuation character(s)
         SPACE   = 31,   ///< whitespace
+        PLACEN  = 32,   ///< Placename keyword
         BADTOKEN = 99   ///< A bad token type.
     } Type;
 
@@ -127,22 +128,22 @@ public:
     } Lang;
 
     typedef enum {
-        NO      = 0,
+        DETACH  = 0,
         PREFIX  = 1,
-        SUFFIX  = 2,
-        EITHER  = 3
+        SUFFIX  = 2
     } AttachType;
 
 
     static std::string asString(const std::set<InClass::Type> &t);
     static std::string asString(const InClass::Type &t);
-    static InClass::Type asType(const std::string &s);
+    static std::set<InClass::Type> asType(const std::string &s);
     static InClass::Type asType(const int i);
-    static InClass::AttachType asAttachType(const std::string &s);
+    static std::set<InClass::AttachType> asAttachType(const std::string &s);
 
     static std::string asString(const InClass::Lang &lang);
     static std::string asName(const InClass::Lang &lang);
     static InClass::Lang asLang(const std::string &s);
+    static std::string asString(const std::set<InClass::AttachType> &t);
     static std::string asString(const InClass::AttachType &t);
 
 private:
