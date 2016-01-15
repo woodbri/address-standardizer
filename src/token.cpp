@@ -22,7 +22,9 @@ Token::Token(std::string text) {
     std::getline(buffer, in_word, '\t');
     if (in_word == "TOKEN:")
         std::getline(buffer, in_word, '\t');
-    buffer >> in_stdword >> in_inclass >> in_attached;
+    std::getline(buffer, in_stdword, '\t');
+    std::getline(buffer, in_inclass, '\t');
+    std::getline(buffer, in_attached, '\t');
 
     text_ = in_word;
     stdtext_ = in_stdword;

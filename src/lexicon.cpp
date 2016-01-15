@@ -57,12 +57,12 @@ Lexicon::Lexicon(std::string name, std::string file) {
         return;
     }
 
-    buffer >> term  // name (ignored)
-           >> term; // lang
+    std::getline(buffer, term, '\t');   // name (ignored)
+    std::getline(buffer, term, '\t');   // lang
 
-    lang_ = InClass::asLang( term );    // set the language
-    buffer >> locale_;                  // set the locale
-                                        // ignore the count of keys
+    lang_ = InClass::asLang( term );        // set the language
+    std::getline(buffer, locale_, '\t');    // set the locale
+                                            // ignore the count of keys
 
     UErrorCode errorCode;
 
@@ -286,7 +286,12 @@ bool sortByStringLength(std::string a, std::string b) {
     return a.length() > b.length();
 }
 
+static const char* special_chars_regex = "([-.+*~$()\\[\\]\\\\|?])";
+static const char* special_chars_replace = "\\\\$1";
+
 std::string Lexicon::regex() {
+
+    boost::regex re(special_chars_regex);
 
     // if the regex string is empty, regenerate it
     if (regex_.length() == 0) {
@@ -300,8 +305,13 @@ std::string Lexicon::regex() {
 
         // concat them into a regex fragment
         std::string str;
-        for ( const auto &key : keys )
-            str += key + "|";
+        for ( const auto &key : keys ) {
+            // escape all characters that have special meaning in a regex
+            // .+*-~^$()[]\|?
+            std::string outkey = boost::regex_replace(key, re, special_chars_replace);
+
+            str += outkey + "|";
+        }
 
         regex_ = str;
     }
