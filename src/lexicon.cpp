@@ -46,7 +46,17 @@ Lexicon::Lexicon(std::string name, std::string file) {
 
     // read the header
     std::getline( is, line );
-        std::cout << "\t" << line << "\n";
+
+    // echo out the read line indented for debugging
+    std::cout << "\t" << line << "\n";
+
+    // replace multiple space chars with a single space
+    // but don't touch tab chars
+    boost::regex re("( +)");
+    const char* replace = " ";
+    std::string tmp = boost::regex_replace(line, re, replace);
+    line = tmp;
+
     std::stringstream buffer(line);
     std::string term;
     std::getline(buffer, term, '\t');
@@ -292,6 +302,7 @@ static const char* special_chars_replace = "\\\\$1";
 std::string Lexicon::regex() {
 
     boost::regex re(special_chars_regex);
+    boost::regex re2("(\\s+)");
 
     // if the regex string is empty, regenerate it
     if (regex_.length() == 0) {
@@ -308,7 +319,8 @@ std::string Lexicon::regex() {
         for ( const auto &key : keys ) {
             // escape all characters that have special meaning in a regex
             // .+*-~^$()[]\|?
-            std::string outkey = boost::regex_replace(key, re, special_chars_replace);
+            std::string tmp = boost::regex_replace(key, re, special_chars_replace);
+            std::string outkey = boost::regex_replace(tmp, re2, "\\\\s+");
 
             str += outkey + "|";
         }
