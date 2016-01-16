@@ -43,6 +43,7 @@ public:
     void remove( const LexEntry &le );
 
     std::string regex();
+    std::string attachedRegex();
 
     // operators
     friend std::ostream &operator<<(std::ostream &ss, const Lexicon &lex);
@@ -51,7 +52,7 @@ public:
 
 private:
 
-    bool isInAttached( const std::string word ) const;
+    std::string escapeRegex( const std::string &str);
 
     struct lexcomp {
         bool operator() (const std::string &lhs, const std::string &rhs) const {
@@ -65,8 +66,8 @@ private:
     InClass::Lang lang_;
     std::string locale_;
     std::map <std::string, std::deque<LexEntry>, lexcomp> lex_;
-    std::deque<std::string> attached_;
     std::string regex_;
+    std::string attachedRegex_;
 
 
 };

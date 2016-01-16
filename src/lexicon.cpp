@@ -113,15 +113,6 @@ std::deque<LexEntry> Lexicon::find( const std::string key ) {
 }
 
 
-bool Lexicon::isInAttached( const std::string word ) const {
-
-    for ( const auto &e :attached_ )
-        if ( e == word ) return true;
-
-    return false;
-}
-
-
 // operators
 
 std::ostream &operator<<(std::ostream &ss, const Lexicon &lex) {
@@ -135,13 +126,6 @@ std::ostream &operator<<(std::ostream &ss, const Lexicon &lex) {
     for (const auto &l  : lex.lex_)
         for (const auto &d : l.second)
             ss << d << "\n";
-
-    ss << "LEXICON.ATTACHED:";
-
-    for (const auto &e : lex.attached_)
-        ss << "\t" << e;
-
-    ss << "\n";
 
     return ss;
 }
@@ -270,9 +254,6 @@ void Lexicon::remove( const LexEntry &le ) {
     for( auto entry=entries.begin(); entry!=entries.end(); entry++ ) {
         if ( *entry == le ) {
             entries.erase( entry );
-            if ( le.isAttached() and not isInAttached( le.word() ) ) {
-                attached_.push_back( le.word() );
-            }
 
             if ( entries.size() == 0 ) {
                 // remove the key from the lexicon
@@ -292,17 +273,13 @@ void Lexicon::remove( const LexEntry &le ) {
     regex_ = "";
 }
 
+
 bool sortByStringLength(std::string a, std::string b) {
     return a.length() > b.length();
 }
 
-static const char* special_chars_regex = "([-.+*~$()\\[\\]\\\\|?])";
-static const char* special_chars_replace = "\\\\$1";
 
 std::string Lexicon::regex() {
-
-    boost::regex re(special_chars_regex);
-    boost::regex re2("(\\s+)");
 
     // if the regex string is empty, regenerate it
     if (regex_.length() == 0) {
@@ -317,11 +294,7 @@ std::string Lexicon::regex() {
         // concat them into a regex fragment
         std::string str;
         for ( const auto &key : keys ) {
-            // escape all characters that have special meaning in a regex
-            // .+*-~^$()[]\|?
-            std::string tmp = boost::regex_replace(key, re, special_chars_replace);
-            std::string outkey = boost::regex_replace(tmp, re2, "\\\\s+");
-
+            std::string outkey = escapeRegex( key );
             str += outkey + "|";
         }
 
@@ -332,3 +305,57 @@ std::string Lexicon::regex() {
 }
 
 
+std::string Lexicon::attachedRegex() {
+
+    if (attachedRegex_.length() == 0) {
+        std::deque<std::string> prefix;
+        std::deque<std::string> suffix;
+
+        for ( const auto &e : lex_ )
+            for ( const auto &le : e.second )
+                if ( le.isAttached() ) {
+                    if (le.isPrefixAttached())
+                        prefix.push_back(e.first);
+                    if (le.isSuffixAttached())
+                        suffix.push_back(e.first);
+                }
+
+        // sort them based on length desc
+        std::sort(prefix.begin(), prefix.end(), sortByStringLength);
+        std::sort(suffix.begin(), suffix.end(), sortByStringLength);
+
+        // concat them into a regex fragment
+        std::string str;
+        for ( const auto &e : prefix ) {
+            std::string ee = escapeRegex( e );
+            str += "\\b" + ee + "\\B|";
+        }
+        for ( const auto &e : suffix ) {
+            std::string ee = escapeRegex( e );
+            str += "\\B" + ee + "\\b|";
+        }
+
+        attachedRegex_ = str;
+    }
+
+    return attachedRegex_;
+}
+
+// PRIVATE methods
+
+static const char* special_chars_regex = "([-.+*~$()\\[\\]\\\\|?])";
+static const char* special_chars_replace = "\\\\$1";
+
+
+std::string Lexicon::escapeRegex( const std::string &str ) {
+
+    boost::regex re(special_chars_regex);
+    boost::regex re2("(\\s+)");
+
+    // escape all characters that have special meaning in a regex
+    // .+*-~^$()[]\|?
+    std::string tmp = boost::regex_replace(str, re, special_chars_replace);
+    std::string outstr = boost::regex_replace(tmp, re2, "\\\\s+");
+
+    return outstr;
+}
