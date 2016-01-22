@@ -128,9 +128,10 @@ public:
     } Lang;
 
     typedef enum {
-        DETACH  = 0,
-        PREFIX  = 1,
-        SUFFIX  = 2
+        DET_PRE  = 0,
+        DET_SUF  = 1,
+        ATT_PRE  = 2,
+        ATT_SUF  = 3
     } AttachType;
 
 

@@ -10,7 +10,17 @@
 
 std::deque<Token> Tokenizer::getTokens(std::string str) {
 
-    std::string regex = "^(" + lex_.regex() + "\\d+/\\d+|\\d+|\\<[[:alpha:]]+\\>|\\w+)([-&\\s\\|[:punct:]]+|$)";
+    // first see if we have attached tokens that we need to split apart
+    std::string attached = "(" + lex_.attachedRegex() + ")";
+    if (attached.length() > 2) {
+        boost::regex re( attached, boost::regex::icase );
+        const char* replace( " $1 " );
+        std::string tmp = boost::regex_replace( str, re, replace );
+        str = tmp;
+    }
+
+    // build the regex for identifying tokens
+    std::string regex = "^\\s*(" + lex_.regex() + "\\d+/\\d+|\\d+|\\<[[:alpha:]]+\\>|\\w+)([-&\\s\\|[:punct:]]+|$)";
     boost::regex expression( regex, boost::regex::icase );
 
     boost::match_results<std::string::const_iterator> what;

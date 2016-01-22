@@ -17,10 +17,12 @@ public:
     std::string stdword() const { return stdword_; };
     std::set<InClass::Type> type() const { return type_; };
     std::set<InClass::AttachType> attached() const { return attached_; };
-    bool isAttached() const { return isPrefixAttached() or isSuffixAttached(); };
+    bool isPrefix() const;
+    bool isSuffix() const;
+    bool isAttached() const;
+    bool isDettached() const;
     bool isPrefixAttached() const;
     bool isSuffixAttached() const;
-    bool isDettached() const;
     ///@}
 
     /** @name mutators */

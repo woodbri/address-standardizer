@@ -511,10 +511,10 @@ std::set<InClass::AttachType> InClass::asAttachType(const std::string &s) {
     while (true) {
         std::getline(buffer, word, ',');
         if (word.length() > 0) {
-            if      ( word == "DETACH" ) type.insert( DETACH );
-            else if ( word == "PREFIX" ) type.insert( PREFIX );
-            else if ( word == "SUFFIX" ) type.insert( SUFFIX );
-            else type.insert( DETACH );
+            if      ( word == "DET_PRE" ) type.insert( DET_PRE );
+            else if ( word == "DET_SUF" ) type.insert( DET_SUF );
+            else if ( word == "ATT_PRE" ) type.insert( ATT_PRE );
+            else if ( word == "ATT_SUF" ) type.insert( ATT_SUF );
         }
         if (buffer.eof())
             break;
@@ -525,9 +525,10 @@ std::set<InClass::AttachType> InClass::asAttachType(const std::string &s) {
 std::string InClass::asString(const InClass::AttachType &t) {
     std::string str;
     switch (t) {
-        case DETACH: str = "DETACH"; break;
-        case PREFIX: str = "PREFIX"; break;
-        case SUFFIX: str = "SUFFIX"; break;
+        case DET_PRE: str = "DET_PRE"; break;
+        case DET_SUF: str = "DET_SUF"; break;
+        case ATT_PRE: str = "ATT_PRE"; break;
+        case ATT_SUF: str = "ATT_SUF"; break;
     }
 
     return str;

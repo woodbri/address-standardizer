@@ -14,24 +14,40 @@
 
 int main(int ac, char* av[]) {
 
-    std::string str("");
-    for(int i=1; i<ac; i++)
-        str += av[i];
+    if (ac < 3) {
+        std::cerr << "Usage: t4 lex.txt 'address to parse'\n";
+        return EXIT_FAILURE;
+    }
 
-    std::cout << "str: '" << str << "'\n";
+    std::string file = av[1];
+    std::string str = av[2];
 
-    std::deque<Token> tok;
+//    std::cout << "Lexicon: '" << file << "'\n";
+    std::cout << "Address: '" << str << "'\n";
 
-    Lexicon lex;
+    // Normalize and UPPERCASE the input string
+    UErrorCode errorCode;
+    std::string nstr = Utils::normalizeUTF8( str, errorCode );
+    std::string Ustr = Utils::upperCaseUTF8( nstr, "en" );
+
+    std::cout << "Normalized: '" << nstr << "'\n";
+    std::cout << "UpperCase: '" << Ustr << "'\n";
+
+    std::deque<Token> tokens;
+
+    Lexicon lex("test-lex", file);
+//    std::cout << lex << "\n";
+//    std::cout << "Lexicon regex: '" << lex.regex() <<"'\n\n";
+//    std::cout << "Lexicon attachedRegex: '" << lex.attachedRegex() <<"'\n\n";
 
     Tokenizer tokenizer( lex );
     tokenizer.addFilter( InClass::PUNCT );
-    tok = tokenizer.getTokens( str );
+    tokens = tokenizer.getTokens( Ustr );
 
-    std::cout << "tok.size() = " << tok.size() << "\n";
+//    std::cout << "tokens.size() = " << tokens.size() << "\n";
 
-    for (auto it = tok.begin(); it != tok.end(); it++) 
-        std::cout << *it << "\n";
+    for (const auto tok : tokens)
+        std::cout << tok << "\n";
 
     return EXIT_SUCCESS;
 }

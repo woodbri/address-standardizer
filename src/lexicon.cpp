@@ -48,7 +48,7 @@ Lexicon::Lexicon(std::string name, std::string file) {
     std::getline( is, line );
 
     // echo out the read line indented for debugging
-    std::cout << "\t" << line << "\n";
+    //std::cout << "\t" << line << "\n";
 
     // replace multiple space chars with a single space
     // but don't touch tab chars
@@ -79,7 +79,7 @@ Lexicon::Lexicon(std::string name, std::string file) {
     // ret in the lexicon entries
     while (not is.eof()) {
         std::getline( is, line );
-            std::cout << "\t" << line << "\n";
+            //std::cout << "\t" << line << "\n";
         if (line.length() == 0) continue;
 
         if ( line.compare(0, 9, "LEXENTRY:") == 0 or
@@ -154,6 +154,7 @@ void Lexicon::classify( Token& token, InClass::Type typ ) {
     boost::regex dash_exp("^[-]+$");
     boost::regex punct_exp("^[-&\\s\\|[:punct:]]+$");
     boost::regex space_exp("^\\s+$");
+    boost::regex fract_exp("^\\d+/\\d+$");
     boost::regex pch_exp("^[A-Z]{1,2}\\d{1,2}[A-Z]{0,1}$", boost::regex::icase);
     boost::regex pct_exp("^(\\d[A-Z]\\d|\\d[A-Z]{2})$", boost::regex::icase);
 
@@ -164,6 +165,10 @@ void Lexicon::classify( Token& token, InClass::Type typ ) {
             token.inclass( InClass::QUAD );
         if (text.length() == 5)
             token.inclass( InClass::QUINT );
+    }
+    // is it a fract
+    else if (boost::regex_match(text, fract_exp, boost::match_default)) {
+        token.inclass( InClass::FRACT );
     }
     // is it pch
     else if (boost::regex_match(text, pch_exp, boost::match_default)) {
@@ -334,6 +339,9 @@ std::string Lexicon::attachedRegex() {
             std::string ee = escapeRegex( e );
             str += "\\B" + ee + "\\b|";
         }
+
+        // remove trailing '|' char
+        str.pop_back();
 
         attachedRegex_ = str;
     }
