@@ -8,6 +8,7 @@
 #include <deque>
 #include <set>
 #include <boost/regex.hpp>
+#include <boost/regex/icu.hpp>
 
 #include "token.h"
 #include "lexicon.h"

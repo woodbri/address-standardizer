@@ -56,6 +56,11 @@ bool LexEntry::isSuffix() const {
 
 
 bool LexEntry::isAttached() const {
+    // if it is empty assume it is detached
+    // this is the case for not street type objects
+    if (attached_.size() == 0)
+        return false;
+
     auto it = attached_.find( InClass::ATT_SUF );
     if (it == attached_.end()) {
         auto it2 = attached_.find( InClass::ATT_PRE );
@@ -69,7 +74,12 @@ bool LexEntry::isAttached() const {
 }
 
 
-bool LexEntry::isDettached() const {
+bool LexEntry::isDetached() const {
+    // if it is empty assume it is detached
+    // this is the case for not street type objects
+    if (attached_.size() == 0)
+        return true;
+
     auto it = attached_.find( InClass::DET_SUF );
     if (it == attached_.end()) {
         auto it2 = attached_.find( InClass::DET_PRE );

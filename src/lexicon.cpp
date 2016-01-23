@@ -152,6 +152,7 @@ void Lexicon::classify( Token& token, InClass::Type typ ) {
     boost::regex word_exp("^\\w+$");
     boost::regex has_digit("^.*\\d.*$");
     boost::regex dash_exp("^[-]+$");
+    boost::regex emdash_exp("^\xe2\x80\x94$");
     boost::regex punct_exp("^[-&\\s\\|[:punct:]]+$");
     boost::regex space_exp("^\\s+$");
     boost::regex fract_exp("^\\d+/\\d+$");
@@ -193,6 +194,10 @@ void Lexicon::classify( Token& token, InClass::Type typ ) {
 
             token.inclass( InClass::WORD );
         }
+    }
+    // is it emdash
+    else if (boost::regex_match(text, emdash_exp, boost::match_default)) {
+        token.inclass( InClass::EMDASH );
     }
     // is it dash
     else if (boost::regex_match(text, dash_exp, boost::match_default)) {
@@ -310,24 +315,18 @@ std::string Lexicon::regex() {
 }
 
 
-std::string Lexicon::attachedRegex() {
+std::string Lexicon::regexPrefixAtt() {
 
-    if (attachedRegex_.length() == 0) {
+    if (regexPrefix_.length() == 0) {
         std::deque<std::string> prefix;
-        std::deque<std::string> suffix;
 
         for ( const auto &e : lex_ )
             for ( const auto &le : e.second )
-                if ( le.isAttached() ) {
-                    if (le.isPrefixAttached())
+                if ( le.isPrefixAttached() )
                         prefix.push_back(e.first);
-                    if (le.isSuffixAttached())
-                        suffix.push_back(e.first);
-                }
 
         // sort them based on length desc
         std::sort(prefix.begin(), prefix.end(), sortByStringLength);
-        std::sort(suffix.begin(), suffix.end(), sortByStringLength);
 
         // concat them into a regex fragment
         std::string str;
@@ -335,6 +334,32 @@ std::string Lexicon::attachedRegex() {
             std::string ee = escapeRegex( e );
             str += "\\b" + ee + "\\B|";
         }
+
+        // remove trailing '|' char
+        str.pop_back();
+
+        regexPrefix_ = str;
+    }
+
+    return regexPrefix_;
+}
+
+
+std::string Lexicon::regexSuffixAtt() {
+
+    if (regexSuffix_.length() == 0) {
+        std::deque<std::string> suffix;
+
+        for ( const auto &e : lex_ )
+            for ( const auto &le : e.second )
+                if ( le.isSuffixAttached() )
+                        suffix.push_back(e.first);
+
+        // sort them based on length desc
+        std::sort(suffix.begin(), suffix.end(), sortByStringLength);
+
+        // concat them into a regex fragment
+        std::string str;
         for ( const auto &e : suffix ) {
             std::string ee = escapeRegex( e );
             str += "\\B" + ee + "\\b|";
@@ -343,11 +368,12 @@ std::string Lexicon::attachedRegex() {
         // remove trailing '|' char
         str.pop_back();
 
-        attachedRegex_ = str;
+        regexSuffix_ = str;
     }
 
-    return attachedRegex_;
+    return regexSuffix_;
 }
+
 
 // PRIVATE methods
 

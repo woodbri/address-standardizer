@@ -38,7 +38,8 @@ int main(int ac, char* av[]) {
     Lexicon lex("test-lex", file);
     std::cout << lex << "\n";
     std::cout << "Lexicon regex: '" << lex.regex() <<"'\n\n";
-    std::cout << "Lexicon attachedRegex: '" << lex.attachedRegex() <<"'\n\n";
+    std::cout << "Lexicon regexPrefixAtt: '" << lex.regexPrefixAtt() <<"'\n\n";
+    std::cout << "Lexicon regexSuffixAtt: '" << lex.regexSuffixAtt() <<"'\n\n";
 
     Tokenizer tokenizer( lex );
     tokenizer.addFilter( InClass::PUNCT );

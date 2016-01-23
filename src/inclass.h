@@ -42,6 +42,7 @@ public:
         PUNCT   = 30,   ///< Punctuation character(s)
         SPACE   = 31,   ///< whitespace
         PLACEN  = 32,   ///< Placename keyword
+        EMDASH  = 33,   ///< Token used to identify where a word was split by the tokenizer
         BADTOKEN = 99   ///< A bad token type.
     } Type;
 
@@ -128,10 +129,10 @@ public:
     } Lang;
 
     typedef enum {
-        DET_PRE  = 0,
-        DET_SUF  = 1,
-        ATT_PRE  = 2,
-        ATT_SUF  = 3
+        DET_PRE  = 0,   ///< detached prefix
+        DET_SUF  = 1,   ///< detached suffix
+        ATT_PRE  = 2,   ///< attached prefix
+        ATT_SUF  = 3    ///< attached suffix
     } AttachType;
 
 

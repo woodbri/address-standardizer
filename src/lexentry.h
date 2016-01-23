@@ -20,7 +20,7 @@ public:
     bool isPrefix() const;
     bool isSuffix() const;
     bool isAttached() const;
-    bool isDettached() const;
+    bool isDetached() const;
     bool isPrefixAttached() const;
     bool isSuffixAttached() const;
     ///@}

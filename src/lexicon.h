@@ -43,7 +43,8 @@ public:
     void remove( const LexEntry &le );
 
     std::string regex();
-    std::string attachedRegex();
+    std::string regexPrefixAtt();
+    std::string regexSuffixAtt();
 
     // operators
     friend std::ostream &operator<<(std::ostream &ss, const Lexicon &lex);
@@ -67,7 +68,8 @@ private:
     std::string locale_;
     std::map <std::string, std::deque<LexEntry>, lexcomp> lex_;
     std::string regex_;
-    std::string attachedRegex_;
+    std::string regexPrefix_;
+    std::string regexSuffix_;
 
 
 };

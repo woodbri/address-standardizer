@@ -3,38 +3,48 @@
 
 #include <deque>
 #include <string>
-#include <boost/tokenizer.hpp>
 
 #include "tokenizer.h"
 
 
 std::deque<Token> Tokenizer::getTokens(std::string str) {
 
+
     // first see if we have attached tokens that we need to split apart
-    std::string attached = "(" + lex_.attachedRegex() + ")";
+    // we place and em dash utf8 char "\xe2\x80\x94" where we split the word
+    // this can later be recognized as EMDASH token if needed
+    std::string attached = "(" + lex_.regexPrefixAtt() + ")";
     if (attached.length() > 2) {
-        boost::regex re( attached, boost::regex::icase );
-        const char* replace( " $1 " );
-        std::string tmp = boost::regex_replace( str, re, replace );
+        boost::u32regex re = boost::make_u32regex( attached );
+        const char* replace( "$1\xe2\x80\x94" );
+        std::string tmp = boost::u32regex_replace( str, re, replace );
+        str = tmp;
+    }
+
+    attached = "(" + lex_.regexSuffixAtt() + ")";
+    if (attached.length() > 2) {
+        boost::u32regex re = boost::make_u32regex( attached );
+        const char* replace( "\xe2\x80\x94$1" );
+        std::string tmp = boost::u32regex_replace( str, re, replace );
         str = tmp;
     }
 
     // build the regex for identifying tokens
-    std::string regex = "^\\s*(" + lex_.regex() + "\\d+/\\d+|\\d+|\\<[[:alpha:]]+\\>|\\w+)([-&\\s\\|[:punct:]]+|$)";
-    boost::regex expression( regex, boost::regex::icase );
+    std::string regex = "^\\s*(?!(?:\xe2\x80\x94)+)(" + lex_.regex() + "\\d+/\\d+|\\d+|\\<[[:alpha:]]+\\>|[\\p{L}\\p{Nd}]+)([-&\\s\\|[:punct:]]+|\xe2\x80\x94|$)";
 
-    boost::match_results<std::string::const_iterator> what;
-    boost::match_flag_type flags = boost::match_default;
+    boost::u32regex re = boost::make_u32regex( regex, boost::regex::icase );
 
     std::deque<Token> outtokens;
+
+    boost::smatch what;
+    boost::match_flag_type flags = boost::match_default;
 
     // could not get this to work with auto
     std::string::const_iterator start, end;
     start = str.begin();
     end   = str.end();
 
-    while(boost::regex_search(start, end, what, expression, flags)) {
-
+    while ( boost::u32regex_search( start, end, what, re ) ) {
         // fetch and create the token for the word or phrase
         if (what[1].first < what[1].second) {
             Token tok( std::string(what[1].first, what[1].second) );

@@ -40,6 +40,7 @@ std::string InClass::asString(const InClass::Type &t) {
         case PUNCT:     str = "PUNCT";  break;
         case SPACE:     str = "SPACE";  break;
         case PLACEN:    str = "PLACEN"; break;
+        case EMDASH:    str = "EMDASH"; break;
         default:        str = "BADTOKEN"; break;
     };
     return str;
@@ -80,6 +81,7 @@ std::set<InClass::Type> InClass::asType(const std::string &s) {
     m["PUNCT"]     = PUNCT;
     m["SPACE"]     = SPACE;
     m["PLACEN"]    = PLACEN;
+    m["EMDASH"]    = EMDASH;
     m["BADTOKEN"]  = BADTOKEN;
 
     std::set<InClass::Type> ret;
@@ -150,6 +152,7 @@ InClass::Type InClass::asType(const int i) {
         case 30: t = PUNCT;     break;
         case 31: t = SPACE;     break;
         case 32: t = PLACEN;    break;
+        case 33: t = EMDASH;    break;
         default: t = BADTOKEN;  break;
     }
     return t;
@@ -515,6 +518,7 @@ std::set<InClass::AttachType> InClass::asAttachType(const std::string &s) {
             else if ( word == "DET_SUF" ) type.insert( DET_SUF );
             else if ( word == "ATT_PRE" ) type.insert( ATT_PRE );
             else if ( word == "ATT_SUF" ) type.insert( ATT_SUF );
+            // other tokens are ignored and not added to the set
         }
         if (buffer.eof())
             break;
