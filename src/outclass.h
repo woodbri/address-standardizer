@@ -20,7 +20,7 @@ public:
         SUFTYP  =  6,   ///< A street type following the root street name. Example, the 'AVENUE' in '3715 WEST TENTH AVENUE'.
         SUFDIR  =  7,   ///< A directional modifier that follows the street name. Example, the 'WEST' in '3715 TENTH AVENUE WEST'.
         RR      =  8,   ///< The 'RR' in 'RR 7'
-        UNKNWN  =  9,   ///< An otherwise unclassified output.
+        EXTRA   =  9,   ///< An otherwise unclassified output.
         CITY    = 10,   ///< A placename. Example, 'LONDON'
         PROV    = 11,   ///< A state, province or region. Example, 'NY' or 'NEW YORK'.
         NATION  = 12,   ///< A country name or abbreviation.

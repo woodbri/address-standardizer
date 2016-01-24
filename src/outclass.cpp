@@ -16,7 +16,7 @@ std::string OutClass::asString(const OutClass::Type &t) {
         case SUFTYP:    str = "SUFTYP";     break;
         case SUFDIR:    str = "SUFDIR";     break;
         case RR:        str = "RR";         break;
-        case UNKNWN:    str = "UNKNWN";     break;
+        case EXTRA:     str = "EXTRA";      break;
         case CITY:      str = "CITY";       break;
         case PROV:      str = "PROV";       break;
         case NATION:    str = "NATION";     break;
@@ -46,7 +46,7 @@ OutClass::Type OutClass::asType(const std::string &s) {
     m["SUFTYP"]    = SUFTYP;
     m["SUFDIR"]    = SUFDIR;
     m["RR"]        = RR;
-    m["UNKNWN"]    = UNKNWN;
+    m["EXTRA"]     = EXTRA;
     m["CITY"]      = CITY;
     m["PROV"]      = PROV;
     m["NATION"]    = NATION;
@@ -80,7 +80,7 @@ OutClass::Type OutClass::asType(const int i) {
         case  6: t = SUFTYP;    break;
         case  7: t = SUFDIR;    break;
         case  8: t = RR;        break;
-        case  9: t = UNKNWN;    break;
+        case  9: t = EXTRA;     break;
         case 10: t = CITY;      break;
         case 11: t = PROV;      break;
         case 12: t = NATION;    break;

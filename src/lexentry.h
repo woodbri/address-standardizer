@@ -50,6 +50,7 @@ public:
         return word_==rhs.word_ and stdword_==rhs.stdword_
             and type_==rhs.type_;
     }
+    ///@}
 
 
     // ~LexEntry() {};

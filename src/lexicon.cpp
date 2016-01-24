@@ -336,7 +336,8 @@ std::string Lexicon::regexPrefixAtt() {
         }
 
         // remove trailing '|' char
-        str.pop_back();
+        if (str.length() > 0)
+            str.pop_back();
 
         regexPrefix_ = str;
     }
@@ -366,7 +367,8 @@ std::string Lexicon::regexSuffixAtt() {
         }
 
         // remove trailing '|' char
-        str.pop_back();
+        if (str.length() > 0)
+            str.pop_back();
 
         regexSuffix_ = str;
     }
