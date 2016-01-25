@@ -11,23 +11,23 @@ Rule::Rule( const std::string &line, const bool isMeta ) : score_(0.0) {
     std::string token;
     std::stringstream buffer(line);
 
-    // read meta rule here
     if (isMeta) {
-        boost::regex re_ismeta("@([\\w_]+)");
+        // read meta rule here
+        boost::regex re_meta("@([\\w_]+)");
         boost::smatch what;
 
         std::string::const_iterator start, end;
         start = line.begin();
         end   = line.end();
 
-        while ( boost::regex_search( start, end, what, re_ismeta ) ) {
+        while ( boost::regex_search( start, end, what, re_meta ) ) {
             if (what[1].first < what[1].second)
                 pushMeta( std::string( what[1].first, what[1].second ) );
             start = what[0].second;
         }
     }
-    // else read normal rule here
     else {
+        // else read normal rule here
         int state = 0;
         while (not buffer.eof()) {
             buffer >> token;
@@ -74,33 +74,21 @@ bool Rule::isValid() const {
 // algorithms
 
 Rule Rule::concat( const Rule &r ) const {
-    Rule conc;
+    Rule conc( *this );
 
     if ( isMeta() != r.isMeta() ) 
         return conc;
 
     if ( isMeta() ) {
         conc.meta( meta_ );
-        std::vector<std::string> meta = r.meta();
-        for (const auto &s : meta )
-            conc.pushMeta( s );
+        conc.meta_.insert( conc.meta_.end(), r.meta_.begin(), r.meta_.end() );
     }
     else {
-
-        // copy this to conc
-        conc.in( inClass_ );
-        conc.out( outClass_ );
-
         // append r to conc
-        std::vector<InClass::Type> in = r.in();
-        for ( const auto &e : in )
-            conc.pushIn( e );
+        conc.inClass_.insert( conc.inClass_.end(), r.inClass_.begin(), r.inClass_.end() );
+        conc.outClass_.insert( conc.outClass_.end(), r.outClass_.begin(), r.outClass_.end() );
 
-        std::vector<OutClass::Type> out = r.out();
-        for ( const auto &e : out )
-            conc.pushOut( e );
-
-        conc.score( (score_ + r.score()) / 2.0 );
+        conc.score_ = (score_ + r.score()) / 2.0;
     }
 
     return conc;

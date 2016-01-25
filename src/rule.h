@@ -15,6 +15,7 @@ class Rule
 public:
 
     // constructors
+    Rule( const Rule &rule ) = default;
     Rule() : score_(0.0) {};
     Rule( const std::string &line, const bool isMeta );
 
