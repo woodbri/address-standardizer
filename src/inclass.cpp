@@ -47,9 +47,8 @@ std::string InClass::asString(const InClass::Type &t) {
 }
 
 
-InClass::Type asOneType(const std::string &s) {
+InClass::Type InClass::asOneType(const std::string &s) {
 
-std::set<InClass::Type> InClass::asType(const std::string &s) {
     std::map<std::string, InClass::Type> m;
 
     m["STOP"]      = STOP;
@@ -87,7 +86,7 @@ std::set<InClass::Type> InClass::asType(const std::string &s) {
     m["BADTOKEN"]  = BADTOKEN;
 
     InClass::Type t;
-    auto it = m.find( word );
+    auto it = m.find( s );
     if (it == m.end()) {
         t = BADTOKEN;
         std::cout << "Error parsing type for '" << s <<"'\n";

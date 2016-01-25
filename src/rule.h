@@ -36,6 +36,12 @@ public:
 
     // setters
     void clear();
+
+private:
+
+    // TODO these probably are not needed so made private
+    // clean up later
+
     void pushMeta( const std::string &s );
     void pushIn( const InClass::Type t );
     void pushOut( const OutClass::Type t );

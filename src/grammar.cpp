@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <boost/regex.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "grammar.h"
 
@@ -18,9 +19,9 @@ Grammar::Grammar( const std::string &file ) {
         return;
     }
 
-    boost::regex re_comment("^\\s*#|^\\s*$");
+    boost::regex re_comment("^\\s*#.*|^\\s*$");
     boost::regex re_section("^\\s*\\[(.+)\\]\\s*$");
-    boost::regex re_ismeta("^(?:\\s*@([\\w_])+)+\\s*$");
+    boost::regex re_ismeta("^(?:\\s*@(?:[\\w_])+)+\\s*$");
 
     std::string gotSection;
     std::vector<Rule> rules;
@@ -43,7 +44,7 @@ Grammar::Grammar( const std::string &file ) {
                 gotSection.clear();
                 rules.clear();
             }
-            gotSection = what[0];
+            gotSection = what[1];
         }
         // load data into section
         else {
@@ -53,14 +54,12 @@ Grammar::Grammar( const std::string &file ) {
                 exit(1);
             }
 
-            Rule rule;
-
             // check if this is a meta rule
             if ( line.find('@') != std::string::npos ) {
-                if (boost::regex_match(line, what, re_ismeta, boost::match_default) ) {
-                    // extract names
-                    for (auto i=0; i<what.size(); ++i)
-                        rule.meta.push_back(what[i]);
+                // make sure all tokens are meta
+                if (boost::regex_match(line, re_ismeta, boost::match_default) ) {
+                    Rule rule( line, true );
+                    rules.push_back( rule );
                 }
                 else {
                     // ERROR all names must match /@([\w_]+)/
@@ -71,7 +70,8 @@ Grammar::Grammar( const std::string &file ) {
             }
             // otherwise it is a standard rule line
             else {
-
+                Rule rule( line, false );
+                rules.push_back( rule );
             }
         }
     }
@@ -84,10 +84,49 @@ Grammar::Grammar( const std::string &file ) {
 
     is.close();
 
-    grammarChecker();
+    std::string issues = check();
+    if ( issues.length() > 0 )
+        std::cerr << issues << "\n";
+}
+
+
+std::string Grammar::check() const {
+    std::string issues;
+    
+    for ( const auto &e : rules_ ) {
+        int cnt = 0;
+        for ( const auto &r : e.second ) {
+            ++cnt;
+            std::string scnt = boost::lexical_cast<std::string>( cnt );
+            if (r.isMeta()) {
+                std::vector<std::string> words = r.meta();
+                for ( const auto &word : words ) {
+                    if ( rules_.find(word) == rules_.end() ) {
+                        issues += "Missing section: " + word +
+                            " : referenced at [" + e.first + "]:" + scnt + "\n";
+                    }
+                }
+            }
+            else {
+                if ( not r.isValid() )
+                    issues += "Invalid rule at [" + e.first + "]:" + scnt + "\n";
+                if ( r.score() == 0.0 ) 
+                    issues += "Score=0 at [" + e.first + "]:" + scnt + "\n";
+            }
+        }
+    }
+
+    return issues;
 }
 
 
 std::ostream &operator<<(std::ostream &ss, const Grammar &g) {
+    for ( const auto &e : g.rules_ ) {
+        ss << "[" << e.first << "]\n";
+        for ( const auto &r : e.second )
+            ss << r << "\n";
+        ss << "\n";
+    }
 
+    return ss;
 }

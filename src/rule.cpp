@@ -79,6 +79,10 @@ Rule Rule::concat( const Rule &r ) const {
     if ( isMeta() != r.isMeta() ) 
         return conc;
 
+    // TODO decide how to deal with common tokens across
+    //      concatenation boundary like:
+    //      ... WORD | WORD ...
+
     if ( isMeta() ) {
         conc.meta( meta_ );
         conc.meta_.insert( conc.meta_.end(), r.meta_.begin(), r.meta_.end() );
@@ -162,8 +166,7 @@ std::ostream &operator<<(std::ostream &ss, const Rule &r) {
     if ( r.isMeta() ) {
         std::vector<std::string> meta = r.meta();
         for ( const auto &e : meta )
-            ss << "@" << e;
-        ss << "\n";
+            ss << "@" << e << " ";
     }
     else {
         std::vector<InClass::Type> inClass = r.in();

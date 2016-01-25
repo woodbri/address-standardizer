@@ -1,16 +1,32 @@
-// char_sep_example_3.cpp
+// test the grammar reader and check()
+
 #include <iostream>
-#include <boost/tokenizer.hpp>
 #include <string>
 
-int main()
+#include "../inclass.h"
+#include "../lexentry.h"
+#include "../lexicon.h"
+#include "../outclass.h"
+#include "../token.h"
+#include "../tokenizer.h"
+#include "../utils.h"
+#include "../rule.h"
+#include "../grammar.h"
+
+
+
+int main(int ac, char* av[])
 {
-   std::string str = "This is,  a test";
-   typedef boost::tokenizer<boost::char_separator<char> > Tok;
-   boost::char_separator<char> sep; // default constructed
-   Tok tok(str, sep);
-   for(Tok::iterator tok_iter = tok.begin(); tok_iter != tok.end(); ++tok_iter)
-     std::cout << "<" << *tok_iter << "> ";
-   std::cout << "\n";
-   return EXIT_SUCCESS;
+    if (ac < 2) {
+        std::cerr << "Usage: t3 test.grammar\n";
+        return EXIT_FAILURE;
+    }
+
+    std::string file = av[1];
+
+    Grammar g(file);
+
+    std::cout << g << "\n";
+
+    return EXIT_SUCCESS;
 }

@@ -10,11 +10,12 @@
 
 #include "inclass.h"
 #include "outclass.h"
+#include "rule.h"
 
 class Grammar
 {
 public:
-
+/*
     typedef struct {
         std::vector<InClass::Type> inKey_;
     } Key;
@@ -23,14 +24,11 @@ public:
         std::vector<OutClass::Type> outKey_;
         float score_;
     } Value;
-
-    typedef struct {
-        std::vector<std::string> meta;
-        Key key;
-        Value value;
-    } Rule;
+*/
 
     Grammar( const std::string &file );
+
+    std::string check() const;
 
     friend std::ostream &operator<<(std::ostream &ss, const Grammar &g);
 
