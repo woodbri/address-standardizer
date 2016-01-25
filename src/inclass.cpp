@@ -46,8 +46,10 @@ std::string InClass::asString(const InClass::Type &t) {
     return str;
 }
 
+
+InClass::Type asOneType(const std::string &s) {
+
 std::set<InClass::Type> InClass::asType(const std::string &s) {
-    InClass::Type t;
     std::map<std::string, InClass::Type> m;
 
     m["STOP"]      = STOP;
@@ -84,20 +86,28 @@ std::set<InClass::Type> InClass::asType(const std::string &s) {
     m["EMDASH"]    = EMDASH;
     m["BADTOKEN"]  = BADTOKEN;
 
+    InClass::Type t;
+    auto it = m.find( word );
+    if (it == m.end()) {
+        t = BADTOKEN;
+        std::cout << "Error parsing type for '" << s <<"'\n";
+    }
+    else
+        t = it->second;
+
+    return t;
+}
+
+
+std::set<InClass::Type> InClass::asType(const std::string &s) {
+    InClass::Type t;
     std::set<InClass::Type> ret;
     std::stringstream buffer(s);
     std::string word;
     while (true) {
         std::getline(buffer, word, ',');
         if (word.length() > 0) {
-            auto it = m.find( word );
-            if (it == m.end()) {
-                t = BADTOKEN;
-                std::cout << "Error parsing type for '" << s <<"'\n";
-            }
-            else
-                t = it->second;
-
+            t = asOneType( word );
             ret.insert( t );
         }
         if (buffer.eof())

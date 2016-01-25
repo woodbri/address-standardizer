@@ -139,6 +139,7 @@ public:
     static std::string asString(const std::set<InClass::Type> &t);
     static std::string asString(const InClass::Type &t);
     static std::set<InClass::Type> asType(const std::string &s);
+    static InClass::Type asOneType(const std::string &s);
     static InClass::Type asType(const int i);
     static std::set<InClass::AttachType> asAttachType(const std::string &s);
 
