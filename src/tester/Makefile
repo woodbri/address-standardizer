@@ -1,7 +1,7 @@
 
 CPPFLAGS = -O0 -g -Wall -std=c++0x -fPIC -frounding-math -Wno-deprecated -pedantic  -fmax-errors=10 -Wextra
 
-EXE = t5
+EXE = t3 t4 t5
 
 all: $(EXE)
 
@@ -21,7 +21,8 @@ t5: t5.cpp
 	g++ $(CPPFLAGS) -D_FORTIFY_SOURCE=2 -D_REENTRANT  -DU_HAVE_ELF_H=1 -DU_HAVE_ATOMIC=1 -L /usr/lib/x86_64-linux-gnu/ `pkg-config --libs --cflags icu-uc icu-io` -Wl,-Bsymbolic-functions -Wl,-z,relro -o t5 t5.cpp ../*.o -ldl -lm `pkg-config --libs --cflags icu-uc icu-io` -L /usr/lib/x86_64-linux-gnu/ -lboost_regex
 
 test: $(EXE)
-	./t5 lex-en.txt '11 radcliff rd, north chelmsford, ma 01863-2313 usa'
+	./t4 lex-en.txt '11 radcliff rd, north chelmsford, ma 01863-2313 usa'
+	./t3 ../../data/grammar/test.grammar
 
 
 clean:
