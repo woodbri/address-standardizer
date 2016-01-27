@@ -33,7 +33,7 @@ public:
     friend std::ostream &operator<<(std::ostream &ss, const Grammar &g);
 
 
-private:
+protected:
 
     std::map<std::string, std::vector<Rule> > rules_;
 

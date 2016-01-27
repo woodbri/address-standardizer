@@ -101,9 +101,9 @@ Lexicon::Lexicon(std::string name, std::string file) {
 // getters
 
 
-std::deque<LexEntry> Lexicon::find( const std::string key ) {
+std::vector<LexEntry> Lexicon::find( const std::string key ) {
 
-    std::deque<LexEntry> empty;
+    std::vector<LexEntry> empty;
 
     auto it = lex_.find( key );
     if ( it != lex_.end() )
@@ -122,7 +122,7 @@ std::ostream &operator<<(std::ostream &ss, const Lexicon &lex) {
        << lex.locale_ << "\t"
        << lex.lex_.size() << "\n";
 
-    // each lexicon entry is a deque of LexEntry objects
+    // each lexicon entry is a vector of LexEntry objects
     for (const auto &l  : lex.lex_)
         for (const auto &d : l.second)
             ss << d << "\n";
@@ -136,7 +136,7 @@ void Lexicon::classify( Token& token, InClass::Type typ ) {
     // fetch the entry from the lexicon
     // we get an empty container if it is not found
     std::string text = token.text();
-    std::deque<LexEntry> entries = find( text );
+    std::vector<LexEntry> entries = find( text );
 
     // append appropriate classes to token
     for( const auto &entry : entries ) {
@@ -232,7 +232,7 @@ void Lexicon::insert( const LexEntry &le ) {
 
     // fetch the entry from the lexicon
     // we get an empty container if it is not found
-    std::deque<LexEntry> entries = find( key );
+    std::vector<LexEntry> entries = find( key );
 
     // see if it is already here and do nothing if it is
     for( const auto &entry : entries )
@@ -258,7 +258,7 @@ void Lexicon::remove( const LexEntry &le ) {
 
     // fetch the entry from the lexicon
     // we get an empty container if it is not found
-    std::deque<LexEntry> entries = find( key );
+    std::vector<LexEntry> entries = find( key );
 
     // see if it is already here and do nothing if it is
     for( auto entry=entries.begin(); entry!=entries.end(); entry++ ) {
@@ -293,8 +293,8 @@ std::string Lexicon::regex() {
 
     // if the regex string is empty, regenerate it
     if (regex_.length() == 0) {
-        // collect all lexicon keys in deque
-        std::deque<std::string> keys;
+        // collect all lexicon keys in vector
+        std::vector<std::string> keys;
         for ( const auto &e : lex_ )
             keys.push_back( e.first );
 
@@ -318,7 +318,7 @@ std::string Lexicon::regex() {
 std::string Lexicon::regexPrefixAtt() {
 
     if (regexPrefix_.length() == 0) {
-        std::deque<std::string> prefix;
+        std::vector<std::string> prefix;
 
         for ( const auto &e : lex_ )
             for ( const auto &le : e.second )
@@ -349,7 +349,7 @@ std::string Lexicon::regexPrefixAtt() {
 std::string Lexicon::regexSuffixAtt() {
 
     if (regexSuffix_.length() == 0) {
-        std::deque<std::string> suffix;
+        std::vector<std::string> suffix;
 
         for ( const auto &e : lex_ )
             for ( const auto &le : e.second )

@@ -66,3 +66,40 @@ bool Token::isInClass( std::set<InClass::Type> test ) const {
 }
 
 
+InClass::Type Token::in(int pos) const {
+    auto it = inclass_.begin();
+    for (int i=0; i<pos; ++i)
+        it++;
+    return *it;
+}
+
+
+std::vector< std::vector<InClass::Type> > Token::enumerate( std::vector<Token> tokens ) {
+
+    std::set< std::vector<InClass::Type> > ulist;
+
+    // count the number of possible combinations
+    int cnt = 1;
+    for (const auto &t : tokens)
+        cnt *= t.inSize();
+
+    // enumerate all the combinations and insert them into a set
+    // so we can remove duplicates
+    for (int i=0; i<cnt; ++i) {
+        std::vector<InClass::Type> one;
+        for ( const auto &t : tokens )
+            one.push_back( t.in( i % t.inSize() ) );
+        ulist.insert( one );
+    }
+
+    // copy the unique set of enumerated combinations
+    // into a vector and return it
+    std::vector< std::vector<InClass::Type> > list;
+    list.clear();
+    list.reserve( ulist.size() );
+
+    for (const auto &e : ulist)
+        list.push_back( e );
+
+    return list;
+}

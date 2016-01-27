@@ -10,7 +10,7 @@
 
 #include <iostream>
 #include <string>
-#include <deque>
+#include <vector>
 
 int main(int ac, char* av[]) {
 
@@ -33,7 +33,7 @@ int main(int ac, char* av[]) {
     std::cout << "Normalized: '" << nstr << "'\n";
     std::cout << "UpperCase: '" << Ustr << "'\n";
 
-    std::deque<Token> tokens;
+    std::vector<Token> tokens;
 
     Lexicon lex("test-lex", file);
     std::cout << lex << "\n";

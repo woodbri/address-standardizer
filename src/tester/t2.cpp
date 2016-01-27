@@ -1,62 +1,84 @@
-// char_sep_example_2.cpp
+
+
+#include "../inclass.h"
+#include "../lexentry.h"
+#include "../lexicon.h"
+#include "../outclass.h"
+#include "../token.h"
+#include "../tokenizer.h"
+#include "../utils.h"
+#include "../grammar.h"
+#include "../search.h"
+
 #include <iostream>
-#include <map>
-#include <boost/regex.hpp>
 #include <string>
+#include <vector>
 
-typedef std::map<std::string, int, std::less<std::string> > map_type;
+int main(int ac, char* av[]) {
 
-void tokenize(map_type &m, const std::string& str) {
-
-    boost::regex expression(
-        "^(\\d+/\\d+|\\d+|\\<[[:alpha:]]+\\>|\\w+)([-\\s\\|[:punct:]]+|$)",
-        boost::regex::icase
-    );;
-
-    std::string::const_iterator start, end;
-    start = str.begin();
-    end = str.end();
-
-    boost::match_results<std::string::const_iterator> what;
-    boost::match_flag_type flags = boost::match_default;
-
-    while(boost::regex_search(start, end, what, expression, flags)) {
-
-        std::cout << "Searcing string: '"
-                  << std::string(start, end)
-                  << "'\n";
-        std::cout << "0: '" << std::string(what[0].first, what[0].second)
-            << "', " << what[0].first-str.begin()
-            << ", "  << what[0].second-str.begin()
-            << "\n";
-        std::cout << "1: '" << std::string(what[1].first, what[1].second)
-            << "', " << what[1].first-str.begin()
-            << ", "  << what[1].second-str.begin()
-            << "\n";
-        std::cout << "2: '" << std::string(what[2].first, what[2].second)
-            << "', " << what[2].first-str.begin()
-            << ", "  << what[2].second-str.begin()
-            << "\n";
-
-        // update search position
-        start = what[0].second;
-        std::cout << "Remaining string: '"
-                  << std::string(start, end)
-                  << "'\n";
-        // update flags
-//        flags |= boost::match_prev_avail;
-        flags |= boost::match_not_bob;
+    if (ac < 4) {
+        std::cerr << "Usage: t2 lex.txt grammar.txt 'address to parse'\n";
+        return EXIT_FAILURE;
     }
-}
 
-int main() {
+    std::string lfile = av[1];
+    std::string gfile = av[2];
+    std::string str = av[3];
 
-    map_type m;
+//    std::cout << "Lexicon: '" << file << "'\n";
+    std::cout << "Address: '" << str << "'\n";
 
-    //std::string str = "1/5;;Hello|world||-foo--bar;yow;baz|";
-    std::string str = "Hello,world,,-foo--bar;yow;baz";
+    // Normalize and UPPERCASE the input string
+    UErrorCode errorCode;
+    std::string nstr = Utils::normalizeUTF8( str, errorCode );
+    std::string Ustr = Utils::upperCaseUTF8( nstr, "en" );
 
-    tokenize(m, str);
+    std::cout << "Normalized: '" << nstr << "'\n";
+    std::cout << "UpperCase: '" << Ustr << "'\n";
+
+    std::vector<Token> tokens;
+
+    Lexicon lex("test-lex", lfile);
+//    std::cout << lex << "\n";
+//    std::cout << "Lexicon regex: '" << lex.regex() <<"'\n\n";
+//    std::cout << "Lexicon attachedRegex: '" << lex.attachedRegex() <<"'\n\n";
+
+    Tokenizer tokenizer( lex );
+    tokenizer.addFilter( InClass::PUNCT );
+    tokenizer.addFilter( InClass::DASH );
+    tokens = tokenizer.getTokens( Ustr );
+
+//    std::cout << "tokens.size() = " << tokens.size() << "\n";
+
+    for (const auto tok : tokens)
+        std::cout << tok << "\n";
+
+    std::vector< std::vector<InClass::Type> > list = Token::enumerate( tokens );
+
+    std::cout << "Enumerated token list size: " << list.size() << "\n";
+    for (const auto &e : list) {
+        for (const auto &t : e )
+            std::cout << InClass::asString( t ) << "  ";
+        std::cout << "\n";
+    }
+    std::cout << "\n";
+
+    Grammar G( gfile );
+
+    Search S( G );
+
+    for (const auto &e : list) {
+        if ( S.search( e ) ) {
+            std::cout << "#### SUCCESS!\n";
+            std::vector<Rule> best = S.bestResult();
+            for (const auto &e : best)
+                std::cout << e << "\n";
+            std::cout << "--------------------------------------------\n";
+        }
+        else {
+            std::cout << "#### FAILED!\n";
+        }
+    }
 
     return EXIT_SUCCESS;
 }

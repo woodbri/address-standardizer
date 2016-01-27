@@ -6,6 +6,7 @@
 
 #include <string>
 #include <set>
+#include <vector>
 
 #include "inclass.h"
 #include "outclass.h"
@@ -31,6 +32,8 @@ public:
     bool isInClass( std::set<InClass::Type> test ) const;
     bool isInClassEmpty() const { return inclass_.empty(); };
 
+    static std::vector< std::vector<InClass::Type> > enumerate( std::vector<Token> tokens );
+
     // mutators
     void text(std::string text) { text_ = text; };
     void stdtext(std::string stdtext) { stdtext_ = stdtext; };
@@ -43,6 +46,11 @@ public:
     // operators
 
     friend std::ostream &operator<<(std::ostream &ss, const Token &token);
+
+private:
+
+    int inSize() const { return inclass_.size(); };
+    InClass::Type in(int i) const;
 
 
 private:

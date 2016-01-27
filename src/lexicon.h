@@ -5,7 +5,7 @@
 #define LEXICON_H
 
 #include <map>
-#include <deque>
+#include <vector>
 #include <string>
 #include <iostream>
 #include <boost/regex.hpp>
@@ -31,7 +31,7 @@ public:
     std::string langAsName() const { return InClass::asName(lang_); };
     std::string locale() const { return locale_; };
 
-    std::deque<LexEntry> find( const std::string key );
+    std::vector<LexEntry> find( const std::string key );
 
     // mutators
     void name( const std::string name ) { name_ = name; };
@@ -66,7 +66,7 @@ private:
     std::string name_;
     InClass::Lang lang_;
     std::string locale_;
-    std::map <std::string, std::deque<LexEntry>, lexcomp> lex_;
+    std::map <std::string, std::vector<LexEntry>, lexcomp> lex_;
     std::string regex_;
     std::string regexPrefix_;
     std::string regexSuffix_;

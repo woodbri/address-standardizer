@@ -1,13 +1,13 @@
 /*HEADER*
 *HEADER*/
 
-#include <deque>
+#include <vector>
 #include <string>
 
 #include "tokenizer.h"
 
 
-std::deque<Token> Tokenizer::getTokens(std::string str) {
+std::vector<Token> Tokenizer::getTokens(std::string str) {
 
 
     // first see if we have attached tokens that we need to split apart
@@ -34,7 +34,7 @@ std::deque<Token> Tokenizer::getTokens(std::string str) {
 
     boost::u32regex re = boost::make_u32regex( regex, boost::regex::icase );
 
-    std::deque<Token> outtokens;
+    std::vector<Token> outtokens;
 
     boost::smatch what;
     boost::match_flag_type flags = boost::match_default;

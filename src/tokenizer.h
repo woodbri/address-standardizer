@@ -5,7 +5,7 @@
 #define TOKENIZER_H
 
 #include <string>
-#include <deque>
+#include <vector>
 #include <set>
 #include <boost/regex.hpp>
 #include <boost/regex/icu.hpp>
@@ -17,7 +17,7 @@ class Tokenizer {
 
 public:
     Tokenizer(Lexicon& in_lex) : lex_(in_lex) {};
-    std::deque<Token> getTokens(std::string str);
+    std::vector<Token> getTokens(std::string str);
 
     std::set<InClass::Type> filter() const { return filter_; };
     Lexicon lexicon() const { return lex_; };

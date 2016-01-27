@@ -10,7 +10,7 @@
 
 #include <iostream>
 #include <string>
-#include <deque>
+#include <vector>
 
 int main(int ac, char* av[]) {
 
