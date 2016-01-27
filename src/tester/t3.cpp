@@ -3,15 +3,7 @@
 #include <iostream>
 #include <string>
 
-#include "../inclass.h"
-#include "../lexentry.h"
-#include "../lexicon.h"
-#include "../outclass.h"
-#include "../token.h"
-#include "../tokenizer.h"
-#include "../utils.h"
-#include "../rule.h"
-#include "../grammar.h"
+#include "grammar.h"
 
 
 

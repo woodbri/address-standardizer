@@ -1,12 +1,6 @@
 
 
-#include "../inclass.h"
-#include "../lexentry.h"
-#include "../lexicon.h"
-#include "../outclass.h"
-#include "../token.h"
-#include "../tokenizer.h"
-#include "../utils.h"
+#include "lexicon.h"
 
 #include <iostream>
 #include <string>

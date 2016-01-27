@@ -76,30 +76,28 @@ InClass::Type Token::in(int pos) const {
 
 std::vector< std::vector<InClass::Type> > Token::enumerate( std::vector<Token> tokens ) {
 
-    std::set< std::vector<InClass::Type> > ulist;
-
     // count the number of possible combinations
     int cnt = 1;
     for (const auto &t : tokens)
         cnt *= t.inSize();
 
-    // enumerate all the combinations and insert them into a set
-    // so we can remove duplicates
-    for (int i=0; i<cnt; ++i) {
-        std::vector<InClass::Type> one;
-        for ( const auto &t : tokens )
-            one.push_back( t.in( i % t.inSize() ) );
-        ulist.insert( one );
-    }
-
-    // copy the unique set of enumerated combinations
-    // into a vector and return it
+    // reserve space for all the combinations
     std::vector< std::vector<InClass::Type> > list;
     list.clear();
-    list.reserve( ulist.size() );
+    list.reserve( list.size() );
 
-    for (const auto &e : ulist)
-        list.push_back( e );
+    // enumerate all the combinations and save them in list
+    for (int i=0; i<cnt; ++i) {
+        int num = 1;
+        std::vector<InClass::Type> one;
+        for ( const auto &t : tokens ) {
+            num *= t.inSize();
+            one.push_back( t.in( i*num/cnt % t.inSize() ) );
+            //std::cout << InClass::asString(one.back()) << " ";
+        }
+        list.push_back( one );
+        //std::cout << "\n";
+    }
 
     return list;
 }
