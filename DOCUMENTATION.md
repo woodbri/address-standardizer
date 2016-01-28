@@ -109,13 +109,13 @@ within a field.
 
 where:
 
-* <filename> - not used, but handy for managing a large number of files
-* <lang> - not used, see **inclass.h** for a list of language codes
-* <locale> - the UTF8 locale for this data used to normalize and uppercase strings.
-* <word> - the word or phrase that represents this entry.
-* <stdword> - the standardized word or phrase for this entry.
-* <InClass::Type> - a comma separated list of InClass::Type(s) for this entry.
-* <InClass::AttachType> - a comma separated list of possible attachment types.
+* &lt;filename> - not used, but handy for managing a large number of files
+* &lt;lang> - not used, see **inclass.h** for a list of language codes
+* &lt;locale> - the UTF8 locale for this data used to normalize and uppercase strings.
+* &lt;word> - the word or phrase that represents this entry.
+* &lt;stdword> - the standardized word or phrase for this entry.
+* &lt;InClass::Type> - a comma separated list of InClass::Type(s) for this entry.
+* &lt;InClass::AttachType> - a comma separated list of possible attachment types.
 
 See **inclass.h** for the list of <InClass::Type> and <InClass::AttachType> values. **DETACH** is used represent no attachments. In lex-german.txt you will find a good example of attachments with this entry:
 
