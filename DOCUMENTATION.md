@@ -163,16 +163,17 @@ The system currently requires the root rule to be named "ADDRESS", beyond that y
 
 The file syntax is:
 
-    file := rule_group+
+    comment := '#' TEXT{0+} NEWLINE
+    file := rule_group{1+} | comment{0+} | NEWLINE{0+}
     rule_group := meta_group | terminal_group
-    term := LETTER | NUMBER | '_'
-    header := "[ADDRESS]"(1) | "[" term "]"
+    identifier := ( LETTER | NUMBER | '_' ){1+}
+    header := '[ADDRESS]'{1} | '[' identifier ']'
     meta_group := header meta_rules
     terminal_group := header terminal_rules
-    meta_reference := '@' term
-    meta_rules := ( meta_reference+ NEWLINE )+
-    rule := InClass::Type{num} '->' OutClass::Type{num} '->' FLOAT
-    terminal_rules :+ ( rule NEWLINE )+
+    meta_reference := '@' identifier
+    meta_rules := ( meta_reference+ NEWLINE ){1+}
+    rule := InClass::Type{n} '->' OutClass::Type{n} '->' FLOAT
+    terminal_rules := ( rule NEWLINE ){1+}
 
 The meta rules look like the follow:
 
