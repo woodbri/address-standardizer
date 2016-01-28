@@ -25,16 +25,6 @@
 class Grammar
 {
 public:
-/*
-    typedef struct {
-        std::vector<InClass::Type> inKey_;
-    } Key;
-
-    typedef struct {
-        std::vector<OutClass::Type> outKey_;
-        float score_;
-    } Value;
-*/
 
     Grammar( const std::string &file );
 
