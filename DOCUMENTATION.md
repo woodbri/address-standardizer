@@ -7,34 +7,47 @@ Author: Stephen Woodbridge
 The Address Standardizer is a set of C++ classes designed to deal with the
 problem of standardizing street addresses for the purpose of geocoding.
 Geocoding is the process of matching an address to a reference set of streets.
-Or in more general terms it can be used for record linkage between data dataset
-be matching a record in one data set to record(s) in another data set.
+In more general terms, this library can be used for record linkage between data
+dataset be matching a record in one data set to record(s) in another data set.
 
 Some of the key design features are:
 
-* Support for UTF8 data to support countries around the world
+* Support for UTF8 data to support multiple languages
 * Human readable Lexicon and Grammar file
 * Support for splitting attached street types like in German
 * Wrappers to make it callable as a PostgreSQL stored procedure
 * C++ OO Class structure
 
+It is **not** intended to be a CASS Address correction or standardizing tool.
+If you do not know what this means then read on.
+
 ## Why You Might Care?
 
 If you need to build a geocoder or a record linking application then this is a
 key component that can help in that task. Additionally, if you need to change
-the underlying data that is being standardized for example by adding a new
+the underlying data that is being matched for example by adding a new
 country to the standardizer or adding an new reference set, then this document
 will help explain the how it works and what you can do to make those changes.
 
 ## How Does It Work?
 
-There are a few main modules in the code: Lexicon, Tokenizer, Grammar, Search
-classes that work together to take and address, parse it into tokens, then
-search the grammar for a match to tokens. The end result is that based on the
-matching we can reclassify the input tokens into a standardized stream of
-output tokens.
+It parses a string into tokens and assigns an input classification to each one
+using a lexicon. It then matches the stream of input tokens against a grammar
+to decide how to best map this token stream to a set of output classification
+based on the grammar so we can understand the structure of the text.
+
+There are a few main modules in the code the work together to accomplish this:
+Lexicon, Tokenizer, Grammar, Search classes that work together to take and
+address, parse it into tokens, then search the grammar for a match to tokens.
+The end result is that based on the matching we can reclassify the input tokens
+into a standardized stream of output tokens.
 
 ### Example Problem
+
+Here is an example address that might get parsed to the following input tokens.
+Then after matching the input tokens to a grammar, we can identify each token
+by its output classification to understand how to map the words in the address
+to components of an address.
 
     Address: 11 Radcliffe Rd North Chelmsford MA 01863 USA
     Input Tokens:  NUMBER WORD TYPE DIRECT WORD PROV NUMBER NATION
