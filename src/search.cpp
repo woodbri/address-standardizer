@@ -71,57 +71,57 @@ std::vector<Rule> Search::bestResult() const {
 }
 
 
-bool Search::matchAllMeta(const Rule &rule, const int lvl) {
+bool Search::matchAllMeta(const Rule &rule, const int level) {
     std::vector<std::string> meta = rule.meta();
     for (const auto &m : meta )
-        if ( not match( m, lvl+1 ) ) {
-            std::cout << std::string(lvl, '.') << "failed on '"
+        if ( not match( m, level+1 ) ) {
+            std::cout << std::string(level, '.') << "failed on '"
                 << m << "'\n";
             return false;
         }
 
-    std::cout << std::string(lvl, '.') << "return true\n";
+    std::cout << std::string(level, '.') << "return true\n";
     return true;
 }
 
-bool Search::match(const std::string &name, const int lvl) {
-    std::cout << std::string(lvl, '.') << "Calling match(\"" << name << "\")\n";
+bool Search::match(const std::string &name, const int level) {
+    std::cout << std::string(level, '.') << "Calling match(\"" << name << "\")\n";
     auto it = rules_.find( name );
     if ( it == rules_.end() ) {
-        std::cout << std::string(lvl, '.') << 
+        std::cout << std::string(level, '.') << 
                 "Failed to find rule for '" << name << "'\n";
         return false;
     }
 
     for ( const auto &r : (*it).second ) {
         if ( r.isMeta() ) {
-            if ( matchAllMeta( r, lvl ) ) {
-                std::cout << std::string(lvl, '.') << "return true\n";
+            if ( matchAllMeta( r, level ) ) {
+                std::cout << std::string(level, '.') << "return true\n";
                 return true;
             }
         }
         else {
-            if ( match( r, lvl+1 ) ) {
-                std::cout << std::string(lvl, '.') << "return true\n";
+            if ( match( r, level+1 ) ) {
+                std::cout << std::string(level, '.') << "return true\n";
                 return true;
             }
         }
     }
 
-    std::cout << std::string(lvl, '.') << "return false\n";
+    std::cout << std::string(level, '.') << "return false\n";
     return false;
 }
 
 
-bool Search::match(const Rule &rule, const int lvl) {
-    std::cout << std::string(lvl, '.') << "Calling match(\"" << rule << "\")\n";
+bool Search::match(const Rule &rule, const int level) {
+    std::cout << std::string(level, '.') << "Calling match(\"" << rule << "\")\n";
     int pos = pos_;
     std::vector<InClass::Type> in = rule.in();
     for (const auto &e : in) {
         if (pos < (int) pattern_.size() and pattern_[pos] == e)
             ++pos;
         else {
-            std::cout << std::string(lvl, '.') << "return false\n";
+            std::cout << std::string(level, '.') << "return false\n";
             return false;
         }
     }
@@ -131,7 +131,7 @@ bool Search::match(const Rule &rule, const int lvl) {
     pos_ = pos;
     stack_.push_back( rule );
 
-    std::cout << std::string(lvl, '.') << "return true\n";
+    std::cout << std::string(level, '.') << "return true\n";
     return true;
 }
 

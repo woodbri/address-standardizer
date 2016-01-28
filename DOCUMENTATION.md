@@ -159,6 +159,21 @@ The grammar is made up of a collection of rules. There are two types of rules:
 1. meta rule that refers to other rules
 2. terminal rules that refer to a partial stream of <InClass::Type>
 
+The system currently requires the root rule to be named "ADDRESS", beyond that you can name your rules using only letters, numbers and '_'. References to rules require the preceeding '@' character, like "@STREET_ADDRESS" below to refer to the "[STREET_ADDRESS]" rule. Comment line begin with a '#' character and blank lines are ignored.
+
+The file syntax is:
+
+    file := rule_group+
+    rule_group := meta_group | terminal_group
+    term := LETTER | NUMBER | '_'
+    header := "[ADDRESS]"(1) | "[" term "]"
+    meta_group := header meta_rules
+    terminal_group := header terminal_rules
+    meta_reference := '@' term
+    meta_rules := ( meta_reference+ NEWLINE )+
+    rule := InClass::Type{num} '->' OutClass::Type{num} '->' FLOAT
+    terminal_rules :+ ( rule NEWLINE )+
+
 The meta rules look like the follow:
 
     [ADDRESS]
