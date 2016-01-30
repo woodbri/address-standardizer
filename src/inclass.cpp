@@ -99,7 +99,7 @@ InClass::Type InClass::asOneType(const std::string &s) {
     auto it = m.find( s );
     if (it == m.end()) {
         t = BADTOKEN;
-        std::cout << "Error parsing type for '" << s <<"'\n";
+        //std::cout << "Error parsing type for '" << s <<"'\n";
     }
     else
         t = it->second;

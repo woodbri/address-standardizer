@@ -59,6 +59,7 @@ public:
 
 private:
 
+    // this methods are used on enumerate()
     int inSize() const { return inclass_.size(); };
     InClass::Type in(int i) const;
 

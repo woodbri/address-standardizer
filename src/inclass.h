@@ -146,18 +146,22 @@ public:
     } AttachType;
 
 
+    // InClass::Type conversions
     static std::string asString(const std::set<InClass::Type> &t);
     static std::string asString(const InClass::Type &t);
     static std::set<InClass::Type> asType(const std::string &s);
     static InClass::Type asOneType(const std::string &s);
     static InClass::Type asType(const int i);
+
+    // InClass::AttachType conversions
+    static std::string asString(const std::set<InClass::AttachType> &t);
+    static std::string asString(const InClass::AttachType &t);
     static std::set<InClass::AttachType> asAttachType(const std::string &s);
 
+    // InClass::Lang conversions
     static std::string asString(const InClass::Lang &lang);
     static std::string asName(const InClass::Lang &lang);
     static InClass::Lang asLang(const std::string &s);
-    static std::string asString(const std::set<InClass::AttachType> &t);
-    static std::string asString(const InClass::AttachType &t);
 
 private:
 

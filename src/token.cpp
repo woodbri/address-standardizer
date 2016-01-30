@@ -16,9 +16,11 @@
 
 #include "token.h"
 
-Token::Token() {
-    text_ = "";
-    stdtext_ = "";
+Token::Token() : outclass_(OutClass::BADTOKEN) {
+    text_.clear();
+    stdtext_.clear();
+    inclass_.clear();
+    attached_.clear();
 }
 
 
@@ -26,6 +28,7 @@ Token::Token(std::string text) {
     std::string in_word;
     std::string in_stdword;
     std::string in_inclass;
+    std::string in_outclass;
     std::string in_attached;
 
     std::stringstream buffer(text);
@@ -34,20 +37,15 @@ Token::Token(std::string text) {
         std::getline(buffer, in_word, '\t');
     std::getline(buffer, in_stdword, '\t');
     std::getline(buffer, in_inclass, '\t');
+    std::getline(buffer, in_outclass, '\t');
     std::getline(buffer, in_attached, '\t');
 
     text_ = in_word;
     stdtext_ = in_stdword;
+    inclass_ = InClass::asType(in_inclass);
+    outclass_ = OutClass::asType(in_outclass);
     attached_ = InClass::asAttachType(in_attached);
 
-    std::stringstream buffer2(in_inclass);
-    while (true) {
-        std::getline(buffer2, in_word, ',');
-        if (in_word.length() > 0)
-            inclass(InClass::asType(in_word));
-        if (buffer2.eof())
-            break;
-    }
 }
 
 
