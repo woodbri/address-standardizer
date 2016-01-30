@@ -62,11 +62,16 @@ Rule::Rule( const std::string &line, const bool isMeta ) : score_(0.0) {
     }
 
     if (not isValid()) {
-        std::cerr << "ERROR: Invalid Rule defined for: '" << line << "'\n";
-        //clear();
+        //std::cerr << "ERROR: Invalid Rule defined for: '" << line << "'\n";
+        clear();
     }
 }
 
+
+bool Rule::isEmpty() const {
+    return meta_.size()==0 and score_==0
+        and inClass_.size()==0 and outClass_.size()==0;
+}
 
 bool Rule::isValid() const {
     if ( isMeta() and (
@@ -144,6 +149,12 @@ void Rule::pushInOut(const InClass::Type in, const OutClass::Type out) {
     outClass_.push_back(out);
 }
 
+
+void Rule::score( const float s ) {
+    score_ = s;
+    meta_.clear();
+}
+
 void Rule::meta( const std::vector<std::string> &meta ) {
     meta_ = meta;
     inClass_.clear();
@@ -152,6 +163,7 @@ void Rule::meta( const std::vector<std::string> &meta ) {
 }
 
 
+/*
 void Rule::in( const std::vector<InClass::Type> &in ) {
     inClass_ = in;
     meta_.clear();
@@ -162,12 +174,7 @@ void Rule::out( const std::vector<OutClass::Type>  &out ) {
     outClass_ = out;
     meta_.clear();
 }
-
-
-void Rule::score( const float s ) {
-    score_ = s;
-    meta_.clear();
-}
+*/
 
 
 std::ostream &operator<<(std::ostream &ss, const Rule &r) {
@@ -175,8 +182,12 @@ std::ostream &operator<<(std::ostream &ss, const Rule &r) {
 
     if ( r.isMeta() ) {
         std::vector<std::string> meta = r.meta();
-        for ( const auto &e : meta )
-            ss << "@" << e << " ";
+        bool first = true;
+        for ( const auto &e : meta ) {
+            if (not first) ss << " ";
+            ss << "@" << e;
+            first = false;
+        }
     }
     else {
         std::vector<InClass::Type> inClass = r.in();

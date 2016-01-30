@@ -36,6 +36,7 @@ public:
     std::vector<OutClass::Type> out() const { return outClass_; };
     float score() const { return score_; };
     bool isValid() const;
+    bool isEmpty() const;
 
     // algorithms
     Rule concat( const Rule &r ) const;
@@ -49,19 +50,21 @@ public:
 
 private:
 
-    // TODO these probably are not needed so made private
-    // clean up later
-
     void pushMeta( const std::string &s );
     void pushIn( const InClass::Type t );
     void pushOut( const OutClass::Type t );
     void pushInOut( const InClass::Type in, const OutClass::Type out);
-
-    void meta( const std::vector<std::string> &meta );
-    void in( const std::vector<InClass::Type> &in );
-    void out( const std::vector<OutClass::Type>  &out );
     void score( const float s );
 
+    void meta( const std::vector<std::string> &meta );
+
+/*
+    // TODO these probably are not needed so made private
+    // clean up later
+
+    void in( const std::vector<InClass::Type> &in );
+    void out( const std::vector<OutClass::Type>  &out );
+*/
 
 private:
 
