@@ -21,13 +21,13 @@
 
 bool LexEntry::isPrefixAttached() const {
     auto it = attached_.find( InClass::ATT_PRE );
-    return not (it == attached_.end());
+    return (it != attached_.end());
 }
 
 
 bool LexEntry::isSuffixAttached() const {
     auto it = attached_.find( InClass::ATT_SUF );
-    return not (it == attached_.end());
+    return (it != attached_.end());
 }
 
 
@@ -35,7 +35,7 @@ bool LexEntry::isPrefix() const {
     auto it = attached_.find( InClass::DET_PRE );
     if (it == attached_.end()) {
         auto it2 = attached_.find( InClass::ATT_PRE );
-        return not (it2 == attached_.end());
+        return (it2 != attached_.end());
     }
     else
         return true;
@@ -46,7 +46,7 @@ bool LexEntry::isSuffix() const {
     auto it = attached_.find( InClass::DET_SUF );
     if (it == attached_.end()) {
         auto it2 = attached_.find( InClass::ATT_SUF );
-        return not (it2 == attached_.end());
+        return (it2 != attached_.end());
     }
     else
         return true;
@@ -62,7 +62,7 @@ bool LexEntry::isAttached() const {
     auto it = attached_.find( InClass::ATT_SUF );
     if (it == attached_.end()) {
         auto it2 = attached_.find( InClass::ATT_PRE );
-        return not (it2 == attached_.end());
+        return (it2 != attached_.end());
     }
     else
         return true;
@@ -78,10 +78,18 @@ bool LexEntry::isDetached() const {
     auto it = attached_.find( InClass::DET_SUF );
     if (it == attached_.end()) {
         auto it2 = attached_.find( InClass::DET_PRE );
-        return not (it2 == attached_.end());
+        return (it2 != attached_.end());
     }
     else
         return true;
+}
+
+
+void LexEntry::set(const std::string &word, const std::string &stdword, const InClass::Type type) {
+    word_ = word;
+    stdword_ = stdword;
+    type_.clear();
+    type_.insert(type);
 }
 
 

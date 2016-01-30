@@ -38,7 +38,7 @@ public:
 
     /** @name mutators */
     ///@{
-    void set(const std::string &word, const std::string &stdword, const InClass::Type &type);
+    void set(const std::string &word, const std::string &stdword, const InClass::Type type);
     void word(const std::string &word) { word_=word; };
     void stdword(const std::string &stdword) { stdword_=stdword; };
     void type(const InClass::Type &type) { type_.insert(type); };
@@ -59,8 +59,12 @@ public:
 
     inline bool operator==(const LexEntry &rhs) const {
         return word_==rhs.word_ and stdword_==rhs.stdword_
-            and type_==rhs.type_;
-    }
+            and type_==rhs.type_ and attached_==rhs.attached_;
+    };
+
+    inline bool operator!=(const LexEntry &rhs) const {
+        return not ( *this == rhs );
+    };
     ///@}
 
 
