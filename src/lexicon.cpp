@@ -269,6 +269,8 @@ void Lexicon::remove( const LexEntry &le ) {
     // fetch the entry from the lexicon
     // we get an empty container if it is not found
     std::vector<LexEntry> entries = find( key );
+    if (entries.size() == 0)
+        return;
 
     // see if it is already here and do nothing if it is
     for( auto entry=entries.begin(); entry!=entries.end(); entry++ ) {
@@ -277,20 +279,21 @@ void Lexicon::remove( const LexEntry &le ) {
 
             if ( entries.size() == 0 ) {
                 // remove the key from the lexicon
-                auto it = lex_.find( key );
-                if ( it != lex_.end() )
-                    lex_.erase( it );
+                lex_.erase( key );
             }
             else {
                 // save it back in the lexicon
                 lex_[key] = entries;
             }
+            break;
         }
     }
 
-    // set cached regex string to empty
+    // set cached regex strings to empty
     // so it will get regenerated
-    regex_ = "";
+    regex_.clear();
+    regexPrefix_.clear();
+    regexSuffix_.clear();
 }
 
 
