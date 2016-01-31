@@ -26,10 +26,9 @@ bool Search::search() {
     if ( pattern_.size() == 0 ) return false;
     results_.clear();
     unsigned int pos = 0;
-    unsigned int stackDepth = 0;
     stack_.clear();
 
-    if ( match( std::string("ADDRESS"), 0, pos, stackDepth ) ) {
+    if ( match( std::string("ADDRESS"), 0, pos ) ) {
         results_.push_back( stack_ );
         return true;
     }
@@ -72,11 +71,16 @@ std::vector<Rule> Search::bestResult() const {
 }
 
 
-bool Search::matchAllMeta(const Rule &rule, const int level, unsigned int pos, unsigned int stackDepth) {
-    std::cout << std::string(level, '.') << "Calling matchAllMeta(\"" << rule <<"\")(" << pos << ", " << stackDepth << ")[" << pos_ << ", " << stack_.size() << "]\n";
+bool Search::matchAllMeta(const Rule &rule, const int level, unsigned int pos) {
+    const unsigned int stackDepth(stack_.size());
+
+    std::cout << std::string(level, '.') << "Calling matchAllMeta(\""
+        << rule <<"\")(" << pos << ", " << stackDepth << ")"
+        "[" << pos_ << ", " << stack_.size() << "]\n";
+
     std::vector<std::string> meta = rule.meta();
     for (const auto &m : meta )
-        if ( not match( m, level+1, pos, stackDepth ) ) {
+        if ( not match( m, level+1, pos ) ) {
             std::cout << std::string(level, '.') << "failed on '"
                 << m << "'\n";
             // unwind stack and pos pointer
@@ -92,8 +96,13 @@ bool Search::matchAllMeta(const Rule &rule, const int level, unsigned int pos, u
     return true;
 }
 
-bool Search::match(const std::string &name, const int level, unsigned int pos, unsigned int stackDepth) {
-    std::cout << std::string(level, '.') << "Calling match(\"" << name << "\")(" << pos << ", " << stackDepth << ")[" << pos_ << ", " << stack_.size() << "]\n";
+bool Search::match(const std::string &name, const int level, unsigned int pos) {
+    const unsigned int stackDepth(stack_.size());
+
+    std::cout << std::string(level, '.') << "Calling match(\""
+        << name << "\")(" << pos << ", " << stackDepth << ")"
+        "[" << pos_ << ", " << stack_.size() << "]\n";
+
     auto it = rules_.find( name );
     if ( it == rules_.end() ) {
         std::cout << std::string(level, '.') << 
@@ -107,13 +116,13 @@ bool Search::match(const std::string &name, const int level, unsigned int pos, u
 
     for ( const auto &r : (*it).second ) {
         if ( r.isMeta() ) {
-            if ( matchAllMeta( r, level+1, pos, stackDepth ) ) {
+            if ( matchAllMeta( r, level+1, pos ) ) {
                 std::cout << std::string(level, '.') << "return true\n";
                 return true;
             }
         }
         else {
-            if ( match( r, level+1, pos, stackDepth ) ) {
+            if ( match( r, level+1, pos ) ) {
                 std::cout << std::string(level, '.') << "return true\n";
                 return true;
             }
@@ -128,8 +137,13 @@ bool Search::match(const std::string &name, const int level, unsigned int pos, u
 }
 
 
-bool Search::match(const Rule &rule, const int level, unsigned int pos, unsigned int stackDepth) {
-    std::cout << std::string(level, '.') << "Calling match(\"" << rule << "\")(" << pos << ", " << stackDepth << ")[" << pos_ << ", " << stack_.size() << "]\n";
+bool Search::match(const Rule &rule, const int level, unsigned int pos) {
+    const unsigned int stackDepth(stack_.size());
+
+    std::cout << std::string(level, '.') << "Calling match(\""
+        << rule << "\")(" << pos << ", " << stackDepth << ")"
+        "[" << pos_ << ", " << stack_.size() << "]\n";
+
     std::vector<InClass::Type> in = rule.in();
     for (const auto &e : in) {
         if (pos < pattern_.size() and pattern_[pos] == e)

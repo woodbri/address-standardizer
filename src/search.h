@@ -40,9 +40,9 @@ public:
 
 private:
 
-    bool matchAllMeta( const Rule &rule, const int level, unsigned int pos, unsigned int stackDepth );
-    bool match( const std::string &name, const int level, unsigned int pos, unsigned int stackDepth );
-    bool match( const Rule &rule, const int level, unsigned int pos, unsigned int stackDepth);
+    bool matchAllMeta( const Rule &rule, const int level, unsigned int pos );
+    bool match( const std::string &name, const int level, unsigned int pos );
+    bool match( const Rule &rule, const int level, unsigned int posi );
 
 private:
 
