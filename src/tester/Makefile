@@ -24,6 +24,7 @@ test: $(EXE)
 	./t4 lex-en.txt '11 radcliff rd, north chelmsford, ma 01863-2313 usa'
 	./t3 ../../data/grammar/test.grammar
 	./t2 lex-usa.txt ../../data/grammar/test.grammar '11 radcliff rd, north chelmsford, ma 01863-2313 usa'
+	./t2 lex-test.txt test.grammar  'a b c d e'
 
 
 clean:
