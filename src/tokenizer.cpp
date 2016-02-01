@@ -15,10 +15,21 @@
 #include <string>
 
 #include "tokenizer.h"
+#include "utils.h"
 
+void Tokenizer::removeFilter(InClass::Type filter) {
+    auto it = filter_.find(filter);
+    if ( it != filter_.end() )
+        filter_.erase(it);
+}
 
 std::vector<Token> Tokenizer::getTokens(std::string str) {
 
+    // make sure the text is normalized and UUPERCASE
+    std::string locale = lex_.locale();
+    UErrorCode errorCode;
+    std::string nstr = Utils::normalizeUTF8( str, errorCode );
+    str = Utils::upperCaseUTF8( nstr, locale );
 
     // first see if we have attached tokens that we need to split apart
     // we place and em dash utf8 char "\xe2\x80\x94" where we split the word

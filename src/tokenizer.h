@@ -35,7 +35,7 @@ public:
     void filter(std::set<InClass::Type> filter) { filter_ = filter; };
     void lexicon(Lexicon& lex) { lex_ = lex; };
     void addFilter(InClass::Type filter) { filter_.insert(filter); };
-    void removeFilter(InClass::Type filter) { filter_.erase(filter_.find(filter)); };
+    void removeFilter(InClass::Type filter);
     void clearFilter() { filter_.clear(); };
 
 private:
