@@ -97,7 +97,7 @@ Grammar::Grammar( const std::string &file )
     is.close();
 
     check();
-    if ( issues_.length() > 0 )
+    if ( status_ != 0 )
         std::cerr << "Grammar::Grammar(): " << issues_ << "\n";
 }
 
@@ -113,7 +113,7 @@ void Grammar::check() {
         auto ref = references_.find( e.first );
         if ( ref == references_.end() and e.first != "ADDRESS" ) {
             issues_ += "Rule '" + e.first + "' defined by not referenced!\n";
-            if ( not( status_ == CHECK_FATAL ) )
+            if ( status_ == CHECK_OK )
                 status_ = CHECK_WARN;
         }
     }
@@ -126,9 +126,12 @@ void Grammar::check() {
 void Grammar::check( std::string section, std::string key ) {
 
     auto rule = rules_.find( key );
-    if ( rule == rules_.end() )
+    if ( rule == rules_.end() ) {
         issues_ += "Missing rule: " + key +
             " : referenced at [" + section + "]\n";
+        status_ = CHECK_FATAL;
+        return;
+    }
     for ( const auto &r : (*rule).second ) {
         if (r.isMeta()) {
             std::vector<std::string> words = r.meta();
