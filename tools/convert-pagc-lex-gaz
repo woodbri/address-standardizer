@@ -1,0 +1,64 @@
+#!/usr/bin/perl -w
+use strict;
+use Data::Dumper;
+$Data::Dumper::Sortkeys = 1;
+
+my @types = qw(NUMBER WORD TYPE QUALIF BADTOKEN BADTOKEN ROAD STOPWORD RR
+    DASH CITY PROV NATION AMPERS BOXH ORD UNITH UNITT SINGLE BUILDH MILE
+    DOUBLE DIRECT MIXED BUILDT FRACT PCT PCH QUINT QUAD PUNCT SPACE PLACEN
+    EMDASH);
+
+sub Usage {
+    die "Usage: convert-pagc lex.sql gaz.sql\n";
+}
+
+Usage() unless @ARGV;
+
+my %lexi = ();
+
+for my $f (@ARGV) {
+    readfile($f);
+}
+
+writelexicon();
+
+exit;
+
+sub readfile {
+    my $f = shift;
+
+    open(IN, $f) || die "ERROR: failed to open '$f' : $!\n";
+    while (my $x = <IN>) {
+        chomp($x);
+        my @f = split(/\t/, $x);
+        if (@f != 4) {
+            #print "Skipping: '$x'\n";
+            next;
+        }
+        my $key = "$f[1]\t$f[3]";
+        my $d = $lexi{$key};
+        if (! defined($d)) {
+            $lexi{$key} = [$f[1], $f[3], [$types[$f[2]]]];
+        }
+        else {
+            if ($lexi{$key}[1] =~ /^$f[3]$/i) {
+                push @{$lexi{$key}[2]}, $types[$f[2]];
+            }
+            else {
+                print "Different stdwords for '$f[1]': '$f[3]' vs '$lexi{$f[1]}[0]'\n";
+            }
+        }
+    }
+
+    close(IN);
+}
+
+sub writelexicon {
+    #print Data::Dumper->Dump([\%lexi], ['lexicon']);
+    print "LEXICON:\tpagc-converted\tUSA\ten_US\t\n";
+    for my $x (sort keys %lexi) {
+        my $le = $lexi{$x};
+        print "LEXENTRY:\t$le->[0]\t$le->[1]\t" .
+            join(",", @{$le->[2]}) . "\t\n";
+    }
+}

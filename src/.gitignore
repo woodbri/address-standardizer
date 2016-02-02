@@ -1,4 +1,5 @@
 *.d
 *.o
 tester/t?
+test/*-test
 .*.swp

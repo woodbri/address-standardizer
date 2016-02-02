@@ -37,6 +37,7 @@ public:
         BOXH    = 14,   ///< Words used to denote post office boxes. For example 'Box' or 'PO Box'.
         ORD     = 15,   ///< Representations such as First or 1st. Often used in street. Are often standardized as numbers.
         UNITH   = 16,   ///< Words and abbreviation used to denote internal subaddresses. For example, 'APT' or 'UNIT'.
+        UNITT   = 17,   ///< Which UNIT is being described
         SINGLE  = 18,   ///< A single letter.
         BUILDH  = 19,   ///< Words used to denote buildings or building complexes, usually as a prefix. For example 'Tower' in 'Tower 7A'.
         MILE    = 20,   ///< Words used to denote milepost addresses.
