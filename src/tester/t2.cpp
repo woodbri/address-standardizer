@@ -75,6 +75,17 @@ int main(int ac, char* av[]) {
 
     Grammar G( gfile );
 
+    switch (G.status() ) {
+        case Grammar::CHECK_FATAL:
+            std::cout << "FATAL loading grammar: " << G.issues() << "\n";
+            return(1);
+        case Grammar::CHECK_WARN:
+            std::cout << "WARNING loading grammar: " << G.issues() << "\n";
+            break;
+        case Grammar::CHECK_OK:
+            break;
+    }
+
     Search S( G );
 
     for (const auto &e : list) {

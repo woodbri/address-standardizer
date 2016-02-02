@@ -26,9 +26,18 @@ class Grammar
 {
 public:
 
+    typedef enum {
+        CHECK_FATAL = -1,
+        CHECK_OK    =  0,
+        CHECK_WARN  =  1
+    } Status;
+
     Grammar( const std::string &file );
 
-    std::string check() const;
+    void check();
+    void check( std::string section, std::string key );
+    Status status() const { return status_; };
+    std::string issues() const { return issues_; } ;
 
     friend std::ostream &operator<<(std::ostream &ss, const Grammar &g);
 
@@ -36,7 +45,9 @@ public:
 protected:
 
     std::map<std::string, std::vector<Rule> > rules_;
-
+    std::string issues_;
+    std::map<std::string, int> references_;
+    Status status_;
 
 };
 

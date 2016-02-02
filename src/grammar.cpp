@@ -19,7 +19,9 @@
 
 #include "grammar.h"
 
-Grammar::Grammar( const std::string &file ) {
+Grammar::Grammar( const std::string &file )
+    : issues_(""), status_(CHECK_OK)
+{
 
     std::string line;
     std::ifstream is (file.c_str(), std::ifstream::in|std::ifstream::binary);
@@ -94,40 +96,65 @@ Grammar::Grammar( const std::string &file ) {
 
     is.close();
 
-    std::string issues = check();
-    if ( issues.length() > 0 )
-        std::cerr << issues << "\n";
+    check();
+    if ( issues_.length() > 0 )
+        std::cerr << "Grammar::Grammar(): " << issues_ << "\n";
 }
 
 
-std::string Grammar::check() const {
-    std::string issues;
-    
+void Grammar::check() {
+    issues_.clear();
+    references_.clear();
+    status_ = CHECK_OK;
+
+    check( "", "ADDRESS" );
+
     for ( const auto &e : rules_ ) {
-        int cnt = 0;
-        for ( const auto &r : e.second ) {
-            ++cnt;
-            std::string scnt = boost::lexical_cast<std::string>( cnt );
-            if (r.isMeta()) {
-                std::vector<std::string> words = r.meta();
-                for ( const auto &word : words ) {
-                    if ( rules_.find(word) == rules_.end() ) {
-                        issues += "Missing section: " + word +
-                            " : referenced at [" + e.first + "]:" + scnt + "\n";
-                    }
-                }
-            }
-            else {
-                if ( not r.isValid() )
-                    issues += "Invalid rule at [" + e.first + "]:" + scnt + "\n";
-                if ( r.score() == 0.0 ) 
-                    issues += "Score=0 at [" + e.first + "]:" + scnt + "\n";
-            }
+        auto ref = references_.find( e.first );
+        if ( ref == references_.end() and e.first != "ADDRESS" ) {
+            issues_ += "Rule '" + e.first + "' defined by not referenced!\n";
+            if ( not( status_ == CHECK_FATAL ) )
+                status_ = CHECK_WARN;
         }
     }
 
-    return issues;
+    // done with reference vector so clear it
+    references_.clear();
 }
+
+
+void Grammar::check( std::string section, std::string key ) {
+
+    auto rule = rules_.find( key );
+    if ( rule == rules_.end() )
+        issues_ += "Missing rule: " + key +
+            " : referenced at [" + section + "]\n";
+    for ( const auto &r : (*rule).second ) {
+        if (r.isMeta()) {
+            std::vector<std::string> words = r.meta();
+            for ( const auto &word : words ) {
+                check( key, word );
+                auto ref = references_.find( word );
+                if (ref == references_.end())
+                    references_[word] = 1;
+                else
+                    references_[word] = references_[word] + 1;
+            }
+        }
+        else {
+            if ( not r.isValid() ) {
+                issues_ += "Invalid rule at [" + key + "]\n";
+                status_ = CHECK_FATAL;
+            }
+            if ( r.score() <= 0.0 ) {
+                issues_ += "Score <= 0 at [" + key + "]\n";
+                if ( not ( status_ == CHECK_FATAL ))
+                    status_ = CHECK_WARN;
+            }
+        }
+    }
+}
+
 
 
 std::ostream &operator<<(std::ostream &ss, const Grammar &g) {
