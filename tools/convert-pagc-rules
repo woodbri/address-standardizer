@@ -1,0 +1,86 @@
+#!/usr/bin/perl -w
+use strict;
+use Data::Dumper;
+$Data::Dumper::Sortkeys = 1;
+
+#
+# there is a bug in the original rules where inclass 5 was used
+# in some rules where 2 should have been used.
+# This is corrected by setting position 5 to TYPE rather than BADTOKEN
+#
+my @intypes = qw(NUMBER WORD TYPE QUALIF BADTOKEN TYPE ROAD STOPWORD RR
+    DASH CITY PROV NATION AMPERS BOXH ORD UNITH UNITT SINGLE BUILDH MILE
+    DOUBLE DIRECT MIXED BUILDT FRACT PCT PCH QUINT QUAD PUNCT SPACE PLACEN
+    EMDASH);
+
+my @outtypes = qw(BLDNG HOUSE PREDIR QUALIF PRETYP STREET SUFTYP SUFDIR RR EXTRA CITY PROV NATION POSTAL BOXH BOXT UNITH UNITT);
+
+my @sect = qw(MACRO MICRO ARC HOUSE BUILDING);
+
+sub Usage {
+    die "Usage: convert-pagc lex.sql gaz.sql\n";
+}
+
+Usage() unless @ARGV;
+
+my %g = ();
+
+for my $f (@ARGV) {
+    readfile($f);
+}
+
+writelexicon();
+
+exit;
+
+sub readfile {
+    my $f = shift;
+
+    open(IN, $f) || die "ERROR: failed to open '$f' : $!\n";
+    while (my $x = <IN>) {
+        chomp($x);
+        next unless $x =~ /^\d+\s+[-\d]+\s+/;
+        my @f = split(/\s+-1\s+/, $x);
+        if (@f != 3) {
+            warn "ERROR: parsing line '$x'\n";
+            next;
+        }
+        my @ins = split(/\s+/, $f[0]);
+        my @outs = split(/\s+/, $f[1]);
+        my ($type, $score) = split(/\s+/, $f[2]);
+        if (scalar @ins != scalar @outs) {
+            warn "ERROR: ins and outs don't match! '$x'\n";
+            next;
+        }
+        if ($type < 0 || $type > 4) {
+            warn "ERROR: unknown type: '$x'\n";
+            next;
+        }
+        my @a = map { $intypes[$_] } @ins;
+        my @b = map { $outtypes[$_] } @outs;
+        push @{$g{$sect[$type]}}, [\@a, \@b, $score/20.0];
+    }
+
+    close(IN);
+}
+
+sub writelexicon {
+    #print Data::Dumper->Dump([\%g], ['grammar']);
+    print <<EOF;
+[ADDRESS]
+\@MICRO \@MACRO
+\@HOUSE \@ARC \@MACRO
+\@BUILDING \@MICRO \@MACRO
+\@BUILDING \@HOUSE \@ARC \@MACRO
+
+EOF
+
+    for my $key (@sect) {
+        print "[$key]\n";
+        for my $r ( @{$g{$key}} ) {
+            print join(' ', @{$r->[0]}), ' -> ',
+                  join(' ', @{$r->[1]}), ' -> ', $r->[2], "\n";
+        }
+        print "\n";
+    }
+}
