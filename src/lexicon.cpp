@@ -177,6 +177,12 @@ void Lexicon::classify( Token& token, InClass::Type typ ) {
         if (text.length() == 5)
             token.inclass( InClass::QUINT );
     }
+    else if ( text == "@" ) {
+        token.inclass( InClass::ATSIGN );
+    }
+    else if ( text == "/" ) {
+        token.inclass( InClass::SLASH );
+    }
     // is it a fract
     else if (boost::regex_match(text, fract_exp, boost::match_default)) {
         token.inclass( InClass::FRACT );

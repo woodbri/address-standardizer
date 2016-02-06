@@ -51,6 +51,8 @@ std::string InClass::asString(const InClass::Type &t) {
         case SPACE:     str = "SPACE";  break;
         case PLACEN:    str = "PLACEN"; break;
         case EMDASH:    str = "EMDASH"; break;
+        case SLASH:     str = "SLASH";  break;
+        case ATSIGN:    str = "ATSIGN"; break;
         default:        str = "BADTOKEN"; break;
     };
     return str;
@@ -93,6 +95,8 @@ InClass::Type InClass::asOneType(const std::string &s) {
     m["SPACE"]     = SPACE;
     m["PLACEN"]    = PLACEN;
     m["EMDASH"]    = EMDASH;
+    m["SLASH"]     = SLASH;
+    m["ATSIGN"]    = ATSIGN;
     m["BADTOKEN"]  = BADTOKEN;
 
     InClass::Type t;
@@ -172,6 +176,8 @@ InClass::Type InClass::asType(const int i) {
         case 31: t = SPACE;     break;
         case 32: t = PLACEN;    break;
         case 33: t = EMDASH;    break;
+        case 34: t = SLASH;     break;
+        case 35: t = ATSIGN;    break;
         default: t = BADTOKEN;  break;
     }
     return t;

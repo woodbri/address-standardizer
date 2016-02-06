@@ -13,7 +13,7 @@ TESTS = $(SRCS:.cpp=)
 
 all: $(TESTS)
 
-$(TESTS):
+$(TESTS): ../*.o
 	$(CPP) $(CPPFLAGS) -o $@ $@.cpp $(LDFLAGS)
 
 test: $(TESTS)

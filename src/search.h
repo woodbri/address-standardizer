@@ -27,22 +27,28 @@ class Search : Grammar
 {
 public:
 
+    typedef std::vector<std::string>::iterator VecStringIter;
+
     Search( const Grammar &G ) : Grammar( G ), pos_(0) {};
     Search( const Grammar &G, const std::vector<InClass::Type> &pattern )
         : Grammar( G ),  pattern_(pattern), pos_(0) {};
 
     bool search();
     bool search( const std::vector<InClass::Type> &pattern );
+    std::vector<Rule> bestResult( const std::vector< std::vector<InClass::Type> > &list );
 
     int numResults() const { return results_.size(); };
     std::vector<std::vector<Rule> > results() const { return results_; };
-    std::vector<Rule> bestResult() const;
+    std::vector<Rule> bestResult();
+    std::vector<Rule> bestResult( float &cost );
 
 private:
 
     bool matchAllMeta( const Rule &rule, const int level, unsigned int pos );
     bool match( const std::string &name, const int level, unsigned int pos );
+    bool match2( const std::string &name, const int level, unsigned int pos );
     bool match( const Rule &rule, const int level, unsigned int posi );
+    bool match(VecStringIter start, VecStringIter  next, VecStringIter end, const int level, unsigned int pos);
 
 private:
 

@@ -1,0 +1,135 @@
+[ADDRESS]
+@micro @macro
+@building @micro @macro
+
+[building]
+@buildt
+@placen
+
+[buildt]
+BUILDT WORD -> BLDNG BLDNG -> 0.4
+BUILDT WORD WORD -> BLDNG BLDNG BLDNG -> 0.3
+BUILDT WORD WORD WORD -> BLDNG BLDNG BLDNG BLDNG -> 0.2
+BUILDT WORD WORD WORD WORD -> BLDNG BLDNG BLDNG BLDNG BLDNG -> 0.1
+
+[placen]
+PLACEN WORD -> BLDNG BLDNG -> 0.4
+PLACEN WORD WORD -> BLDNG BLDNG BLDNG -> 0.3
+PLACEN WORD WORD WORD -> BLDNG BLDNG BLDNG BLDNG -> 0.2
+PLACEN WORD WORD WORD WORD -> BLDNG BLDNG BLDNG BLDNG BLDNG -> 0.1
+
+[micro]
+@housenum @street @unit
+@housenum @street
+#@street @housenum @unit
+#@street @housenum
+#@street @atsign @street
+#@street @ampersand @street
+
+[macro]
+@city @prov @postal @nation
+@city @prov @nation
+#@postal @city @prov @nation
+#@postal @city @nation
+
+[housenum]
+NUMBER SLASH SINGLE -> HOUSE HOUSE HOUSE -> 0.3
+NUMBER SLASH DOUBLE -> HOUSE HOUSE HOUSE -> 0.3
+NUMBER FRACT -> HOUSE HOUSE -> 0.3
+NUMBER SINGLE -> HOUSE HOUSE -> 0.3
+NUMBER DOUBLE -> HOUSE HOUSE -> 0.3
+MILE NUMBER -> HOUSE HOUSE -> 0.1
+NUMBER MILE -> HOUSE HOUSE -> 0.1
+NUMBER -> HOUSE -> 0.3
+FRACT -> HOUSE -> 0.3
+DIRECT NUMBER DIRECT NUMBER -> HOUSE HOUSE HOUSE HOUSE -> 0.4
+
+[street]
+@prefixtype @basename @suffixtype
+@prefix @road @basename @suffix
+@prefix @road @basename
+@road @basename @suffix
+@prefixtype @basename
+@road @basename
+@ruralroute @basename
+@basename @suffixtype
+@basename
+
+[basename]
+SINGLE AMPERS SINGLE WORD WORD -> STREET STREET STREET STREET STREET -> 0.5
+SINGLE AMPERS SINGLE WORD -> STREET STREET STREET STREET -> 0.5
+SINGLE AMPERS SINGLE -> STREET STREET STREET -> 0.5
+WORD AMPERS WORD -> STREET STREET STREET -> 0.5
+WORD WORD WORD WORD WORD -> STREET STREET STREET STREET STREET -> 0.5
+WORD WORD WORD WORD -> STREET STREET STREET STREET -> 0.5
+WORD WORD WORD -> STREET STREET STREET -> 0.5
+WORD WORD -> STREET STREET -> 0.5
+ORD -> STREET -> 0.3
+NUMBER -> STREET -> 0.3
+SINGLE -> STREET -> 0.3
+DOUBLE -> STREET -> 0.3
+WORD -> STREET -> 0.3
+
+[prefixtype]
+@prefix @type
+@type
+
+[suffixtype]
+@type @suffix
+@type
+
+[prefix]
+QUALIF DIRECT -> STREET STREET -> 0.3
+QUALIF -> STREET -> 0.3
+DIRECT -> STREET -> 0.3
+
+[suffix]
+DIRECT QUALIF -> STREET STREET -> 0.3
+DIRECT -> STREET -> 0.3
+QUALIF -> STREET -> 0.3
+
+[type]
+TYPE -> STREET -> 0.5
+
+[ruralroute]
+RR -> STREET -> 0.8
+
+[road]
+ROAD -> STREET -> 0.8
+
+[unit]
+UNITH MIXED -> UNITH UNITT -> 0.6
+UNITH UNITH -> UNITH UNITT -> 0.6
+UNITH WORD WORD WORD -> UNITH UNITT UNITT UNITT -> 0.4
+UNITH WORD WORD -> UNITH UNITT UNITT -> 0.4
+UNITH WORD -> UNITH UNITT -> 0.4
+
+[city]
+DIRECT CITY -> CITY CITY -> 0.6
+CITY -> CITY -> 0.8
+WORD WORD WORD WORD -> CITY CITY CITY CITY -> 0.2
+WORD WORD WORD -> CITY CITY CITY -> 0.2
+WORD WORD -> CITY CITY -> 0.2
+WORD -> CITY -> 0.2
+
+[postal]
+QUINT DASH QUAD -> POSTAL POSTAL POSTAL -> 0.7
+QUINT QUAD -> POSTAL POSTAL -> 0.7
+PCH PCT -> POSTAL POSTAL -> 0.7
+PCH -> POSTAL -> 0.6
+QUINT -> POSTAL -> 0.5
+NUMBER NUMBER -> POSTAL POSTAL -> 0.4
+NUMBER -> POSTAL -> 0.3
+
+[prov]
+PROV -> PROV -> 0.8
+
+[nation]
+NATION -> NATION -> 0.8
+
+[atsign]
+ATSIGN -> ATSIGN -> 0.8
+
+[ampersand]
+AMPERS -> STREET -> 0.7
+

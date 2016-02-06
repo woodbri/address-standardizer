@@ -77,7 +77,7 @@ EOF
 
     for my $key (@sect) {
         print "[$key]\n";
-        for my $r ( @{$g{$key}} ) {
+        for my $r ( sort { scalar @{$b->[0]} <=> scalar @{$a->[0]} } @{$g{$key}} ) {
             print join(' ', @{$r->[0]}), ' -> ',
                   join(' ', @{$r->[1]}), ' -> ', $r->[2], "\n";
         }

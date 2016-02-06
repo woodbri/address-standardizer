@@ -12,7 +12,7 @@
 //
 // and include the test headers
 
-#define BOOST_TEST_MODULE OutClassTestModule
+#define BOOST_TEST_MODULE SearchTestModule
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>

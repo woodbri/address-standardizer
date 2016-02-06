@@ -54,6 +54,8 @@ public:
         SPACE   = 31,   ///< whitespace
         PLACEN  = 32,   ///< Placename keyword
         EMDASH  = 33,   ///< Token used to identify where a word was split by the tokenizer
+        SLASH   = 34,   ///< A slash '/' token like 1/a 1/ab, but not a FRACT
+        ATSIGN  = 35,   ///< a at sign '@' token to indicate an intersection
         BADTOKEN = 99   ///< A bad token type.
     } Type;
 
