@@ -163,7 +163,7 @@ void Lexicon::classify( Token& token, InClass::Type typ ) {
     boost::regex has_digit("^.*\\d.*$");
     boost::regex dash_exp("^[-]+$");
     boost::regex emdash_exp("^\xe2\x80\x94$");
-    boost::regex punct_exp("^[-&\\s\\|[:punct:]]+$");
+    boost::regex punct_exp("^[\\|[:punct:]]+$");
     boost::regex space_exp("^\\s+$");
     boost::regex fract_exp("^\\d+/\\d+$");
     boost::regex pch_exp("^[A-Z]{1,2}\\d{1,2}[A-Z]{0,1}$", boost::regex::icase);
@@ -218,20 +218,18 @@ void Lexicon::classify( Token& token, InClass::Type typ ) {
     // is it dash
     else if (boost::regex_match(text, dash_exp, boost::match_default)) {
         token.inclass( InClass::DASH );
-        token.inclass( InClass::PUNCT );
     }
     // is it ampersand
     else if (text == "&") {
         token.inclass( InClass::AMPERS );
-        token.inclass( InClass::PUNCT );
-    }
-    // is it punct
-    else if (boost::regex_match(text, punct_exp, boost::match_default)) {
-        token.inclass( InClass::PUNCT );
     }
     // is it whitespace
     else if (boost::regex_match(text, space_exp, boost::match_default)) {
         token.inclass( InClass::SPACE );
+    }
+    // is it punct
+    else if (boost::regex_match(text, punct_exp, boost::match_default)) {
+        token.inclass( InClass::PUNCT );
     }
 
     if ( (token.inclass()).empty() )

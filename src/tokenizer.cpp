@@ -50,10 +50,22 @@ std::vector<Token> Tokenizer::getTokens(std::string str) {
         str = tmp;
     }
 
-    // build the regex for identifying tokens
-    std::string regex = "^\\s*(?!(?:\xe2\x80\x94)+)(" + lex_.regex() + "\\d+/\\d+|\\d+|\\<[[:alpha:]]+\\>|[\\p{L}\\p{Nd}]+)([-&\\s\\|[:punct:]]+|\xe2\x80\x94|$)";
+    // split mixed alpha digit tokens, eg:
+    // 500W => 500 W or N123 => N 123 or I80 => I 80
+    const char* replace( "$1 $2" );
+    attached = "\\<(\\d+)([[:alpha:]\\p{L}])\\>";
+    boost::u32regex re = boost::make_u32regex( attached );
+    std::string tmp = boost::u32regex_replace( str, re, replace );
+    str = tmp;
+    attached = "\\<([[:alpha:]\\p{L}])(\\d+)\\>";
+    re = boost::make_u32regex( attached );
+    tmp = boost::u32regex_replace( str, re, replace );
+    str = tmp;
 
-    boost::u32regex re = boost::make_u32regex( regex, boost::regex::icase );
+    // build the regex for identifying tokens
+    std::string regex = "^\\s*(?!(?:\xe2\x80\x94)+)(" + lex_.regex() + "\\d+/\\d+|\\d+|\\<[[:alpha:]]+\\>|[\\p{L}\\p{Nd}]+|[[:alpha:]\\d]+)([-&\\s\\|[:punct:]]+|\xe2\x80\x94|$)";
+
+    re = boost::make_u32regex( regex, boost::regex::icase );
 
     std::vector<Token> outtokens;
 

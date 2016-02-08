@@ -19,6 +19,7 @@
 
 #include "inclass.h"
 #include "outclass.h"
+#include "token.h"
 #include "rule.h"
 #include "grammar.h"
 
@@ -37,10 +38,12 @@ public:
     bool search( const std::vector<InClass::Type> &pattern );
     std::vector<Rule> bestResult( const std::vector< std::vector<InClass::Type> > &list );
 
-    int numResults() const { return results_.size(); };
+    long unsigned int numResults() const { return results_.size(); };
     std::vector<std::vector<Rule> > results() const { return results_; };
-    std::vector<Rule> bestResult();
-    std::vector<Rule> bestResult( float &cost );
+    std::vector<Rule> bestResult() const;
+    std::vector<Rule> bestResult( float &cost ) const;
+
+    bool reclassTokens(std::vector<Token> &tokens, const std::vector<Rule> rules) const;
 
 private:
 

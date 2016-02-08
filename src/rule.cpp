@@ -55,7 +55,7 @@ Rule::Rule( const std::string &line, const bool isMeta ) : score_(0.0) {
                     pushOut( OutClass::asType( token ) );
                     break;
                 case 2:     // reading score
-                    score( atof( token.c_str() ) );
+                    score( static_cast<float>( atof( token.c_str() ) ) );
                     break;
             }
         }
@@ -65,6 +65,20 @@ Rule::Rule( const std::string &line, const bool isMeta ) : score_(0.0) {
         //std::cerr << "ERROR: Invalid Rule defined for: '" << line << "'\n";
         clear();
     }
+}
+
+
+InClass::Type Rule::in(long unsigned int pos) const {
+    if ( pos < inClass_.size() )
+        return inClass_[pos];
+    return InClass::BADTOKEN;
+}
+
+
+OutClass::Type Rule::out(long unsigned int pos) const {
+    if ( pos < outClass_.size() )
+        return outClass_[pos];
+    return OutClass::BADTOKEN;
 }
 
 
@@ -107,7 +121,7 @@ Rule Rule::concat( const Rule &r ) const {
         conc.inClass_.insert( conc.inClass_.end(), r.inClass_.begin(), r.inClass_.end() );
         conc.outClass_.insert( conc.outClass_.end(), r.outClass_.begin(), r.outClass_.end() );
 
-        conc.score_ = (score_ + r.score()) / 2.0;
+        conc.score_ = static_cast<float>( (score_ + r.score()) / 2.0 );
     }
 
     return conc;

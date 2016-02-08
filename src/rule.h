@@ -34,7 +34,11 @@ public:
     std::vector<std::string> meta() const { return meta_; };
     std::vector<InClass::Type> in() const { return inClass_; };
     std::vector<OutClass::Type> out() const { return outClass_; };
+    InClass::Type in(long unsigned int pos) const;
+    OutClass::Type out(long unsigned int pos) const;
     float score() const { return score_; };
+    long unsigned int inSize() const { return inClass_.size(); };
+    long unsigned int outSize() const { return outClass_.size(); };
     bool isValid() const;
     bool isEmpty() const;
 

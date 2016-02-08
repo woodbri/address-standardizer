@@ -40,6 +40,7 @@ public:
     std::string inclassAsString() const { return InClass::asString( inclass_ ); };
     std::string outclassAsString() const { return OutClass::asString( outclass_ ); };
     bool isInClass( std::set<InClass::Type> test ) const;
+    bool isInClass( InClass::Type test ) const;
     bool isInClassEmpty() const { return inclass_.empty(); };
 
     static std::vector< std::vector<InClass::Type> > enumerate( std::vector<Token> tokens );
@@ -60,8 +61,8 @@ public:
 private:
 
     // this methods are used on enumerate()
-    int inSize() const { return inclass_.size(); };
-    InClass::Type in(int i) const;
+    long unsigned int inSize() const { return inclass_.size(); };
+    InClass::Type in(long unsigned int i) const;
 
 
 private:

@@ -1,5 +1,5 @@
 
-CPPFLAGS = -O0 -g -Wall -std=c++0x -fPIC -frounding-math -Wno-deprecated -pedantic  -fmax-errors=10 -Wextra -I ..
+CPPFLAGS = -O0 -g -Wall -std=c++0x -fPIC -frounding-math -Wno-deprecated -pedantic  -fmax-errors=10 -Wextra -Werror=conversion -I ..
 
 EXE = t2 t3 t4 t5
 

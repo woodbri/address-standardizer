@@ -45,13 +45,42 @@ bool Search::search( const std::vector<InClass::Type> &pattern ) {
 }
 
 
-std::vector<Rule> Search::bestResult() {
+bool Search::reclassTokens( std::vector<Token> &tokens, const std::vector<Rule> rules ) const {
+    // count the tokens in the rules and compare to tokens
+    long unsigned int cnt = 0;
+    for ( const auto &r : rules )
+        cnt += r.inSize();
+    if ( cnt != tokens.size() )
+        return false;
+
+    // set the outClass attribute on the tokens based on the search results
+    std::vector<Token>::iterator it = tokens.begin();
+    for ( const auto &r : rules ) {
+        const auto in = r.in();
+        const auto out = r.out();
+        for ( long unsigned int i=0; i<in.size(); ++i ) {
+            if ( it->isInClass( in[i] ) ) {
+                it->outclass( out[i] );
+                ++it;
+            }
+            else {
+                std::cerr << "ERROR: Search::reclassTokens: Results do not match tokens!\n";
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+
+std::vector<Rule> Search::bestResult()  const {
     float score;
     return bestResult( score );
 }
 
 
-std::vector<Rule> Search::bestResult( float &score ) {
+std::vector<Rule> Search::bestResult( float &score ) const {
     // if not results return an empty vector
     if (results_.size() == 0) {
         std::vector<Rule> dummy;
@@ -67,7 +96,7 @@ std::vector<Rule> Search::bestResult( float &score ) {
         float sum = 0.0;
         for ( const auto &rule : result )
             sum += rule.score();
-        sum /= result.size();
+        sum /= static_cast<float>( result.size() );
         if (sum > bestScore) {
             best = i;
             bestScore = sum;
@@ -87,11 +116,23 @@ std::vector<Rule> Search::bestResult( const std::vector< std::vector<InClass::Ty
     for (const auto &e : list) {
         if ( search( e ) ) {
             float score;
-            auto best = bestResult( score );
+            auto best = this->bestResult( score );
             if ( score > bestScore ) {
                 bestResult = best;
                 bestScore = score;
             }
+#if defined(TRACING_SEARCH) || defined(TRACING_SEARCH_MIN)
+            std::cout << "PATTERN:";
+            for (const auto &t : e)
+                std::cout << " " << InClass::asString(t);
+            std::cout << "\t(" << score << ")\n";
+        }
+        else {
+            std::cout << "PATTERN:";
+            for (const auto &t : e)
+                std::cout << " " << InClass::asString(t);
+            std::cout << "\t(failed)\n";
+#endif
         }
     }
 
@@ -100,7 +141,7 @@ std::vector<Rule> Search::bestResult( const std::vector< std::vector<InClass::Ty
 
 
 bool Search::matchAllMeta(const Rule &rule, const int level, unsigned int pos) {
-    const unsigned int stackDepth(stack_.size());
+    const auto stackDepth( stack_.size() );
 
 #ifdef TRACING_SEARCH
     std::cout << std::string(level, '.') << "Calling matchAllMeta(\""
@@ -133,7 +174,7 @@ bool Search::matchAllMeta(const Rule &rule, const int level, unsigned int pos) {
 
 
 bool Search::match(const std::string &name, const int level, unsigned int pos) {
-    const unsigned int stackDepth(stack_.size());
+    const auto stackDepth(stack_.size());
 
 #ifdef TRACING_SEARCH
     std::cout << std::string(level, '.') << "Calling match(\""
@@ -207,7 +248,7 @@ bool Search::match(const std::string &name, const int level, unsigned int pos) {
 
 
 bool Search::match2(const std::string &name, const int level, unsigned int pos) {
-    const unsigned int stackDepth(stack_.size());
+    const auto stackDepth(stack_.size());
 
 #ifdef TRACING_SEARCH
     std::cout << std::string(level, '.') << "Calling match(\""
@@ -260,7 +301,7 @@ bool Search::match2(const std::string &name, const int level, unsigned int pos) 
 bool Search::match(const Rule &rule, const int level, unsigned int pos) {
 
 #ifdef TRACING_SEARCH
-    const unsigned int stackDepth(stack_.size());
+    const auto stackDepth(stack_.size());
     std::cout << std::string(level, '.') << "Calling match(\""
         << rule << "\")(" << pos << ", " << stackDepth << ")"
         "[" << pos_ << ", " << stack_.size() << "]\n";
@@ -292,7 +333,7 @@ bool Search::match(const Rule &rule, const int level, unsigned int pos) {
 
 
 bool Search::match(VecStringIter start, VecStringIter  next, VecStringIter end, const int level, unsigned int pos) {
-    const unsigned int stackDepth(stack_.size());
+    const auto stackDepth(stack_.size());
 
 #ifdef TRACING_SEARCH
     std::cout << std::string(level, '.') << "Calling iter match(\""

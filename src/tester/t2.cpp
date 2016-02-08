@@ -55,6 +55,7 @@ int main(int ac, char* av[]) {
 
     Tokenizer tokenizer( lex );
     tokenizer.addFilter( InClass::PUNCT );
+    tokenizer.addFilter( InClass::SPACE );
     tokenizer.addFilter( InClass::DASH );
     tokens = tokenizer.getTokens( Ustr );
 
@@ -88,16 +89,23 @@ int main(int ac, char* av[]) {
 
     Search S( G );
 
-    for (const auto &e : list) {
-        if ( S.search( e ) ) {
-            std::cout << "#### SUCCESS!\n";
-            std::vector<Rule> best = S.bestResult();
-            for (const auto &e : best)
-                std::cout << e << "\n";
-            std::cout << "--------------------------------------------\n";
+    auto best = S.bestResult( list );
+    if ( best.size() == 0 ) {
+        std::cout << "#### BEST FAILED! (search)\n";
+    }
+    else {
+        if ( S.reclassTokens( tokens, best ) ) {
+            std::cout << "BEST: ";
+            for (const auto &t : tokens)
+                std::cout << OutClass::asString(t.outclass()) << " ";
+            std::cout << "\n";
+            for (const auto &r : best)
+                std::cout << r << "\n";
+            for (const auto &t : tokens)
+                std::cout << t << "\n";
         }
         else {
-            std::cout << "#### FAILED!\n";
+            std::cout << "#### BEST FAILED (reclass)!\n";
         }
     }
 

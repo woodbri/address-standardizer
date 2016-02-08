@@ -65,6 +65,13 @@ std::ostream &operator<<(std::ostream &ss, const Token &token) {
 }
 
 
+bool Token::isInClass( InClass::Type test ) const {
+    if (inclass_.find( test ) != inclass_.end())
+        return true;
+    return false;
+}
+
+
 bool Token::isInClass( std::set<InClass::Type> test ) const {
     for ( const auto &e : test ) {
         if (inclass_.find( e ) != inclass_.end())
@@ -74,9 +81,9 @@ bool Token::isInClass( std::set<InClass::Type> test ) const {
 }
 
 
-InClass::Type Token::in(int pos) const {
+InClass::Type Token::in(long unsigned int pos) const {
     auto it = inclass_.begin();
-    for (int i=0; i<pos; ++i)
+    for (long unsigned int i=0; i<pos; ++i)
         it++;
     return *it;
 }
@@ -85,7 +92,7 @@ InClass::Type Token::in(int pos) const {
 std::vector< std::vector<InClass::Type> > Token::enumerate( std::vector<Token> tokens ) {
 
     // count the number of possible combinations
-    int cnt = 1;
+    long unsigned int cnt = 1;
     for (const auto &t : tokens)
         cnt *= t.inSize();
 
@@ -95,8 +102,8 @@ std::vector< std::vector<InClass::Type> > Token::enumerate( std::vector<Token> t
     list.reserve( list.size() );
 
     // enumerate all the combinations and save them in list
-    for (int i=0; i<cnt; ++i) {
-        int num = 1;
+    for (long unsigned int i=0; i<cnt; ++i) {
+        long unsigned int num = 1;
         std::vector<InClass::Type> one;
         for ( const auto &t : tokens ) {
             num *= t.inSize();
