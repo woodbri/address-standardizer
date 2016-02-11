@@ -26,6 +26,14 @@
 
 class Search : Grammar
 {
+private:
+
+    typedef struct {
+        int level;
+        std::string name;
+        int indx;
+    } BackTrack;
+
 public:
 
     typedef std::vector<std::string>::iterator VecStringIter;
@@ -35,6 +43,7 @@ public:
         : Grammar( G ),  pattern_(pattern), pos_(0) {};
 
     bool search();
+    void walk() const;
     bool search( const std::vector<InClass::Type> &pattern );
     std::vector<Rule> bestResult( const std::vector< std::vector<InClass::Type> > &list );
 
@@ -48,10 +57,12 @@ public:
 private:
 
     bool matchAllMeta( const Rule &rule, const int level, unsigned int pos );
-    bool match( const std::string &name, const int level, unsigned int pos );
+    bool match( const std::string &name, const int level, unsigned int pos, unsigned int index );
     bool match2( const std::string &name, const int level, unsigned int pos );
-    bool match( const Rule &rule, const int level, unsigned int posi );
+    bool match( const Rule &rule, const int level, unsigned int pos, unsigned int index );
     bool match(VecStringIter start, VecStringIter  next, VecStringIter end, const int level, unsigned int pos);
+
+    void walk( const std::string &name, const int level ) const;
 
 private:
 
@@ -59,6 +70,7 @@ private:
     int pos_;
     std::vector<std::vector<Rule> > results_;
     std::vector<Rule> stack_;
+    std::vector<BackTrack> backtrack_;
 
 };
 

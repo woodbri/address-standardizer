@@ -29,8 +29,9 @@ bool Search::search() {
     results_.clear();
     unsigned int pos = 0;
     stack_.clear();
+    backtrack_.clear();
 
-    if ( match( std::string("ADDRESS"), 0, pos ) ) {
+    if ( match( std::string("ADDRESS"), 0, pos, 0 ) ) {
         results_.push_back( stack_ );
         return true;
     }
@@ -139,6 +140,162 @@ std::vector<Rule> Search::bestResult( const std::vector< std::vector<InClass::Ty
     return bestResult;
 }
 
+
+
+bool Search::match( const std::string &name, const int level, unsigned int pos, unsigned int index ) {
+
+    const auto stackDepth(stack_.size());
+//    const auto backtrackDepth(backtrack_.size());
+
+#ifdef TRACING_SEARCH
+    std::cout << std::string(level, '.') << "Calling match(\""
+        << name << "\")(" << pos << ", " << stackDepth << ")"
+        "[" << pos_ << ", " << stack_.size() << "]{" << index << "}\n";
+#endif
+
+    auto it = rules_.find( name );
+    if ( it == rules_.end() ) {
+#ifdef TRACING_SEARCH
+        std::cout << std::string(level, '.') << 
+                "Failed to find rule for '" << name << "'\n";
+#endif
+        // TODO this should be a throw
+
+        // unwind stack and pos pointer
+        if (stack_.size() > stackDepth)
+            stack_.resize(stackDepth);
+        pos_ = pos;
+        return false;
+    }
+
+    // track this call
+/*
+    BackTrack bt;
+    bt.level = level;
+    bt.name = name;
+    bt.index = index;
+    backtrack_.push_back(bt);
+*/
+    unsigned int idx = 0;
+    for ( const auto &r : (*it).second ) {
+        if ( r.isMeta() ) {
+            // must match all m in this rule
+            for (const auto &m : r.meta()) {
+                if ( not match( m, level+1, pos_, idx) ) {
+#ifdef TRACING_SEARCH
+                    std::cout << std::string(level, '.') << "failed '" << m
+                        << "' {" << idx << "}, continuing\n";
+#endif
+                    if (stack_.size() > stackDepth)
+                        stack_.resize(stackDepth);
+//                    backtrack_.resize(backtrackDepth+1);
+                    pos_ = pos;
+                    goto OUTER;
+                }
+            }
+#ifdef TRACING_SEARCH
+            std::cout << std::string(level, '.') << "matched '" << name
+                << "' {" << idx << "}:";
+            for (const auto &m : r.meta())
+                std::cout << " " << m;
+            std::cout << "\n";
+#endif
+        }
+        else {
+            if ( match( r, level+1, pos_, idx ) ) {
+#ifdef TRACING_SEARCH
+                std::cout << std::string(level, '.') << "matched '" << name
+                    << "' {" << idx << "}:" << r << "\n";
+#endif
+                return true;
+            }
+            else {
+                if (stack_.size() > stackDepth)
+                    stack_.resize(stackDepth);
+                pos_ = pos;
+                continue;
+            }
+        }
+        OUTER: //continue
+        ++idx;
+    }
+
+#ifdef TRACING_SEARCH
+    std::cout << std::string(level, '.') << "failed '" << name << "' return false\n";
+#endif
+    if (stack_.size() > stackDepth)
+        stack_.resize(stackDepth);
+    pos_ = pos;
+    return false;
+}
+
+
+
+bool Search::match(const Rule &rule, const int level, unsigned int pos, unsigned int index) {
+
+#ifdef TRACING_SEARCH
+    const auto stackDepth(stack_.size());
+    std::cout << std::string(level, '.') << "Calling match(\""
+        << rule << "\")(" << pos << ", " << stackDepth << ")"
+        "[" << pos_ << ", " << stack_.size() << "]{" << index << "}\n";
+#endif
+
+    std::vector<InClass::Type> in = rule.in();
+    for (const auto &e : in) {
+        if (pos < pattern_.size() and pattern_[pos] == e)
+            ++pos;
+        else {
+#ifdef TRACING_SEARCH
+            std::cout << std::string(level, '.') << "return false\n";
+#endif
+            return false;
+        }
+    }
+
+    // advance the pointer into pattern on success
+    // and save rule on stack
+    pos_ = pos;
+    stack_.push_back( rule );
+
+#ifdef TRACING_SEARCH
+    std::cout << std::string(level, '.') << "return true {" << index << "}\n";
+#endif
+
+    return level == level; // dummy return true to avoid warning
+}
+
+
+void Search::walk() const {
+    walk(std::string("ADDRESS"), 0);
+}
+
+
+void Search::walk( const std::string &name, const int level ) const {
+    auto it = rules_.find( name );
+    if ( it == rules_.end() ) {
+        std::cout << std::string(level, '.') << "ERROR: Failed to find '"
+            << name << "'\n";
+        return;
+    }
+
+    std::cout << std::string(level, '.') << "[" << name << "]\n";
+    for ( const auto r : (*it).second ) {
+        if ( r.isMeta() ) {
+            int cnt = 0;
+            for ( const auto &word : r.meta() ) {
+                walk( word, level+1+cnt );
+                ++cnt;
+            }
+        }
+        else {
+            std::cout << std::string(level+2, '.') << r << "\n";
+        }
+    }
+}
+
+
+
+#if 0
 
 bool Search::matchAllMeta(const Rule &rule, const int level, unsigned int pos) {
     const auto stackDepth( stack_.size() );
@@ -298,39 +455,6 @@ bool Search::match2(const std::string &name, const int level, unsigned int pos) 
 }
 
 
-bool Search::match(const Rule &rule, const int level, unsigned int pos) {
-
-#ifdef TRACING_SEARCH
-    const auto stackDepth(stack_.size());
-    std::cout << std::string(level, '.') << "Calling match(\""
-        << rule << "\")(" << pos << ", " << stackDepth << ")"
-        "[" << pos_ << ", " << stack_.size() << "]\n";
-#endif
-
-    std::vector<InClass::Type> in = rule.in();
-    for (const auto &e : in) {
-        if (pos < pattern_.size() and pattern_[pos] == e)
-            ++pos;
-        else {
-#ifdef TRACING_SEARCH
-            std::cout << std::string(level, '.') << "return false\n";
-#endif
-            return false;
-        }
-    }
-
-    // advance the pointer into pattern on success
-    // and save rule on stack
-    pos_ = pos;
-    stack_.push_back( rule );
-
-#ifdef TRACING_SEARCH
-    std::cout << std::string(level, '.') << "return true\n";
-#endif
-
-    return level == level; // dummy return true to avoid warning
-}
-
 
 bool Search::match(VecStringIter start, VecStringIter  next, VecStringIter end, const int level, unsigned int pos) {
     const auto stackDepth(stack_.size());
@@ -377,3 +501,6 @@ bool Search::match(VecStringIter start, VecStringIter  next, VecStringIter end, 
         return false;
     }
 }
+
+
+#endif

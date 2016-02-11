@@ -89,6 +89,11 @@ int main(int ac, char* av[]) {
 
     Search S( G );
 
+#if 0
+    S.walk();
+    return EXIT_SUCCESS;
+
+#else    
     auto best = S.bestResult( list );
     if ( best.size() == 0 ) {
         std::cout << "#### BEST FAILED! (search)\n";
@@ -110,4 +115,5 @@ int main(int ac, char* av[]) {
     }
 
     return EXIT_SUCCESS;
+#endif
 }
