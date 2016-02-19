@@ -10,12 +10,13 @@ SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)
 
-all: $(OBJS) test
+#all: $(OBJS) test
+all: $(OBJS)
 
 %.o: %.cpp
 	$(CPP) $(CPPFLAGS) -c $< -o $@
 
-test: $(OBJS)
+test: $(OBJS) test/*.cpp
 	$(MAKE) -C test test
 
 .PHONY: clean

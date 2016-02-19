@@ -77,6 +77,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing1, TestFixture)
 {
     // create a tokenizer using the test lexicon
     Tokenizer tz(lexicon);
+//    tz.addFilter( InClass::SPACE );
 
     // parse a string
     std::vector<Token> tokens = tz.getTokens("11 Dackon Allee Podunk AL 12345");
@@ -87,15 +88,15 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing1, TestFixture)
     //printf("'%s'\n", os.str().c_str());
     std::string expect1 =
         "TOKEN:\t11\t\tNUMBER\tBADTOKEN\t\n"
-        "TOKEN:\t \t\tPUNCT\tBADTOKEN\t\n"
+        "TOKEN:\t \t\tSPACE\tBADTOKEN\t\n"
         "TOKEN:\tDACKON\t\tWORD\tBADTOKEN\t\n"
-        "TOKEN:\t \t\tPUNCT\tBADTOKEN\t\n"
+        "TOKEN:\t \t\tSPACE\tBADTOKEN\t\n"
         "TOKEN:\tALLEE\t\tTYPE\tBADTOKEN\t\n"
-        "TOKEN:\t \t\tPUNCT\tBADTOKEN\t\n"
+        "TOKEN:\t \t\tSPACE\tBADTOKEN\t\n"
         "TOKEN:\tPODUNK\t\tWORD\tBADTOKEN\t\n"
-        "TOKEN:\t \t\tPUNCT\tBADTOKEN\t\n"
+        "TOKEN:\t \t\tSPACE\tBADTOKEN\t\n"
         "TOKEN:\tAL\t\tPROV\tBADTOKEN\t\n"
-        "TOKEN:\t \t\tPUNCT\tBADTOKEN\t\n"
+        "TOKEN:\t \t\tSPACE\tBADTOKEN\t\n"
         "TOKEN:\t12345\t\tNUMBER,QUINT\tBADTOKEN\t\n";
     BOOST_CHECK(os.str() == expect1);
 
@@ -109,8 +110,8 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing1, TestFixture)
     //printf("'%s'\n", os.str().c_str());
     BOOST_CHECK(os.str() == "");
 
-    // filter out PUNCT tokens
-    tz.addFilter(InClass::PUNCT);
+    // filter out SPACE tokens
+    tz.addFilter(InClass::SPACE);
     tokens = tz.getTokens("11 Dackon Allee Podunk AL 12345");
 
     os.str(""); // clear
@@ -148,7 +149,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing1, TestFixture)
     for (const auto &e : filter)
         os << InClass::asString(e) << " ";
     //printf("'%s'\n", os.str().c_str());
-    BOOST_CHECK(os.str() == "QUINT PUNCT ");
+    BOOST_CHECK(os.str() == "QUINT SPACE ");
 
     // verify that we can remove QUINT filter
     tz.removeFilter(InClass::QUINT);
@@ -207,6 +208,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing2, TestFixture)
     // create and empty lexicon and tokenizer based on that
     Lexicon emptylexicon;
     Tokenizer tz(emptylexicon);
+//    tz.addFilter( InClass::SPACE );
 
     // get the tokens with default classifications
     std::vector<Token> tokens = tz.getTokens("11 radcliff rd north chelmsford ma 01863");
@@ -217,17 +219,17 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing2, TestFixture)
     //printf("'%s'\n", os.str().c_str());
     std::string expect1 =
         "TOKEN:\t11\t\tNUMBER\tBADTOKEN\t\n"
-        "TOKEN:\t \t\tPUNCT\tBADTOKEN\t\n"
+        "TOKEN:\t \t\tSPACE\tBADTOKEN\t\n"
         "TOKEN:\tRADCLIFF\t\tWORD\tBADTOKEN\t\n"
-        "TOKEN:\t \t\tPUNCT\tBADTOKEN\t\n"
+        "TOKEN:\t \t\tSPACE\tBADTOKEN\t\n"
         "TOKEN:\tRD\t\tWORD,DOUBLE\tBADTOKEN\t\n"
-        "TOKEN:\t \t\tPUNCT\tBADTOKEN\t\n"
+        "TOKEN:\t \t\tSPACE\tBADTOKEN\t\n"
         "TOKEN:\tNORTH\t\tWORD\tBADTOKEN\t\n"
-        "TOKEN:\t \t\tPUNCT\tBADTOKEN\t\n"
+        "TOKEN:\t \t\tSPACE\tBADTOKEN\t\n"
         "TOKEN:\tCHELMSFORD\t\tWORD\tBADTOKEN\t\n"
-        "TOKEN:\t \t\tPUNCT\tBADTOKEN\t\n"
+        "TOKEN:\t \t\tSPACE\tBADTOKEN\t\n"
         "TOKEN:\tMA\t\tWORD,DOUBLE\tBADTOKEN\t\n"
-        "TOKEN:\t \t\tPUNCT\tBADTOKEN\t\n"
+        "TOKEN:\t \t\tSPACE\tBADTOKEN\t\n"
         "TOKEN:\t01863\t\tNUMBER,QUINT\tBADTOKEN\t\n";
     BOOST_CHECK(os.str() == expect1);
 
@@ -241,8 +243,8 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing2, TestFixture)
     //printf("'%s'\n", os.str().c_str());
     BOOST_CHECK(os.str() == "");
 
-    // filter out PUNCT tokens
-    tz.addFilter(InClass::PUNCT);
+    // filter out SPACE tokens
+    tz.addFilter(InClass::SPACE);
     tokens = tz.getTokens("11 radcliff rd north chelmsford ma 01863");
 
     os.str(""); // clear
@@ -259,7 +261,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing2, TestFixture)
         "TOKEN:\t01863\t\tNUMBER,QUINT\tBADTOKEN\t\n";
     BOOST_CHECK(os.str() == expect2);
 
-    // filter out PUNCT tokens  and QUINT
+    // filter out SPACE tokens  and QUINT
     tz.addFilter(InClass::QUINT);
     tokens = tz.getTokens("11 radcliff rd north chelmsford ma 01863");
 
@@ -282,7 +284,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing2, TestFixture)
     for (const auto &e : filter)
         os << InClass::asString(e) << " ";
     //printf("'%s'\n", os.str().c_str());
-    BOOST_CHECK(os.str() == "QUINT PUNCT ");
+    BOOST_CHECK(os.str() == "QUINT SPACE ");
 
     // verify that we can remove QUINT filter
     tz.removeFilter(InClass::QUINT);

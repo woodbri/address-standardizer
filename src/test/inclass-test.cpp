@@ -188,6 +188,12 @@ BOOST_FIXTURE_TEST_CASE(InClass_asType, TestFixture)
     //printf("%s\n", tmp2.c_str());
     BOOST_REQUIRE(tmp2 == "DET_PRE,DET_SUF,ATT_PRE,ATT_SUF");
 
+    // verify conversion of a list with good and bad tokens and spaces
+    tmp = InClass::asAttachType(" DETACH ,DET_PRE, DET_SUF , ATT_PRE,ATT_SUF ");
+    std::string tmp3 = InClass::asString(tmp);
+    //printf("%s\n", tmp3.c_str());
+    BOOST_REQUIRE(tmp3 == "DET_PRE,DET_SUF,ATT_PRE,ATT_SUF");
+
 }
 
 BOOST_FIXTURE_TEST_CASE(InClass_asNum, TestFixture)

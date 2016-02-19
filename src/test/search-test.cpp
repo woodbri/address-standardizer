@@ -17,7 +17,7 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#include <string>
+#include "token.h"
 #include "search.h"
 
 // The two relevant Boost namespaces for the unit test framework are:
@@ -41,14 +41,14 @@ struct TestFixture
         //printf("Initialize test\n");
 
         std::string expect = 
-            "[A]\n"
-            "NUMBER -> BLDNG -> 0.5\n\n"
-            "[AB]\n"
-            "NUMBER WORD -> BLDNG HOUSE -> 0.5\n\n"
             "[ADDRESS]\n"
             "@AB @CD @EF\n"
             "@A @BC @DE\n"
             "@CD @EF\n\n"
+            "[A]\n"
+            "NUMBER -> BLDNG -> 0.5\n\n"
+            "[AB]\n"
+            "NUMBER WORD -> BLDNG HOUSE -> 0.5\n\n"
             "[BC]\n"
             "WORD TYPE -> HOUSE PREDIR -> 0.5\n\n"
             "[CD]\n"
@@ -63,12 +63,13 @@ struct TestFixture
 
         //printf("'%s'\n", os.str().c_str());
         BOOST_CHECK(os.str() == expect);
-        //printf("status: %d\n", G.status());
+        printf("status: %d\n", G.status());
         BOOST_CHECK(G.status() == Grammar::CHECK_OK);
-        //printf("'%s'\n", G.issues().c_str());
+        printf("'%s'\n", G.issues().c_str());
         BOOST_CHECK(G.issues() == "");
 
         os.str(""); // clear
+
     }
     ~TestFixture() {
         // Put test cleanup here, the destructor will automatically be
@@ -101,108 +102,91 @@ struct TestFixture
 // unit test
 BOOST_FIXTURE_TEST_CASE(SearchTest_1, TestFixture)
 {
-    // a pattern we should match
-    std::vector<InClass::Type> pattern;
-    pattern.push_back(InClass::NUMBER);
-    pattern.push_back(InClass::WORD);
-    pattern.push_back(InClass::TYPE);
-    pattern.push_back(InClass::QUALIF);
-    pattern.push_back(InClass::ROAD);
+    // define sequence of tokens we want to search for in the grammar
+    std::vector<Token> pat1;
+    pat1.push_back( Token("11\t11\tNUMBER\tBADTOKEN\tDETACH") );
+    pat1.push_back( Token("OAK\tOAK\tWORD\tBADTOKEN\tDETACH") );
+    pat1.push_back( Token("ST\tSTREET\tTYPE\tBADTOKEN\tDETACH") );
+    pat1.push_back( Token("EXT\tEXT\tQUALIF\tBADTOKEN\tDETACH") );
+    pat1.push_back( Token("HWY\tHWY\tROAD\tBADTOKEN\tDETACH") );
 
-    Search s(G, pattern);
-    s.search();
-    int num = s.numResults();
-    BOOST_CHECK(num == 1);
+    Search s(G);
+    MatchResults mr = s.search( pat1 );
+    printf("mr.size: %ld\n", mr.size() );
+    BOOST_CHECK(mr.size() == 1);
 
     std::string expect =
         "NUMBER -> BLDNG -> 0.5\n"
         "WORD TYPE -> HOUSE PREDIR -> 0.5\n"
         "QUALIF ROAD -> QUALIF SUFTYP -> 0.5\n";
 
-    std::vector<std::vector<Rule> > results = s.results();
     os.str(""); // clear
-    for (const auto &e : results) {
-        os << resultAsString( e );
+    for (const auto &e : mr) {
+        os << resultAsString( e.rules );
     }
-    //printf("'%s'\n", os.str().c_str());
-    BOOST_CHECK(os.str() == expect);
-
-    std::vector<Rule> best = s.bestResult();
-    os.str(""); // clear
-    os << resultAsString( best );
-    //printf("'%s'\n", os.str().c_str());
+    printf("'%s'\n", os.str().c_str());
     BOOST_CHECK(os.str() == expect);
 
 }
 
 BOOST_FIXTURE_TEST_CASE(SearchTest_2, TestFixture)
 {
-    // a pattern we should match
-    std::vector<InClass::Type> pattern;
-    pattern.push_back(InClass::NUMBER);
-    pattern.push_back(InClass::WORD);
-    pattern.push_back(InClass::TYPE);
-    pattern.push_back(InClass::QUALIF);
-    pattern.push_back(InClass::ROAD);
+    // define sequence of tokens we want to search for in the grammar
+    std::vector<Token> pat1;
+    pat1.push_back( Token("11\t11\tNUMBER\tBADTOKEN\tDETACH") );
+    pat1.push_back( Token("OAK\tOAK\tWORD\tBADTOKEN\tDETACH") );
+    pat1.push_back( Token("ST\tSTREET\tType\tBADTOKEN\tDETACH") );
+    pat1.push_back( Token("EXT\tEXT\tQUALIF\tBADTOKEN\tDETACH") );
+    pat1.push_back( Token("HWY\tHWY\tROAD\tBADTOKEN\tDETACH") );
 
     Search s(G);
-    s.search(pattern);
-    int num = s.numResults();
-    BOOST_CHECK(num == 1);
+    float cost = 0.0;
+    MatchResult mr = s.searchAndReclassBest( pat1, cost );
+    printf("s.searchAndReclassBest: cost: %.3f\n", cost);
+    //BOOST_CHECK_CLOSE( cost, 0.2, 0.001 );
 
     std::string expect =
         "NUMBER -> BLDNG -> 0.5\n"
         "WORD TYPE -> HOUSE PREDIR -> 0.5\n"
         "QUALIF ROAD -> QUALIF SUFTYP -> 0.5\n";
 
-    std::vector<std::vector<Rule> > results = s.results();
     os.str(""); // clear
-    for (const auto &e : results) {
-        os << resultAsString( e );
-    }
+    os << resultAsString( mr.rules );
+
     //printf("'%s'\n", os.str().c_str());
     BOOST_CHECK(os.str() == expect);
 
-    std::vector<Rule> best = s.bestResult();
+    //TODO check the reclassed tokens
     os.str(""); // clear
-    os << resultAsString( best );
-    //printf("'%s'\n", os.str().c_str());
-    BOOST_CHECK(os.str() == expect);
-
+    for ( const auto &e : pat1 )
+        os << e << "\n";
+    printf("reclassed----------\n%s\n----------\n", os.str().c_str());
 }
 
 BOOST_FIXTURE_TEST_CASE(SearchTest_3, TestFixture)
 {
-    // a pattern we should match
-    std::vector<InClass::Type> pattern;
-    pattern.push_back(InClass::NUMBER);
-    pattern.push_back(InClass::WORD);
-    pattern.push_back(InClass::TYPE);
-    pattern.push_back(InClass::QUALIF);
-    pattern.push_back(InClass::ROAD);
-    pattern.push_back(InClass::RR);
+    std::vector<Token> pat3;
+    pat3.push_back( Token("11\t11\tNUMBER\tBADTOKEN\tDETACH") );
+    pat3.push_back( Token("OAK\tOAK\tWORD\tBADTOKEN\tDETACH") );
+    pat3.push_back( Token("ST\tSTREET\tType\tBADTOKEN\tDETACH") );
+    pat3.push_back( Token("EXT\tEXT\tQUALIF\tBADTOKEN\tDETACH") );
+    pat3.push_back( Token("HWY\tHWY\tROAD\tBADTOKEN\tDETACH") );
+    pat3.push_back( Token("RR\tRR\tRR\tBADTOKEN\tDETACH") );
+
 
     Search s(G);
-    s.search(pattern);
-    int num = s.numResults();
-    BOOST_CHECK(num == 1);
+    MatchResults mr = s.search( pat3 );
+    BOOST_CHECK(mr.size() == 1);
 
     std::string expect =
         "NUMBER WORD -> BLDNG HOUSE -> 0.5\n"
         "TYPE QUALIF -> PREDIR QUALIF -> 0.5\n"
         "ROAD RR -> SUFTYP SUFDIR -> 0.5\n";
 
-    std::vector<std::vector<Rule> > results = s.results();
     os.str(""); // clear
-    for (const auto &e : results) {
-        os << resultAsString( e );
+    for (const auto &e : mr) {
+        os << resultAsString( e.rules );
     }
-    //printf("'%s'\n", os.str().c_str());
-    BOOST_CHECK(os.str() == expect);
-
-    std::vector<Rule> best = s.bestResult();
-    os.str(""); // clear
-    os << resultAsString( best );
     //printf("'%s'\n", os.str().c_str());
     BOOST_CHECK(os.str() == expect);
 
@@ -210,31 +194,23 @@ BOOST_FIXTURE_TEST_CASE(SearchTest_3, TestFixture)
 
 BOOST_FIXTURE_TEST_CASE(SearchTest_4, TestFixture)
 {
-    // a pattern we should FAIL to match
-    std::vector<InClass::Type> pattern;
-    pattern.push_back(InClass::NUMBER);
-    pattern.push_back(InClass::WORD);
-    pattern.push_back(InClass::TYPE);
-    pattern.push_back(InClass::ROAD);
+    std::vector<Token> pat4;
+    pat4.push_back( Token("11\t11\tNUMBER\tBADTOKEN\tDETACH") );
+    pat4.push_back( Token("OAK\tOAK\tWORD\tBADTOKEN\tDETACH") );
+    pat4.push_back( Token("ST\tSTREET\tType\tBADTOKEN\tDETACH") );
+    pat4.push_back( Token("HWY\tHWY\tROAD\tBADTOKEN\tDETACH") );
+
 
     Search s(G);
-    s.search(pattern);
-    int num = s.numResults();
-    BOOST_CHECK(num == 0);
+    MatchResults mr = s.search( pat4 );
+    BOOST_CHECK(mr.size() == 0);
 
     std::string expect = "";
 
-    std::vector<std::vector<Rule> > results = s.results();
     os.str(""); // clear
-    for (const auto &e : results) {
-        os << resultAsString( e );
+    for (const auto &e : mr) {
+        os << resultAsString( e.rules );
     }
-    //printf("'%s'\n", os.str().c_str());
-    BOOST_CHECK(os.str() == expect);
-
-    std::vector<Rule> best = s.bestResult();
-    os.str(""); // clear
-    os << resultAsString( best );
     //printf("'%s'\n", os.str().c_str());
     BOOST_CHECK(os.str() == expect);
 

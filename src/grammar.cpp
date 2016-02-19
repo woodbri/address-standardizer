@@ -22,21 +22,32 @@
 Grammar::Grammar( const std::string &file )
     : issues_(""), status_(CHECK_OK)
 {
+    std::ifstream ifs;
+    ifs.open( file.c_str(), std::ifstream::in);
+    initialize( ifs );
+    ifs.close();
+}
 
-    std::string line;
-    std::ifstream is (file.c_str(), std::ifstream::in|std::ifstream::binary);
-    if (not is.is_open()) {
-        std::cerr << "ERROR: Failed to open file: '" << file << "'\n";
-        //throw 2000
-        return;
-    }
+
+Grammar::Grammar( std::istream &is )
+    : issues_(""), status_(CHECK_OK)
+{
+    initialize( is );
+}
+
+
+void Grammar::initialize( std::istream &is )
+{
 
     boost::regex re_comment("^\\s*#.*|^\\s*$");
     boost::regex re_section("^\\s*\\[(.+)\\]\\s*$");
     boost::regex re_ismeta("^(?:\\s*@(?:[\\w_])+)+\\s*$");
 
     std::string gotSection;
+    RuleType ruleType = UNKNWN;
+    std::vector<MetaRule> mrules;
     std::vector<Rule> rules;
+    std::string line;
 
     boost::smatch what;
     int line_cnt = 0;
@@ -50,55 +61,91 @@ Grammar::Grammar( const std::string &file )
             continue;
         // handle a section header
         else if ( boost::regex_match(line, what, re_section, boost::match_extra) ) {
-            // if we already have section data, then save 
-            if (gotSection.length() > 0) {
-                rules_[gotSection] = rules;
-                gotSection.clear();
+            // the current data if any
+            if ( ruleType != UNKNWN and gotSection == "") {
+                    throw std::runtime_error("Grammar-Empty-Section-Defined");
+            }
+            else if ( ruleType == ISMETA ) {
+                MetaSection ms(gotSection);
+                ms.rules(mrules);
+                metas_[gotSection] = ms;
+                ruleType = UNKNWN;
+                mrules.clear();
                 rules.clear();
             }
+            else if ( ruleType == ISRULE ) {
+                RuleSection rs(gotSection);
+                rs.rules(rules);
+                rules_[gotSection] = rs;
+                ruleType = UNKNWN;
+                mrules.clear();
+                rules.clear();
+            }
+
+            // start a new section
             gotSection = what[1];
+    
+            // check if the section already exists
+            if ( metas_.find(gotSection) != metas_.end() or
+                 rules_.find(gotSection) != rules_.end() )
+                throw std::runtime_error("Grammar-Duplicate-Section_Name");
         }
         // load data into section
         else {
-            if (gotSection.length() == 0) {
-                std::cerr << "ERROR: trying to load grammar section data outside of a section!\n";
-                std::cerr << line_cnt << ": " << line << "\n";
-                exit(1);
-            }
+            if (gotSection.length() == 0)
+                throw std::runtime_error("Grammar-Syntax-Error");
 
             // check if this is a meta rule
             if ( line.find('@') != std::string::npos ) {
+                if ( ruleType == ISRULE )
+                    throw std::runtime_error("Grammar-Mixing-Rules-and-Metas");
+
+                ruleType = ISMETA;
+
                 // make sure all tokens are meta
                 if (boost::regex_match(line, re_ismeta, boost::match_default) ) {
-                    Rule rule( line, true );
-                    rules.push_back( rule );
-                }
-                else {
-                    // ERROR all names must match /@([\w_]+)/
-                    std::cerr << "ERROR: all names must match pattern /@([\\w_]+)/ on meta rule lines!\n";
-                    std::cerr << line_cnt << ": " << line << "\n";
-                    exit(1);
+                    MetaRule rule( line );
+                    mrules.push_back( rule );
                 }
             }
             // otherwise it is a standard rule line
             else {
-                Rule rule( line, false );
+                if ( ruleType == ISMETA )
+                    throw std::runtime_error("Grammar-Mixing-Rules-and-Metas");
+
+                ruleType = ISRULE;
+
+                Rule rule( line );
                 rules.push_back( rule );
             }
         }
     }
     // save the last section with read in
     if (gotSection.length() > 0) {
-        rules_[gotSection] = rules;
-        gotSection.clear();
+        if ( ruleType == ISMETA ) {
+            MetaSection ms(gotSection);
+            ms.rules(mrules);
+            metas_[gotSection] = ms;
+        }
+        else if ( ruleType == ISRULE ) {
+            RuleSection rs(gotSection);
+            rs.rules(rules);
+            rules_[gotSection] = rs;
+        }
+
+        ruleType = UNKNWN;
+        mrules.clear();
         rules.clear();
     }
 
-    is.close();
-
     check();
-    if ( status_ != 0 )
-        std::cerr << "Grammar::Grammar(): " << issues_ << "\n";
+
+//    if ( status_ != 0 )
+//        std::cerr << "Grammar::Grammar(): " << issues_ << "\n";
+
+    if ( status_ == CHECK_FATAL )
+        throw std::runtime_error( issues_ );
+
 }
 
 
@@ -126,15 +173,19 @@ void Grammar::check() {
 void Grammar::check( std::string section, std::string key ) {
 
     auto rule = rules_.find( key );
-    if ( rule == rules_.end() ) {
-        issues_ += "Missing rule: " + key +
-            " : referenced at [" + section + "]\n";
-        status_ = CHECK_FATAL;
-        return;
+    auto meta = metas_.find( key );
+
+    if ( rule != rules_.end() ) {
+        for ( const auto &r : ((*rule).second).rules() ) {
+            if ( not r.isValid() ) {
+                issues_ += "Invalid rule at [" + key + "]\n";
+                status_ = CHECK_FATAL;
+            }
+        }
     }
-    for ( const auto &r : (*rule).second ) {
-        if (r.isMeta()) {
-            std::vector<std::string> words = r.meta();
+    else if ( meta != metas_.end() ) {
+        for ( const auto &r : ((*meta).second).rules() ) {
+            std::vector<std::string> words = r.refs();
             for ( const auto &word : words ) {
                 check( key, word );
                 auto ref = references_.find( word );
@@ -144,28 +195,27 @@ void Grammar::check( std::string section, std::string key ) {
                     references_[word] = references_[word] + 1;
             }
         }
-        else {
-            if ( not r.isValid() ) {
-                issues_ += "Invalid rule at [" + key + "]\n";
-                status_ = CHECK_FATAL;
-            }
-            if ( r.score() <= 0.0 ) {
-                issues_ += "Score <= 0 at [" + key + "]\n";
-                if ( not ( status_ == CHECK_FATAL ))
-                    status_ = CHECK_WARN;
-            }
-        }
+    }
+    else {
+        issues_ += "Missing rule: " + key +
+            " : referenced at [" + section + "]\n";
+        status_ = CHECK_FATAL;
+        return;
     }
 }
 
 
 
 std::ostream &operator<<(std::ostream &ss, const Grammar &g) {
+    for ( const auto &e : g.metas_ ) {
+//        ss << "[" << e.first << "]\n";
+        ss << e.second << "\n";
+//        ss << "\n";
+    }
     for ( const auto &e : g.rules_ ) {
-        ss << "[" << e.first << "]\n";
-        for ( const auto &r : e.second )
-            ss << r << "\n";
-        ss << "\n";
+//        ss << "[" << e.first << "]\n";
+        ss << e.second << "\n";
+//        ss << "\n";
     }
 
     return ss;

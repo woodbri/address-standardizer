@@ -17,10 +17,13 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <iostream>
+#include <stdexcept>
 
 #include "inclass.h"
 #include "outclass.h"
-#include "rule.h"
+#include "metasection.h"
+#include "rulesection.h"
 
 class Grammar
 {
@@ -32,8 +35,11 @@ public:
         CHECK_WARN  =  1
     } Status;
 
+    Grammar( const Grammar& ) = default;
     Grammar( const std::string &file );
+    Grammar( std::istream &is );
 
+    void initialize( std::istream &is );
     void check();
     void check( std::string section, std::string key );
     Status status() const { return status_; };
@@ -42,9 +48,21 @@ public:
     friend std::ostream &operator<<(std::ostream &ss, const Grammar &g);
 
 
+private:
+
+    typedef enum {
+        ISMETA,
+        ISRULE,
+        UNKNWN
+    } RuleType;
+
+
 protected:
 
-    std::map<std::string, std::vector<Rule> > rules_;
+    std::map<std::string, MetaSection> metas_;
+    std::map<std::string, RuleSection> rules_;
+
+    // temp storage for analysis and checking of grammar
     std::string issues_;
     std::map<std::string, int> references_;
     Status status_;

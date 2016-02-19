@@ -17,7 +17,9 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
+#include <fstream>
 #include <string>
+#include <stdexcept>
 #include "grammar.h"
 
 // The two relevant Boost namespaces for the unit test framework are:
@@ -60,57 +62,24 @@ struct TestFixture
 // unit test
 BOOST_FIXTURE_TEST_CASE(Grammar_Fatal_1, TestFixture)
 {
-    Grammar G("fatal1.grammar");
-    //printf("status: %d\n", G.status());
-    BOOST_CHECK(G.status() == Grammar::CHECK_FATAL);
-    //printf("'%s'\n", G.issues().c_str());
-
-    std::string expect =
-        "Missing rule: ADDRESS : referenced at []\n"
-        "Rule 'A' defined by not referenced!\n"
-        "Rule 'AB' defined by not referenced!\n"
-        "Rule 'BC' defined by not referenced!\n"
-        "Rule 'CD' defined by not referenced!\n"
-        "Rule 'DE' defined by not referenced!\n"
-        "Rule 'EF' defined by not referenced!\n"
-        "Rule 'ROOT' defined by not referenced!\n";
-
-    BOOST_CHECK(G.issues() == expect);
+    BOOST_CHECK_THROW( Grammar G("fatal1.grammar"),  std::runtime_error );
 }
 
 BOOST_FIXTURE_TEST_CASE(Grammar_Fatal_2, TestFixture)
 {
-    Grammar G("fatal2.grammar");
-    //printf("status: %d\n", G.status());
-    BOOST_CHECK(G.status() == Grammar::CHECK_FATAL);
-    //printf("'%s'\n", G.issues().c_str());
-
-    std::string expect =
-        "Score <= 0 at [AB]\n"
-        "Score <= 0 at [BC]\n"
-        "Missing rule: XY : referenced at [ADDRESS]\n"
-        "Rule 'XYZ' defined by not referenced!\n";
-
-    BOOST_CHECK(G.issues() == expect);
+    BOOST_CHECK_THROW( Grammar G( "fatal2.grammar" ), std::runtime_error );
 }
 
 BOOST_FIXTURE_TEST_CASE(Grammar_Warn, TestFixture)
 {
-    Grammar G("warn.grammar");
-    //printf("status: %d\n", G.status());
-    BOOST_CHECK(G.status() == Grammar::CHECK_WARN);
-    //printf("'%s'\n", G.issues().c_str());
 
-    std::string expect =
-        "Score <= 0 at [A]\n"
-        "Rule 'XY' defined by not referenced!\n";
-
-    BOOST_CHECK(G.issues() == expect);
+    BOOST_CHECK_THROW( Grammar G( "warn.grammar" ), std::runtime_error );
 }
 
 BOOST_FIXTURE_TEST_CASE(Grammar_Good, TestFixture)
 {
-    Grammar G("good.grammar");
+    BOOST_CHECK_NO_THROW( Grammar G( "good.grammar" ) );
+    Grammar G( "good.grammar" );
     //printf("status: %d\n", G.status());
     BOOST_CHECK(G.status() == Grammar::CHECK_OK);
     //printf("'%s'\n", G.issues().c_str());
@@ -120,14 +89,14 @@ BOOST_FIXTURE_TEST_CASE(Grammar_Good, TestFixture)
     os << G;
 
     std::string expect = 
-        "[A]\n"
-        "NUMBER -> BLDNG -> 0.5\n\n"
-        "[AB]\n"
-        "NUMBER WORD -> BLDNG HOUSE -> 0.5\n\n"
         "[ADDRESS]\n"
         "@AB @CD @EF\n"
         "@A @BC @DE\n"
         "@CD @EF\n\n"
+        "[A]\n"
+        "NUMBER -> BLDNG -> 0.5\n\n"
+        "[AB]\n"
+        "NUMBER WORD -> BLDNG HOUSE -> 0.5\n\n"
         "[BC]\n"
         "WORD TYPE -> HOUSE PREDIR -> 0.5\n\n"
         "[CD]\n"
@@ -137,7 +106,8 @@ BOOST_FIXTURE_TEST_CASE(Grammar_Good, TestFixture)
         "[EF]\n"
         "ROAD RR -> SUFTYP SUFDIR -> 0.5\n\n";
 
-    //printf("'%s'\n", os.str().c_str());
+    //printf("GOT: '%s'\n", os.str().c_str());
+    //printf("EXP: '%s'\n", expect.c_str());
     BOOST_CHECK(os.str() == expect);
 }
 

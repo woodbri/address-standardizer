@@ -68,20 +68,20 @@ BOOST_FIXTURE_TEST_CASE(Rule_Constructors, TestFixture)
     BOOST_CHECK(r1.isEmpty());
 
     std::string sr2 = " -> -> 0.0";
-    Rule r2(sr2, false);
+    Rule r2(sr2);
     os.str(""); // clear os
     os << r2;
     //printf("%s\n", os.str().c_str());
     BOOST_CHECK(os.str() == "-> -> 0");
 
     std::string sr3 = "NUMBER WORD TYPE -> HOUSE STREET SUFTYP -> 0.2";
-    Rule r3(sr3, false);
+    Rule r3(sr3);
     os.str(""); // clear os
     os << r3;
     //printf("%s\n", os.str().c_str());
     BOOST_CHECK(os.str() == "NUMBER WORD TYPE -> HOUSE STREET SUFTYP -> 0.2");
 
-    Rule r3f(sr3, true);
+    Rule r3f(std::string("@micro @macro"));
     os.str(""); // clear os
     os << r3f;
     //printf("%s\n", os.str().c_str());
@@ -89,7 +89,7 @@ BOOST_FIXTURE_TEST_CASE(Rule_Constructors, TestFixture)
     BOOST_CHECK(os.str() == "-> -> 0");
 
     std::string sr4 = "NUMBER WORD -> HOUSE STREET SUFTYP -> 0.2";
-    Rule r4(sr4, false);
+    Rule r4(sr4);
     os.str(""); // clear os
     os << r4;
     //printf("%s\n", os.str().c_str());
@@ -97,37 +97,17 @@ BOOST_FIXTURE_TEST_CASE(Rule_Constructors, TestFixture)
     BOOST_CHECK(os.str() == "-> -> 0");
 
     std::string sr5 = " NUMBER   WORD TYPE  ->  HOUSE STREET  SUFTYP -> 0.2";
-    Rule r5(sr5, false);
+    Rule r5(sr5);
     os.str(""); // clear os
     os << r5;
     //printf("%s\n", os.str().c_str());
     BOOST_CHECK(os.str() == "NUMBER WORD TYPE -> HOUSE STREET SUFTYP -> 0.2");
 
-    std::string sr6 = "@HOUSE_NUMBER @STREET_NAME @MACRO";
-    Rule r6(sr6, true);
+    Rule r6( r5 );
     os.str(""); // clear os
     os << r6;
-    //printf("'%s'\n", os.str().c_str());
-    BOOST_CHECK(os.str() == "@HOUSE_NUMBER @STREET_NAME @MACRO");
-
-    Rule r6f(sr6, false);
-    os.str(""); // clear os
-    os << r6f;
-    //printf("%s\n", os.str().c_str());
-    BOOST_CHECK(r6f.isEmpty());
-    BOOST_CHECK(os.str() == "-> -> 0");
-
-    Rule r7( r5 );
-    os.str(""); // clear os
-    os << r7;
     //printf("%s\n", os.str().c_str());
     BOOST_CHECK(os.str() == "NUMBER WORD TYPE -> HOUSE STREET SUFTYP -> 0.2");
-
-    Rule r8( r6 );
-    os.str(""); // clear os
-    os << r8;
-    //printf("%s\n", os.str().c_str());
-    BOOST_CHECK(os.str() == "@HOUSE_NUMBER @STREET_NAME @MACRO");
 
 }
 
@@ -136,34 +116,19 @@ BOOST_FIXTURE_TEST_CASE(Rule_getters, TestFixture)
     std::ostringstream os;
 
     std::string sr = "NUMBER WORD TYPE -> HOUSE STREET SUFTYP -> 0.2";
-    Rule r(sr, false);
+    Rule r(sr);
     os.str(""); // clear os
     os << r;
     //printf("%s\n", os.str().c_str());
     BOOST_CHECK(os.str() == "NUMBER WORD TYPE -> HOUSE STREET SUFTYP -> 0.2");
 
-    BOOST_CHECK( r.isMeta() == false );
-    BOOST_CHECK( r.meta().size() == 0 );
     BOOST_CHECK( r.in().size() == 3 );
     BOOST_CHECK( r.out().size() == 3 );
+    BOOST_CHECK( r.inSize() == 3 );
+    BOOST_CHECK( r.outSize() == 3 );
     BOOST_CHECK_CLOSE( r.score(), 0.2, 0.001 );
     BOOST_CHECK( r.isValid() == true );
     BOOST_CHECK( r.isEmpty() == false );
-
-    std::string sr2 = "@HOUSE_NUMBER @STREET_NAME @MACRO";
-    Rule r2(sr2, true);
-    os.str(""); // clear os
-    os << r2;
-    //printf("%s\n", os.str().c_str());
-    BOOST_CHECK(os.str() == "@HOUSE_NUMBER @STREET_NAME @MACRO");
-
-    BOOST_CHECK( r2.isMeta() == true );
-    BOOST_CHECK( r2.meta().size() == 3 );
-    BOOST_CHECK( r2.in().size() == 0 );
-    BOOST_CHECK( r2.out().size() == 0 );
-    BOOST_CHECK_CLOSE( r2.score(), 0.0, 0.001 );
-    BOOST_CHECK( r2.isValid() == true );
-    BOOST_CHECK( r2.isEmpty() == false );
 
 }
 
@@ -172,14 +137,14 @@ BOOST_FIXTURE_TEST_CASE(Rule_mutators_test1, TestFixture)
     std::ostringstream os;
 
     std::string sr = "NUMBER WORD TYPE -> HOUSE STREET SUFTYP -> 0.2";
-    Rule r(sr, false);
+    Rule r(sr);
     os.str(""); // clear os
     os << r;
     //printf("%s\n", os.str().c_str());
     BOOST_CHECK(os.str() == "NUMBER WORD TYPE -> HOUSE STREET SUFTYP -> 0.2");
 
     std::string sr1 = "WORD PROV NUMBER -> CITY PROV POSTAL -> 0.4";
-    Rule r1(sr1, false);
+    Rule r1(sr1);
     os.str(""); // clear os
     os << r1;
     //printf("%s\n", os.str().c_str());
