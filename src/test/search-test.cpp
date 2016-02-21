@@ -63,9 +63,9 @@ struct TestFixture
 
         //printf("'%s'\n", os.str().c_str());
         BOOST_CHECK(os.str() == expect);
-        printf("status: %d\n", G.status());
+        //printf("status: %d\n", G.status());
         BOOST_CHECK(G.status() == Grammar::CHECK_OK);
-        printf("'%s'\n", G.issues().c_str());
+        //printf("'%s'\n", G.issues().c_str());
         BOOST_CHECK(G.issues() == "");
 
         os.str(""); // clear
@@ -111,8 +111,8 @@ BOOST_FIXTURE_TEST_CASE(SearchTest_1, TestFixture)
     pat1.push_back( Token("HWY\tHWY\tROAD\tBADTOKEN\tDETACH") );
 
     Search s(G);
-    MatchResults mr = s.search( pat1 );
-    printf("mr.size: %ld\n", mr.size() );
+    SearchPaths mr = s.search( pat1 );
+    //printf("mr.size: %ld\n", mr.size() );
     BOOST_CHECK(mr.size() == 1);
 
     std::string expect =
@@ -124,7 +124,7 @@ BOOST_FIXTURE_TEST_CASE(SearchTest_1, TestFixture)
     for (const auto &e : mr) {
         os << resultAsString( e.rules );
     }
-    printf("'%s'\n", os.str().c_str());
+    //printf("'%s'\n", os.str().c_str());
     BOOST_CHECK(os.str() == expect);
 
 }
@@ -135,15 +135,15 @@ BOOST_FIXTURE_TEST_CASE(SearchTest_2, TestFixture)
     std::vector<Token> pat1;
     pat1.push_back( Token("11\t11\tNUMBER\tBADTOKEN\tDETACH") );
     pat1.push_back( Token("OAK\tOAK\tWORD\tBADTOKEN\tDETACH") );
-    pat1.push_back( Token("ST\tSTREET\tType\tBADTOKEN\tDETACH") );
+    pat1.push_back( Token("ST\tSTREET\tTYPE\tBADTOKEN\tDETACH") );
     pat1.push_back( Token("EXT\tEXT\tQUALIF\tBADTOKEN\tDETACH") );
     pat1.push_back( Token("HWY\tHWY\tROAD\tBADTOKEN\tDETACH") );
 
     Search s(G);
     float cost = 0.0;
-    MatchResult mr = s.searchAndReclassBest( pat1, cost );
-    printf("s.searchAndReclassBest: cost: %.3f\n", cost);
-    //BOOST_CHECK_CLOSE( cost, 0.2, 0.001 );
+    SearchPath mr = s.searchAndReclassBest( pat1, cost );
+    //printf("s.searchAndReclassBest: cost: %.3f\n", cost);
+    BOOST_CHECK_CLOSE( cost, 0.500, 0.001 );
 
     std::string expect =
         "NUMBER -> BLDNG -> 0.5\n"
@@ -156,11 +156,18 @@ BOOST_FIXTURE_TEST_CASE(SearchTest_2, TestFixture)
     //printf("'%s'\n", os.str().c_str());
     BOOST_CHECK(os.str() == expect);
 
-    //TODO check the reclassed tokens
+    std::string expect2 =
+        "TOKEN:\t11\t11\tNUMBER\tBLDNG\t\n"
+        "TOKEN:\tOAK\tOAK\tWORD\tHOUSE\t\n"
+        "TOKEN:\tST\tSTREET\tTYPE\tPREDIR\t\n"
+        "TOKEN:\tEXT\tEXT\tQUALIF\tQUALIF\t\n"
+        "TOKEN:\tHWY\tHWY\tROAD\tSUFTYP\t\n";
+
     os.str(""); // clear
     for ( const auto &e : pat1 )
         os << e << "\n";
-    printf("reclassed----------\n%s\n----------\n", os.str().c_str());
+    //printf("'%s'\n'%s'\n", os.str().c_str(), expect2.c_str());
+    BOOST_CHECK(os.str() == expect2);
 }
 
 BOOST_FIXTURE_TEST_CASE(SearchTest_3, TestFixture)
@@ -168,14 +175,14 @@ BOOST_FIXTURE_TEST_CASE(SearchTest_3, TestFixture)
     std::vector<Token> pat3;
     pat3.push_back( Token("11\t11\tNUMBER\tBADTOKEN\tDETACH") );
     pat3.push_back( Token("OAK\tOAK\tWORD\tBADTOKEN\tDETACH") );
-    pat3.push_back( Token("ST\tSTREET\tType\tBADTOKEN\tDETACH") );
+    pat3.push_back( Token("ST\tSTREET\tTYPE\tBADTOKEN\tDETACH") );
     pat3.push_back( Token("EXT\tEXT\tQUALIF\tBADTOKEN\tDETACH") );
     pat3.push_back( Token("HWY\tHWY\tROAD\tBADTOKEN\tDETACH") );
     pat3.push_back( Token("RR\tRR\tRR\tBADTOKEN\tDETACH") );
 
 
     Search s(G);
-    MatchResults mr = s.search( pat3 );
+    SearchPaths mr = s.search( pat3 );
     BOOST_CHECK(mr.size() == 1);
 
     std::string expect =
@@ -197,12 +204,12 @@ BOOST_FIXTURE_TEST_CASE(SearchTest_4, TestFixture)
     std::vector<Token> pat4;
     pat4.push_back( Token("11\t11\tNUMBER\tBADTOKEN\tDETACH") );
     pat4.push_back( Token("OAK\tOAK\tWORD\tBADTOKEN\tDETACH") );
-    pat4.push_back( Token("ST\tSTREET\tType\tBADTOKEN\tDETACH") );
+    pat4.push_back( Token("ST\tSTREET\tTYPE\tBADTOKEN\tDETACH") );
     pat4.push_back( Token("HWY\tHWY\tROAD\tBADTOKEN\tDETACH") );
 
 
     Search s(G);
-    MatchResults mr = s.search( pat4 );
+    SearchPaths mr = s.search( pat4 );
     BOOST_CHECK(mr.size() == 0);
 
     std::string expect = "";

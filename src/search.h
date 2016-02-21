@@ -23,13 +23,14 @@
 #include "rule.h"
 #include "grammar.h"
 
-class MatchResult {
+class SearchPath {
 public:
     std::vector<Rule> rules;
+    std::vector<std::string> next;
     std::vector<InClass::Type> remaining;
 };
 
-typedef std::vector<MatchResult> MatchResults;
+typedef std::vector<SearchPath> SearchPaths;
 
 
 
@@ -39,25 +40,23 @@ public:
 
     Search( const Grammar &G ) : Grammar( G ) {};
 
-    MatchResults search( const std::vector<Token> &phrase ) const;
+    SearchPaths search( std::vector<Token> &phrase ) const;
 
-    MatchResults search( const std::string &grammarNode, const std::vector<Token> &phrase ) const;
+    SearchPaths search( const std::string &grammarNode, std::vector<Token> &phrase ) const;
 
-    bool reclassTokens(std::vector<Token> &tokens, const MatchResult &result ) const;
+    bool reclassTokens(std::vector<Token> &tokens, const SearchPath &path ) const;
 
-    MatchResult searchAndReclassBest( std::vector<Token> &phrase, float &cost ) const;
+    SearchPath searchAndReclassBest( std::vector<Token> &phrase, float &cost ) const;
 
-    //MatchResult searchAndReclassBest( std::vector<std::vector<Token> > &phrases, float &cost ) const;
+    SearchPath searchAndReclassBest( std::vector<std::vector<Token> > &phrases, float &cost ) const;
 
 private:
 
-    MatchResults match( const std::string &name, const MatchResults &results ) const;
-    MatchResults match( const std::string &name, const MatchResult &result ) const;
-    MatchResults matchMeta( const MetaRule &r, const MatchResults &results ) const;
-    MatchResults matchMeta( const MetaRule &r, const MatchResult &result ) const;
-    MatchResults mergeResults( const MatchResult &orig, const MatchResult &added ) const;
-    MatchResults mergeResults( const MatchResult &orig, const MatchResults &added ) const;
-    MatchResult matchRule( const Rule &r, const std::vector<InClass::Type> pattern ) const;
+    SearchPaths match( const std::string &name, const SearchPaths &paths ) const;
+    SearchPaths match( const std::string &name, const SearchPath &path ) const;
+    SearchPaths matchNext( const SearchPaths &paths ) const;
+    SearchPaths matchNext( const SearchPath &path ) const;
+    SearchPath matchRule( const Rule &r, const SearchPath &path ) const;
 
 
 };
