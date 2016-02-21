@@ -4,6 +4,7 @@ The goal of the address standardizer is to parse an input address string into to
 
 For example lets look at the following address ``123 MAIN ST ANYTOWN MA 12345 USA``:
 
+|      |   |    |  |       |  |     |   |
 |------|---|----|--|-------|--|-----|---|
 |Tokens|123|MAIN|ST|ANYTOWN|MA|12345|USA|
 |InClass|NUMBER|WORD|TYPE,WORD|WORD|PROV|NUMBER,QUINT|NATION|
