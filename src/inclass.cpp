@@ -16,6 +16,16 @@
 
 #include "inclass.h"
 
+// non-class utility function to trim leading and trailing spaces
+inline std::string trimboth( std::string str ) {
+    auto start = str.find_first_not_of(" ");
+    if ( start == std::string::npos ) start = 0;
+    auto end = str.find_last_not_of(" ");
+    if ( end == std::string::npos ) end = str.size();
+    return std::string( str, start, end - start + 1 );
+}
+
+
 std::string InClass::asString(const InClass::Type &t) {
     std::string str;
     switch (t) {
@@ -119,6 +129,7 @@ std::set<InClass::Type> InClass::asType(const std::string &s) {
     std::string word;
     while (true) {
         std::getline(buffer, word, ',');
+        word = trimboth( word );
         if (word.length() > 0) {
             t = asOneType( word );
             ret.insert( t );
@@ -538,6 +549,7 @@ std::set<InClass::AttachType> InClass::asAttachType(const std::string &s) {
     std::string word;
     while (true) {
         std::getline(buffer, word, ',');
+        word = trimboth( word );
         if (word.length() > 0) {
             if      ( word == "DET_PRE" ) type.insert( DET_PRE );
             else if ( word == "DET_SUF" ) type.insert( DET_SUF );

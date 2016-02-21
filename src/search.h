@@ -23,54 +23,41 @@
 #include "rule.h"
 #include "grammar.h"
 
+class SearchPath {
+public:
+    std::vector<Rule> rules;
+    std::vector<std::string> next;
+    std::vector<InClass::Type> remaining;
+};
+
+typedef std::vector<SearchPath> SearchPaths;
+
+
 
 class Search : Grammar
 {
-private:
-
-    typedef struct {
-        int level;
-        std::string name;
-        int indx;
-    } BackTrack;
-
 public:
 
-    typedef std::vector<std::string>::iterator VecStringIter;
+    Search( const Grammar &G ) : Grammar( G ) {};
 
-    Search( const Grammar &G ) : Grammar( G ), pos_(0) {};
-    Search( const Grammar &G, const std::vector<InClass::Type> &pattern )
-        : Grammar( G ),  pattern_(pattern), pos_(0) {};
+    SearchPaths search( std::vector<Token> &phrase ) const;
 
-    bool search();
-    void walk() const;
-    bool search( const std::vector<InClass::Type> &pattern );
-    std::vector<Rule> bestResult( const std::vector< std::vector<InClass::Type> > &list );
+    SearchPaths search( const std::string &grammarNode, std::vector<Token> &phrase ) const;
 
-    long unsigned int numResults() const { return results_.size(); };
-    std::vector<std::vector<Rule> > results() const { return results_; };
-    std::vector<Rule> bestResult() const;
-    std::vector<Rule> bestResult( float &cost ) const;
+    bool reclassTokens(std::vector<Token> &tokens, const SearchPath &path ) const;
 
-    bool reclassTokens(std::vector<Token> &tokens, const std::vector<Rule> rules) const;
+    SearchPath searchAndReclassBest( std::vector<Token> &phrase, float &cost ) const;
+
+    SearchPath searchAndReclassBest( std::vector<std::vector<Token> > &phrases, float &cost ) const;
 
 private:
 
-    bool matchAllMeta( const Rule &rule, const int level, unsigned int pos );
-    bool match( const std::string &name, const int level, unsigned int pos, unsigned int index );
-    bool match2( const std::string &name, const int level, unsigned int pos );
-    bool match( const Rule &rule, const int level, unsigned int pos, unsigned int index );
-    bool match(VecStringIter start, VecStringIter  next, VecStringIter end, const int level, unsigned int pos);
+    SearchPaths match( const std::string &name, const SearchPaths &paths ) const;
+    SearchPaths match( const std::string &name, const SearchPath &path ) const;
+    SearchPaths matchNext( const SearchPaths &paths ) const;
+    SearchPaths matchNext( const SearchPath &path ) const;
+    SearchPath matchRule( const Rule &r, const SearchPath &path ) const;
 
-    void walk( const std::string &name, const int level ) const;
-
-private:
-
-    std::vector<InClass::Type> pattern_;
-    int pos_;
-    std::vector<std::vector<Rule> > results_;
-    std::vector<Rule> stack_;
-    std::vector<BackTrack> backtrack_;
 
 };
 

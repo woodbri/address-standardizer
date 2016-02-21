@@ -16,37 +16,49 @@
 #include "search.h"
 
 
-bool Search::search() {
+SearchPaths Search::search( const std::string &grammarNode, std::vector<Token> &phrase ) const {
     // tracing
 #ifdef TRACING_SEARCH
-    std::cout << "Calling Search()\nPattern:";
-    for (const auto &e : pattern_)
-        std::cout << " " << InClass::asString( e );
+    std::cout << "Calling Search()\nPhrase:";
+    for (const auto &t : phrase)
+        std::cout << t << "\n";
     std::cout << "\n";
 #endif
 
-    if ( pattern_.size() == 0 ) return false;
-    results_.clear();
-    unsigned int pos = 0;
-    stack_.clear();
-    backtrack_.clear();
+    // make a list of enumerated token patterns
+    std::vector< std::vector<InClass::Type> > list
+        = Token::enumerate( phrase );
 
-    if ( match( std::string("ADDRESS"), 0, pos, 0 ) ) {
-        results_.push_back( stack_ );
-        return true;
+    // seed the search for each pattern with an empty result
+    SearchPaths patterns;
+    for (const auto &e : list ) {
+        SearchPath pattern;
+        pattern.remaining = e;
+        patterns.push_back( pattern );
     }
-    
-    return false;
+
+    // do the search and return the results
+    // we need to check if we consumed all the tokens
+    // and toss out partial matches
+    SearchPaths results;
+    SearchPaths matchs = match( grammarNode, patterns );
+    for ( const auto match : matchs )
+        if ( match.remaining.size() == 0 )
+            results.push_back( match );
+
+
+    return results;
 }
 
 
-bool Search::search( const std::vector<InClass::Type> &pattern ) {
-    pattern_ = pattern;
-    return search();
+SearchPaths Search::search( std::vector<Token> &phrase ) const {
+    return search( std::string("ADDRESS"), phrase );
 }
 
 
-bool Search::reclassTokens( std::vector<Token> &tokens, const std::vector<Rule> rules ) const {
+bool Search::reclassTokens( std::vector<Token> &tokens, const SearchPath &result ) const {
+    auto rules = result.rules;
+
     // count the tokens in the rules and compare to tokens
     long unsigned int cnt = 0;
     for ( const auto &r : rules )
@@ -75,17 +87,14 @@ bool Search::reclassTokens( std::vector<Token> &tokens, const std::vector<Rule> 
 }
 
 
-std::vector<Rule> Search::bestResult()  const {
-    float score;
-    return bestResult( score );
-}
-
-
-std::vector<Rule> Search::bestResult( float &score ) const {
-    // if not results return an empty vector
-    if (results_.size() == 0) {
-        std::vector<Rule> dummy;
-        return dummy;
+SearchPath Search::searchAndReclassBest( std::vector<Token> &phrase, float &score ) const {
+    
+    SearchPaths results = search( phrase );
+    // if we failed to match against the grammar
+    // set score to -1.0 and return an empty result
+    if ( results.size() == 0 ) {
+        score = -1.0;
+        return SearchPath();
     }
 
     // for each result compute the average score of the rules in the result
@@ -93,11 +102,11 @@ std::vector<Rule> Search::bestResult( float &score ) const {
     int best = 0;
     float bestScore = 0.0;
     int i = 0;
-    for ( const auto &result : results_ ) {
+    for ( const auto &result : results ) {
         float sum = 0.0;
-        for ( const auto &rule : result )
+        for ( const auto &rule : result.rules )
             sum += rule.score();
-        sum /= static_cast<float>( result.size() );
+        sum /= static_cast<float>( result.rules.size() );
         if (sum > bestScore) {
             best = i;
             bestScore = sum;
@@ -107,400 +116,220 @@ std::vector<Rule> Search::bestResult( float &score ) const {
 
     score = bestScore;
 
-    return results_[best];
+    if ( not reclassTokens( phrase, results[best] ) )
+        score = -2.0;
+
+    return results[best];
 }
 
 
-std::vector<Rule> Search::bestResult( const std::vector< std::vector<InClass::Type> > &list ) {
-    std::vector<Rule> bestResult;
-    float bestScore;
-    for (const auto &e : list) {
-        if ( search( e ) ) {
-            float score;
-            auto best = this->bestResult( score );
-            if ( score > bestScore ) {
-                bestResult = best;
-                bestScore = score;
+SearchPath Search::searchAndReclassBest( std::vector<std::vector<Token> > &phrases, float &score ) const {
+    
+    SearchPath best;
+    float bestScore = -1.;
+
+    float thisScore = -1.;
+    for ( auto &phrase : phrases ) {
+        SearchPath result = searchAndReclassBest( phrase, thisScore );
+        if ( thisScore > bestScore ) {
+            bestScore = thisScore;
+            best = result;
+        }
+    }
+
+    score = bestScore;
+    return best;
+}
+
+
+// ---------------------- PRIVATE ----------------------------
+
+
+SearchPaths Search::match( const std::string &name, const SearchPaths &paths ) const {
+#ifdef TRACING_SEARCH
+    std::cout << "Search::match1('" << name << "'[";
+    for (const auto &t_p : paths ) {
+        std::cout << "{";
+        for (const auto &t_e : t_p.remaining)
+            std::cout << InClass::asString(t_e) << " ";
+        std::cout << "}";
+    }
+    std::cout << "])\n";
+#endif
+
+    SearchPaths results;
+    for ( const auto &path : paths ) {
+        SearchPaths pathResults = match( name, path );
+        for ( const auto result : pathResults )
+            results.push_back( result );
+    }
+
+#ifdef TRACING_SEARCH
+    std::cout << "\tReturning: Search::match1(" << results.size() << ")\n";
+#endif
+    return results;
+}
+
+
+SearchPaths Search::match( const std::string &name, const SearchPath &path ) const {
+#ifdef TRACING_SEARCH
+    std::cout << "Search::match2('" << name << "'[";
+    for (const auto &t_e : path.remaining)
+        std::cout << InClass::asString(t_e) << " ";
+    std::cout << "])\n";
+#endif
+
+    auto meta = metas_.find( name );
+    if ( meta != metas_.end() ) {
+        SearchPaths results;
+        for ( const auto &r : (meta->second).rules() ) {
+            SearchPath current( path );
+            current.next = r.refs();
+            for ( const auto &e : path.next )
+                current.next.push_back( e );
+
+            if ( current.next.size() > 0 ) {
+                auto mresults = matchNext( current );
+                for ( const auto &mr : mresults )
+                    results.push_back( mr );
             }
-#if defined(TRACING_SEARCH) || defined(TRACING_SEARCH_MIN)
-            std::cout << "PATTERN:";
-            for (const auto &t : e)
-                std::cout << " " << InClass::asString(t);
-            std::cout << "\t(" << score << ")\n";
+        }
+#ifdef TRACING_SEARCH
+        std::cout << "\tReturning: Search::match2(" << results.size() << ")\n";
+#endif
+        return results;
+    }
+
+    auto rule = rules_.find( name );
+    if ( rule != rules_.end() ) {
+        SearchPaths results;
+        for ( const auto &r : (rule->second).rules() ) {
+            auto mr = matchRule( r, path );
+            if ( mr.rules.size() > 0 )
+                results.push_back( mr );
+        }
+#ifdef TRACING_SEARCH
+        std::cout << "\tReturning: Search::match2(" << results.size() << ")\n";
+#endif
+        return results;
+    }
+
+#ifdef TRACING_SEARCH
+    std::cout << "\tReturning: Search::match2(0) [RULE NOT FOUND]\n";
+#endif
+    return SearchPaths();
+}
+
+
+SearchPaths Search::matchNext( const SearchPaths &paths ) const {
+#ifdef TRACING_SEARCH
+    std::cout << "Search::matchNext1(paths)\n";
+#endif
+    SearchPaths results;
+    for ( const auto &path : paths ) {
+        if ( path.next.size() > 0 ) {
+            SearchPaths matches = matchNext( path );
+            for ( const auto &match : matches )
+                results.push_back( match );
+        }
+    }
+
+#ifdef TRACING_SEARCH
+    std::cout << "\tReturning: Search::matchNext1(" << results.size() << ")\n";
+#endif
+    return results;
+}
+
+
+SearchPaths Search::matchNext( const SearchPath &path ) const {
+#ifdef TRACING_SEARCH
+    std::cout << "Search::matchNext2(path)\n";
+    std::cout << "\tNext:";
+    for (const auto &t_e : path.next )
+        std::cout << " " << t_e;
+    std::cout << "\n\tRemaining:";
+    for (const auto &t_e : path.remaining )
+        std::cout << " " << InClass::asString( t_e );
+    std::cout << "\n";
+#endif
+
+    // we should never call matchNext if there are no next items!
+    if ( path.next.size() == 0 )
+        return SearchPaths();
+
+    SearchPaths results;
+    SearchPath current( path );
+    auto word = current.next.front();
+    current.next.erase( current.next.begin() );
+
+    SearchPaths mr = match( word, current );
+    if ( mr.size() == 0 ) {
+#ifdef TRACING_SEARCH
+        std::cout << "\tReturning: Search::matchNext2(0) for '" << word << "'\n";
+#endif
+        return SearchPaths();
+    }
+
+    for ( const auto &result : mr ) {
+        if ( result.next.size() > 0 ) {
+            SearchPaths nextResults = matchNext( mr );
+            for ( const auto &result : nextResults )
+                results.push_back( result );
         }
         else {
-            std::cout << "PATTERN:";
-            for (const auto &t : e)
-                std::cout << " " << InClass::asString(t);
-            std::cout << "\t(failed)\n";
-#endif
+            results.push_back( result );
         }
     }
 
-    return bestResult;
+#ifdef TRACING_SEARCH
+    std::cout << "\tReturning: Search::matchNext2(" << results.size() << ")\n";
+#endif
+    return results;
 }
 
 
-
-bool Search::match( const std::string &name, const int level, unsigned int pos, unsigned int index ) {
-
-    const auto stackDepth(stack_.size());
-//    const auto backtrackDepth(backtrack_.size());
-
+SearchPath Search::matchRule( const Rule &r, const SearchPath &path ) const {
 #ifdef TRACING_SEARCH
-    std::cout << std::string(level, '.') << "Calling match(\""
-        << name << "\")(" << pos << ", " << stackDepth << ")"
-        "[" << pos_ << ", " << stack_.size() << "]{" << index << "}\n";
+    std::cout << "Search::matchRule\n";
 #endif
-
-    auto it = rules_.find( name );
-    if ( it == rules_.end() ) {
+    auto &pattern = path.remaining;
+    auto it = pattern.begin();
+    for (const auto &e : r.in()) {
+        if ( it == pattern.end() ) {
+            // failed to match, rules has more items than pattern
+            // return an empty result
 #ifdef TRACING_SEARCH
-        std::cout << std::string(level, '.') << 
-                "Failed to find rule for '" << name << "'\n";
+            std::cout << "\tReturning: Search::matchRule: Failed 1\n";
 #endif
-        // TODO this should be a throw
-
-        // unwind stack and pos pointer
-        if (stack_.size() > stackDepth)
-            stack_.resize(stackDepth);
-        pos_ = pos;
-        return false;
-    }
-
-    // track this call
-/*
-    BackTrack bt;
-    bt.level = level;
-    bt.name = name;
-    bt.index = index;
-    backtrack_.push_back(bt);
-*/
-    unsigned int idx = 0;
-    for ( const auto &r : (*it).second ) {
-        if ( r.isMeta() ) {
-            // must match all m in this rule
-            for (const auto &m : r.meta()) {
-                if ( not match( m, level+1, pos_, idx) ) {
-#ifdef TRACING_SEARCH
-                    std::cout << std::string(level, '.') << "failed '" << m
-                        << "' {" << idx << "}, continuing\n";
-#endif
-                    if (stack_.size() > stackDepth)
-                        stack_.resize(stackDepth);
-//                    backtrack_.resize(backtrackDepth+1);
-                    pos_ = pos;
-                    goto OUTER;
-                }
-            }
-#ifdef TRACING_SEARCH
-            std::cout << std::string(level, '.') << "matched '" << name
-                << "' {" << idx << "}:";
-            for (const auto &m : r.meta())
-                std::cout << " " << m;
-            std::cout << "\n";
-#endif
+            return SearchPath();
         }
+
+        if ( *it == e )
+            it++;
         else {
-            if ( match( r, level+1, pos_, idx ) ) {
+            // failed to match
 #ifdef TRACING_SEARCH
-                std::cout << std::string(level, '.') << "matched '" << name
-                    << "' {" << idx << "}:" << r << "\n";
+            std::cout << "\tReturning: Search::matchRule: Failed 2\n";
 #endif
-                return true;
-            }
-            else {
-                if (stack_.size() > stackDepth)
-                    stack_.resize(stackDepth);
-                pos_ = pos;
-                continue;
-            }
+            return SearchPath();
         }
-        OUTER: //continue
-        ++idx;
     }
 
+    // we have a match so update result and return it
+    SearchPath result( path );
+    result.rules.push_back(r);
+    result.remaining.clear();
+    for (;it!=pattern.end(); it++)
+        result.remaining.push_back(*it);
+
 #ifdef TRACING_SEARCH
-    std::cout << std::string(level, '.') << "failed '" << name << "' return false\n";
+    std::cout << "\tReturning: Search::matchRule: rule[" << r << "], remaining:[";
+    for (const auto &t_e : result.remaining)
+        std::cout << InClass::asString(t_e) << " ";
+    std::cout << "]\n";
 #endif
-    if (stack_.size() > stackDepth)
-        stack_.resize(stackDepth);
-    pos_ = pos;
-    return false;
+    return result;
 }
 
 
 
-bool Search::match(const Rule &rule, const int level, unsigned int pos, unsigned int index) {
-
-#ifdef TRACING_SEARCH
-    const auto stackDepth(stack_.size());
-    std::cout << std::string(level, '.') << "Calling match(\""
-        << rule << "\")(" << pos << ", " << stackDepth << ")"
-        "[" << pos_ << ", " << stack_.size() << "]{" << index << "}\n";
-#endif
-
-    std::vector<InClass::Type> in = rule.in();
-    for (const auto &e : in) {
-        if (pos < pattern_.size() and pattern_[pos] == e)
-            ++pos;
-        else {
-#ifdef TRACING_SEARCH
-            std::cout << std::string(level, '.') << "return false\n";
-#endif
-            return false;
-        }
-    }
-
-    // advance the pointer into pattern on success
-    // and save rule on stack
-    pos_ = pos;
-    stack_.push_back( rule );
-
-#ifdef TRACING_SEARCH
-    std::cout << std::string(level, '.') << "return true {" << index << "}\n";
-#endif
-
-    return level == level; // dummy return true to avoid warning
-}
-
-
-void Search::walk() const {
-    walk(std::string("ADDRESS"), 0);
-}
-
-
-void Search::walk( const std::string &name, const int level ) const {
-    auto it = rules_.find( name );
-    if ( it == rules_.end() ) {
-        std::cout << std::string(level, '.') << "ERROR: Failed to find '"
-            << name << "'\n";
-        return;
-    }
-
-    std::cout << std::string(level, '.') << "[" << name << "]\n";
-    for ( const auto r : (*it).second ) {
-        if ( r.isMeta() ) {
-            int cnt = 0;
-            for ( const auto &word : r.meta() ) {
-                walk( word, level+1+cnt );
-                ++cnt;
-            }
-        }
-        else {
-            std::cout << std::string(level+2, '.') << r << "\n";
-        }
-    }
-}
-
-
-
-#if 0
-
-bool Search::matchAllMeta(const Rule &rule, const int level, unsigned int pos) {
-    const auto stackDepth( stack_.size() );
-
-#ifdef TRACING_SEARCH
-    std::cout << std::string(level, '.') << "Calling matchAllMeta(\""
-        << rule <<"\")(" << pos << ", " << stackDepth << ")"
-        "[" << pos_ << ", " << stack_.size() << "]\n";
-#endif
-
-    std::vector<std::string> meta = rule.meta();
-    for (const auto &m : meta )
-        if ( not match( m, level+1, pos ) ) {
-#ifdef TRACING_SEARCH
-            std::cout << std::string(level, '.') << "failed on '"
-                << m << "'\n";
-#endif
-            // unwind stack and pos pointer
-            if (stack_.size() > stackDepth)
-                stack_.resize(stackDepth);
-            pos_ = pos;
-            return false;
-        }
-        else
-            pos = pos_;
-
-#ifdef TRACING_SEARCH
-    std::cout << std::string(level, '.') << "return true\n";
-#endif
-    return true;
-}
-
-
-
-bool Search::match(const std::string &name, const int level, unsigned int pos) {
-    const auto stackDepth(stack_.size());
-
-#ifdef TRACING_SEARCH
-    std::cout << std::string(level, '.') << "Calling match(\""
-        << name << "\")(" << pos << ", " << stackDepth << ")"
-        "[" << pos_ << ", " << stack_.size() << "]\n";
-#endif
-
-    auto it = rules_.find( name );
-    if ( it == rules_.end() ) {
-#ifdef TRACING_SEARCH
-        std::cout << std::string(level, '.') << 
-                "Failed to find rule for '" << name << "'\n";
-#endif
-        // unwind stack and pos pointer
-        if (stack_.size() > stackDepth)
-            stack_.resize(stackDepth);
-        pos_ = pos;
-        return false;
-    }
-
-    for ( const auto &r : (*it).second ) {
-        if ( r.isMeta() ) {
-            std::vector<std::string> meta = r.meta();
-            auto start = meta.begin();
-            auto remaining = start;
-            ++remaining;
-            auto end = meta.end();
-            if ( match( start, remaining, end, level+1, pos ) ) {
-#ifdef TRACING_SEARCH
-                std::cout << std::string(level, '.') << "return true\n";
-#endif
-                return true;
-            }
-            else {
-#ifdef TRACING_SEARCH
-                std::cout << std::string(level, '.') << "continuing\n";
-#endif
-                if (stack_.size() > stackDepth)
-                    stack_.resize(stackDepth);
-                pos_ = pos;
-                continue;
-            }
-        }
-        else {
-            if ( match( r, level+1, pos ) ) {
-#ifdef TRACING_SEARCH
-                std::cout << std::string(level, '.') << "return true\n";
-#endif
-                return true;
-            }
-            else {
-#ifdef TRACING_SEARCH
-                std::cout << std::string(level, '.') << "continuing\n";
-#endif
-                if (stack_.size() > stackDepth)
-                    stack_.resize(stackDepth);
-                pos_ = pos;
-                continue;
-            }
-        }
-    }
-
-#ifdef TRACING_SEARCH
-    std::cout << std::string(level, '.') << "return false\n";
-#endif
-    if (stack_.size() > stackDepth)
-        stack_.resize(stackDepth);
-    pos_ = pos;
-    return false;
-}
-
-
-bool Search::match2(const std::string &name, const int level, unsigned int pos) {
-    const auto stackDepth(stack_.size());
-
-#ifdef TRACING_SEARCH
-    std::cout << std::string(level, '.') << "Calling match(\""
-        << name << "\")(" << pos << ", " << stackDepth << ")"
-        "[" << pos_ << ", " << stack_.size() << "]\n";
-#endif
-
-    auto it = rules_.find( name );
-    if ( it == rules_.end() ) {
-#ifdef TRACING_SEARCH
-        std::cout << std::string(level, '.') << 
-                "Failed to find rule for '" << name << "'\n";
-#endif
-        // unwind stack and pos pointer
-        if (stack_.size() > stackDepth)
-            stack_.resize(stackDepth);
-        pos_ = pos;
-        return false;
-    }
-
-    for ( const auto &r : (*it).second ) {
-        if ( r.isMeta() ) {
-            if ( matchAllMeta( r, level+1, pos ) ) {
-#ifdef TRACING_SEARCH
-                std::cout << std::string(level, '.') << "return true\n";
-#endif
-                return true;
-            }
-        }
-        else {
-            if ( match( r, level+1, pos ) ) {
-#ifdef TRACING_SEARCH
-                std::cout << std::string(level, '.') << "return true\n";
-#endif
-                return true;
-            }
-        }
-    }
-
-#ifdef TRACING_SEARCH
-    std::cout << std::string(level, '.') << "return false\n";
-#endif
-    if (stack_.size() > stackDepth)
-        stack_.resize(stackDepth);
-    pos_ = pos;
-    return false;
-}
-
-
-
-bool Search::match(VecStringIter start, VecStringIter  next, VecStringIter end, const int level, unsigned int pos) {
-    const auto stackDepth(stack_.size());
-
-#ifdef TRACING_SEARCH
-    std::cout << std::string(level, '.') << "Calling iter match(\""
-        << *start << ", next, end, " << level << ", " << pos 
-        << ")\n";
-#endif
-    if ( match( *start, level+1, pos ) ) {
-        if ( next == end ) {
-#ifdef TRACING_SEARCH
-            std::cout << std::string(level, '.') << "pos_: "
-                << pos_ << ", len: " << pattern_.size()
-                << ((pos_ == (int)pattern_.size())?" true": " false") << "\n";
-#endif
-            return true;
-        }
-        start = next;
-        ++next;
-        if ( match( start, next, end, level+1, pos_ ) ) {
-#ifdef TRACING_SEARCH
-            std::cout << std::string(level, '.') << "return true\n";
-#endif
-            return true;
-        }
-        else {
-#ifdef TRACING_SEARCH
-            std::cout << std::string(level, '.') << "return false\n";
-#endif
-            if (stack_.size() > stackDepth)
-                stack_.resize(stackDepth);
-            pos_ = pos;
-            return false;
-        }
-    }
-    else {
-#ifdef TRACING_SEARCH
-        std::cout << std::string(level, '.') << "return true\n";
-#endif
-        if (stack_.size() > stackDepth)
-            stack_.resize(stackDepth);
-        pos_ = pos;
-        return false;
-    }
-}
-
-
-#endif
