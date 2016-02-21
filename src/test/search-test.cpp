@@ -141,10 +141,11 @@ BOOST_FIXTURE_TEST_CASE(SearchTest_2, TestFixture)
 
     Search s(G);
     float cost = 0.0;
-    SearchPath mr = s.searchAndReclassBest( pat1, cost );
+    auto mr = s.searchAndReclassBest( pat1, cost );
     //printf("s.searchAndReclassBest: cost: %.3f\n", cost);
     BOOST_CHECK_CLOSE( cost, 0.500, 0.001 );
 
+/*
     std::string expect =
         "NUMBER -> BLDNG -> 0.5\n"
         "WORD TYPE -> HOUSE PREDIR -> 0.5\n"
@@ -155,6 +156,7 @@ BOOST_FIXTURE_TEST_CASE(SearchTest_2, TestFixture)
 
     //printf("'%s'\n", os.str().c_str());
     BOOST_CHECK(os.str() == expect);
+*/
 
     std::string expect2 =
         "TOKEN:\t11\t11\tNUMBER\tBLDNG\t\n"
@@ -164,7 +166,7 @@ BOOST_FIXTURE_TEST_CASE(SearchTest_2, TestFixture)
         "TOKEN:\tHWY\tHWY\tROAD\tSUFTYP\t\n";
 
     os.str(""); // clear
-    for ( const auto &e : pat1 )
+    for ( const auto &e : mr )
         os << e << "\n";
     //printf("'%s'\n'%s'\n", os.str().c_str(), expect2.c_str());
     BOOST_CHECK(os.str() == expect2);

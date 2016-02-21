@@ -85,6 +85,12 @@ bool LexEntry::isDetached() const {
 }
 
 
+bool LexEntry::isInClass(const InClass::Type type) const {
+    auto it = type_.find( type );
+    return ( it == type_.end() ) ? false : true;
+}
+
+
 void LexEntry::set(const std::string &word, const std::string &stdword, const InClass::Type type) {
     word_ = word;
     stdword_ = stdword;

@@ -27,7 +27,8 @@ class Tokenizer {
 
 public:
     Tokenizer(Lexicon& in_lex) : lex_(in_lex) {};
-    std::vector<Token> getTokens(std::string str);
+    std::vector<std::vector<Token> > getTokens( std::string str );
+    std::vector<Token> getTokens( std::string str, bool splitTokens );
 
     std::set<InClass::Type> filter() const { return filter_; };
     Lexicon lexicon() const { return lex_; };

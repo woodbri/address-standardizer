@@ -34,6 +34,7 @@ public:
     bool isDetached() const;
     bool isPrefixAttached() const;
     bool isSuffixAttached() const;
+    bool isInClass(const InClass::Type type) const;
     ///@}
 
     /** @name mutators */

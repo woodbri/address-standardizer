@@ -24,7 +24,7 @@ The full list of OutClass types is listed in the following table.
 | STREET  | The root street name, stripped of directional or type modifiers. Example, the 'TENTH' in '3715 WEST TENTH AVENUE'. |
 | SUFTYP  | A street type following the root street name. Example, the 'AVENUE' in '3715 WEST TENTH AVENUE'. |
 | SUFDIR  | A directional modifier that follows the street name. Example, the 'WEST' in '3715 TENTH AVENUE WEST'. |
-| RR      | The 'RR' in 'RR 7' |
+| RR      | Used to identify US Rural Routes. The 'RR' in 'RR 7' |
 | EXTRA   | An otherwise unclassified output. |
 | CITY    | A placename. Example, 'LONDON' |
 | PROV    | A state, province or region. Example, 'NY' or 'NEW YORK'. |
@@ -34,7 +34,7 @@ The full list of OutClass types is listed in the following table.
 | BOXT    | The '3B' in 'BOX 3B' |
 | UNITH   | The 'APT' in 'APT 3B' |
 | UNITT   | The '3B' in 'APT 3B' |
-| BADTOKEN | bad token type |
+| BADTOKEN | Used to identify invalid token classification. |
 
 
 ## See Also

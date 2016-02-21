@@ -59,7 +59,9 @@ public:
     // operators
     friend std::ostream &operator<<(std::ostream &ss, const Lexicon &lex);
 
+    // algorithms
     void classify( Token& token, InClass::Type typ );
+    void standardize( Token& token );
 
 private:
 

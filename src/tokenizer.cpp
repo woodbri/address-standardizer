@@ -23,7 +23,21 @@ void Tokenizer::removeFilter(InClass::Type filter) {
         filter_.erase(it);
 }
 
-std::vector<Token> Tokenizer::getTokens(std::string str) {
+std::vector<std::vector<Token> > Tokenizer::getTokens(std::string str) {
+    std::vector<std::vector<Token> > phrases;
+
+    std::vector<Token> phrase1 = getTokens( str, false );
+    phrases.push_back( phrase1 );
+
+    std::vector<Token> phrase2 = getTokens( str, true );
+    if ( phrase2.size() > 0 )
+        phrases.push_back( phrase2 );
+
+    return phrases;
+}
+
+
+std::vector<Token> Tokenizer::getTokens( std::string str, bool splitTokens ) {
 
     // make sure the text is normalized and UUPERCASE
     std::string locale = lex_.locale();
@@ -34,12 +48,14 @@ std::vector<Token> Tokenizer::getTokens(std::string str) {
     // first see if we have attached tokens that we need to split apart
     // we place and em dash utf8 char "\xe2\x80\x94" where we split the word
     // this can later be recognized as EMDASH token if needed
+    bool didSplit = false;
     std::string attached = "(" + lex_.regexPrefixAtt() + ")";
     if (attached.length() > 2) {
         boost::u32regex re = boost::make_u32regex( attached );
         const char* replace( "$1\xe2\x80\x94" );
         std::string tmp = boost::u32regex_replace( str, re, replace );
         str = tmp;
+        didSplit = true;
     }
 
     attached = "(" + lex_.regexSuffixAtt() + ")";
@@ -48,7 +64,16 @@ std::vector<Token> Tokenizer::getTokens(std::string str) {
         const char* replace( "\xe2\x80\x94$1" );
         std::string tmp = boost::u32regex_replace( str, re, replace );
         str = tmp;
+        didSplit = true;
     }
+
+    // if we are asked for to split tokens
+    // but there were no regex for splitting
+    // then we return an empty result.
+    // the rationale is that this would be a duplicate
+    // set of tokens to those returned by not splitTokens
+    if ( splitTokens and not didSplit )
+        return std::vector<Token>();
 
     // split mixed alpha digit tokens, eg:
     // 500W => 500 W or N123 => N 123 or I80 => I 80

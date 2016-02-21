@@ -46,8 +46,6 @@ int main(int ac, char* av[]) {
     std::cout << "Normalized: '" << nstr << "'\n";
     std::cout << "UpperCase: '" << Ustr << "'\n";
 
-    std::vector<Token> tokens;
-
     Lexicon lex("test-lex", lfile);
 //    std::cout << lex << "\n";
 //    std::cout << "Lexicon regex: '" << lex.regex() <<"'\n\n";
@@ -57,63 +55,55 @@ int main(int ac, char* av[]) {
     tokenizer.addFilter( InClass::PUNCT );
     tokenizer.addFilter( InClass::SPACE );
     tokenizer.addFilter( InClass::DASH );
-    tokens = tokenizer.getTokens( Ustr );
 
-//    std::cout << "tokens.size() = " << tokens.size() << "\n";
+    std::vector<std::vector<Token> > phrases = tokenizer.getTokens( Ustr );
 
-    for (const auto tok : tokens)
-        std::cout << tok << "\n";
-
-    std::vector< std::vector<InClass::Type> > list = Token::enumerate( tokens );
-
-    std::cout << "Enumerated token list size: " << list.size() << "\n";
-    for (const auto &e : list) {
-        for (const auto &t : e )
-            std::cout << InClass::asString( t ) << "  ";
-        std::cout << "\n";
+    for ( const auto phrase : phrases ) {
+        std::cout << "-------------------------------\n";
+        for ( const auto tok : phrase )
+            std::cout << tok << "\n";
     }
-    std::cout << "\n";
+    std::cout << "-------------------------------\n";
 
-    Grammar G( gfile );
+    try {
+        Grammar G( gfile );
 
-    switch (G.status() ) {
-        case Grammar::CHECK_FATAL:
-            std::cout << "FATAL loading grammar: " << G.issues() << "\n";
+        switch (G.status() ) {
+            case Grammar::CHECK_FATAL:
+                std::cout << "FATAL loading grammar: " << G.issues() << "\n";
+                return(1);
+            case Grammar::CHECK_WARN:
+                std::cout << "WARNING loading grammar: " << G.issues() << "\n";
+                break;
+            case Grammar::CHECK_OK:
+                break;
+        }
+
+        Search S( G );
+
+        float bestCost = -1.0;
+        auto best = S.searchAndReclassBest( phrases, bestCost );
+        if ( bestCost < 0.0 ) {
+            std::cout << "#### Failed to find a match (searchAndReclassBest)(" << bestCost << ")\n";
             return(1);
-        case Grammar::CHECK_WARN:
-            std::cout << "WARNING loading grammar: " << G.issues() << "\n";
-            break;
-        case Grammar::CHECK_OK:
-            break;
-    }
-
-    Search S( G );
-
-#if 0
-    S.walk();
-    return EXIT_SUCCESS;
-
-#else    
-    auto best = S.bestResult( list );
-    if ( best.size() == 0 ) {
-        std::cout << "#### BEST FAILED! (search)\n";
-    }
-    else {
-        if ( S.reclassTokens( tokens, best ) ) {
-            std::cout << "BEST: ";
-            for (const auto &t : tokens)
-                std::cout << OutClass::asString(t.outclass()) << " ";
-            std::cout << "\n";
-            for (const auto &r : best)
-                std::cout << r << "\n";
-            for (const auto &t : tokens)
-                std::cout << t << "\n";
         }
-        else {
-            std::cout << "#### BEST FAILED (reclass)!\n";
-        }
-    }
 
+        // get the appropriate standard terms and
+        // print out the reclassified tokens
+        std::cout << "bestCost: " << bestCost << "\n";
+        for (auto &token : best) {
+            lex.standardize( token );
+            std::cout << token << "\n";
+        }
+
+    }
+    catch (std::runtime_error& e) {
+        std::cout << "Runtime Error: " << e.what() << "\n";
+        return(1);
+    }
+    catch (...) {
+        std::cout << "Error: Unknown exception caught!\n";
+        return(1);
+    }
     return EXIT_SUCCESS;
-#endif
 }

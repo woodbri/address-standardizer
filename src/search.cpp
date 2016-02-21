@@ -16,7 +16,7 @@
 #include "search.h"
 
 
-SearchPaths Search::search( const std::string &grammarNode, std::vector<Token> &phrase ) const {
+SearchPaths Search::search( const std::string &grammarNode, const std::vector<Token> &phrase ) const {
     // tracing
 #ifdef TRACING_SEARCH
     std::cout << "Calling Search()\nPhrase:";
@@ -51,7 +51,7 @@ SearchPaths Search::search( const std::string &grammarNode, std::vector<Token> &
 }
 
 
-SearchPaths Search::search( std::vector<Token> &phrase ) const {
+SearchPaths Search::search( const std::vector<Token> &phrase ) const {
     return search( std::string("ADDRESS"), phrase );
 }
 
@@ -73,6 +73,8 @@ bool Search::reclassTokens( std::vector<Token> &tokens, const SearchPath &result
         const auto out = r.out();
         for ( long unsigned int i=0; i<in.size(); ++i ) {
             if ( it->isInClass( in[i] ) ) {
+                it->inclass( std::set<InClass::Type>() ); // clear it
+                it->inclass( in[i] ); // set it to only the type we matched
                 it->outclass( out[i] );
                 ++it;
             }
@@ -87,14 +89,14 @@ bool Search::reclassTokens( std::vector<Token> &tokens, const SearchPath &result
 }
 
 
-SearchPath Search::searchAndReclassBest( std::vector<Token> &phrase, float &score ) const {
+std::vector<Token> Search::searchAndReclassBest( const std::vector<Token> &phrase, float &score ) const {
     
     SearchPaths results = search( phrase );
     // if we failed to match against the grammar
     // set score to -1.0 and return an empty result
     if ( results.size() == 0 ) {
         score = -1.0;
-        return SearchPath();
+        return std::vector<Token>();
     }
 
     // for each result compute the average score of the rules in the result
@@ -115,22 +117,23 @@ SearchPath Search::searchAndReclassBest( std::vector<Token> &phrase, float &scor
     }
 
     score = bestScore;
+    std::vector<Token> reclassed( phrase );
 
-    if ( not reclassTokens( phrase, results[best] ) )
+    if ( not reclassTokens( reclassed, results[best] ) )
         score = -2.0;
 
-    return results[best];
+    return reclassed;
 }
 
 
-SearchPath Search::searchAndReclassBest( std::vector<std::vector<Token> > &phrases, float &score ) const {
+std::vector<Token> Search::searchAndReclassBest( const std::vector<std::vector<Token> > &phrases, float &score ) const {
     
-    SearchPath best;
+    std::vector<Token> best;
     float bestScore = -1.;
 
-    float thisScore = -1.;
     for ( auto &phrase : phrases ) {
-        SearchPath result = searchAndReclassBest( phrase, thisScore );
+        float thisScore = -1.;
+        auto result = searchAndReclassBest( phrase, thisScore );
         if ( thisScore > bestScore ) {
             bestScore = thisScore;
             best = result;

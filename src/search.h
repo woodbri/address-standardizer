@@ -40,15 +40,15 @@ public:
 
     Search( const Grammar &G ) : Grammar( G ) {};
 
-    SearchPaths search( std::vector<Token> &phrase ) const;
+    SearchPaths search( const std::vector<Token> &phrase ) const;
 
-    SearchPaths search( const std::string &grammarNode, std::vector<Token> &phrase ) const;
+    SearchPaths search( const std::string &grammarNode, const std::vector<Token> &phrase ) const;
 
-    bool reclassTokens(std::vector<Token> &tokens, const SearchPath &path ) const;
+    bool reclassTokens( std::vector<Token> &tokens, const SearchPath &path ) const;
 
-    SearchPath searchAndReclassBest( std::vector<Token> &phrase, float &cost ) const;
+    std::vector<Token> searchAndReclassBest( const std::vector<Token> &phrase, float &cost ) const;
 
-    SearchPath searchAndReclassBest( std::vector<std::vector<Token> > &phrases, float &cost ) const;
+    std::vector<Token> searchAndReclassBest( const std::vector<std::vector<Token> > &phrases, float &cost ) const;
 
 private:
 

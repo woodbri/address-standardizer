@@ -80,7 +80,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing1, TestFixture)
 //    tz.addFilter( InClass::SPACE );
 
     // parse a string
-    std::vector<Token> tokens = tz.getTokens("11 Dackon Allee Podunk AL 12345");
+    std::vector<Token> tokens = tz.getTokens("11 Dackon Allee Podunk AL 12345", false);
 
     os.str(""); // clear
     for (const auto &t : tokens)
@@ -102,7 +102,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing1, TestFixture)
 
     // get the tokens with default classifications for a null string
     tokens.clear();
-    tokens = tz.getTokens("");
+    tokens = tz.getTokens("", false);
 
     os.str(""); // clear
     for (const auto &t : tokens)
@@ -112,7 +112,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing1, TestFixture)
 
     // filter out SPACE tokens
     tz.addFilter(InClass::SPACE);
-    tokens = tz.getTokens("11 Dackon Allee Podunk AL 12345");
+    tokens = tz.getTokens("11 Dackon Allee Podunk AL 12345", false);
 
     os.str(""); // clear
     for (const auto &t : tokens)
@@ -129,7 +129,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing1, TestFixture)
 
     // filter out PUNCT tokens  and QUINT
     tz.addFilter(InClass::QUINT);
-    tokens = tz.getTokens("11 Dackon Allee Podunk al 12345");
+    tokens = tz.getTokens("11 Dackon Allee Podunk al 12345", false);
 
     os.str(""); // clear
     for (const auto &t : tokens)
@@ -153,7 +153,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing1, TestFixture)
 
     // verify that we can remove QUINT filter
     tz.removeFilter(InClass::QUINT);
-    tokens = tz.getTokens("11 Dackon Allee Podunk al 12345");
+    tokens = tz.getTokens("11 Dackon Allee Podunk al 12345", false);
 
     os.str(""); // clear
     for (const auto &t : tokens)
@@ -163,7 +163,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing1, TestFixture)
 
     // verify that removing a non-existent filter doex nothing
     tz.removeFilter(InClass::PROV);
-    tokens = tz.getTokens("11 Dackon Allee Podunk al 12345");
+    tokens = tz.getTokens("11 Dackon Allee Podunk al 12345", false);
 
     os.str(""); // clear
     for (const auto &t : tokens)
@@ -173,7 +173,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing1, TestFixture)
 
     // verify that we can clear the filters
     tz.clearFilter();
-    tokens = tz.getTokens("11 Dackon Allee Podunk al 12345");
+    tokens = tz.getTokens("11 Dackon Allee Podunk al 12345", false);
 
     os.str(""); // clear
     for (const auto &t : tokens)
@@ -183,7 +183,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing1, TestFixture)
 
     // verify that we can install a previously saved filter
     tz.filter(filter);
-    tokens = tz.getTokens("11 Dackon Allee Podunk al 12345");
+    tokens = tz.getTokens("11 Dackon Allee Podunk al 12345", false);
 
     os.str(""); // clear
     for (const auto &t : tokens)
@@ -211,7 +211,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing2, TestFixture)
 //    tz.addFilter( InClass::SPACE );
 
     // get the tokens with default classifications
-    std::vector<Token> tokens = tz.getTokens("11 radcliff rd north chelmsford ma 01863");
+    std::vector<Token> tokens = tz.getTokens("11 radcliff rd north chelmsford ma 01863", false);
 
     os.str(""); // clear
     for (const auto &t : tokens)
@@ -235,7 +235,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing2, TestFixture)
 
     // get the tokens with default classifications for a null string
     tokens.clear();
-    tokens = tz.getTokens("");
+    tokens = tz.getTokens("", false);
 
     os.str(""); // clear
     for (const auto &t : tokens)
@@ -245,7 +245,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing2, TestFixture)
 
     // filter out SPACE tokens
     tz.addFilter(InClass::SPACE);
-    tokens = tz.getTokens("11 radcliff rd north chelmsford ma 01863");
+    tokens = tz.getTokens("11 radcliff rd north chelmsford ma 01863", false);
 
     os.str(""); // clear
     for (const auto &t : tokens)
@@ -263,7 +263,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing2, TestFixture)
 
     // filter out SPACE tokens  and QUINT
     tz.addFilter(InClass::QUINT);
-    tokens = tz.getTokens("11 radcliff rd north chelmsford ma 01863");
+    tokens = tz.getTokens("11 radcliff rd north chelmsford ma 01863", false);
 
     os.str(""); // clear
     for (const auto &t : tokens)
@@ -288,7 +288,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing2, TestFixture)
 
     // verify that we can remove QUINT filter
     tz.removeFilter(InClass::QUINT);
-    tokens = tz.getTokens("11 radcliff rd north chelmsford ma 01863");
+    tokens = tz.getTokens("11 radcliff rd north chelmsford ma 01863", false);
 
     os.str(""); // clear
     for (const auto &t : tokens)
@@ -298,7 +298,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing2, TestFixture)
 
     // verify that removing a non-existent filter doex nothing
     tz.removeFilter(InClass::PROV);
-    tokens = tz.getTokens("11 radcliff rd north chelmsford ma 01863");
+    tokens = tz.getTokens("11 radcliff rd north chelmsford ma 01863", false);
 
     os.str(""); // clear
     for (const auto &t : tokens)
@@ -308,7 +308,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing2, TestFixture)
 
     // verify that we can clear the filters
     tz.clearFilter();
-    tokens = tz.getTokens("11 radcliff rd north chelmsford ma 01863");
+    tokens = tz.getTokens("11 radcliff rd north chelmsford ma 01863", false);
 
     os.str(""); // clear
     for (const auto &t : tokens)
@@ -318,7 +318,7 @@ BOOST_FIXTURE_TEST_CASE(Tokenizer_Testing2, TestFixture)
 
     // verify that we can install a previously saved filter
     tz.filter(filter);
-    tokens = tz.getTokens("11 radcliff rd north chelmsford ma 01863");
+    tokens = tz.getTokens("11 radcliff rd north chelmsford ma 01863", false);
 
     os.str(""); // clear
     for (const auto &t : tokens)
