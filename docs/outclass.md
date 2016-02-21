@@ -4,11 +4,11 @@ The goal of the address standardizer is to parse an input address string into to
 
 For example lets look at the following address ``123 MAIN ST ANYTOWN MA 12345 USA``:
 
-|      |   |    |  |       |  |     |   |
-|------|---|----|--|-------|--|-----|---|
-|Tokens|123|MAIN|ST|ANYTOWN|MA|12345|USA|
-|InClass|NUMBER|WORD|TYPE,WORD|WORD|PROV|NUMBER,QUINT|NATION|
-|OutClass|HOUSE|STREET|SUFTYP|CITY|PROV|POSTAL|NATION|
+| Step | 1 | 2  | 3 | 4     | 5 | 6   | 7 |
+| ---- | - | -- | - | ----- | - | --- | - |
+| Tokens | 123 | MAIN | ST | ANYTOWN | MA | 12345 | USA |
+| InClass | NUMBER | WORD | TYPE,WORD | WORD | PROV | NUMBER,QUINT | NATION |
+| OutClass | HOUSE | STREET | SUFTYP | CITY | PROV | POSTAL | NATION |
 
 Here we parse the address into Tokens in line 1, and they get classified by the type of Token it is as seen in the second line, and after we match the tokens against a grammar and reclassify them we get the OutClass classifications on line three.
 
