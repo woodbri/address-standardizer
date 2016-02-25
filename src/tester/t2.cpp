@@ -21,6 +21,8 @@
 #include "search.h"
 
 #include <iostream>
+#include <fstream>
+#include <streambuf>
 #include <string>
 #include <vector>
 
@@ -35,7 +37,7 @@ int main(int ac, char* av[]) {
     std::string gfile = av[2];
     std::string str = av[3];
 
-//    std::cout << "Lexicon: '" << file << "'\n";
+    //std::cout << "Lexicon: '" << file << "'\n";
     std::cout << "Address: '" << str << "'\n";
 
     // Normalize and UPPERCASE the input string
@@ -46,7 +48,24 @@ int main(int ac, char* av[]) {
     std::cout << "Normalized: '" << nstr << "'\n";
     std::cout << "UpperCase: '" << Ustr << "'\n";
 
-    Lexicon lex("test-lex", lfile);
+    //Lexicon lex("test-lex", lfile);
+
+    // simulate the postgres call, by reading the whole file into a string
+    std::istringstream iss;
+    std::string s;
+    std::ifstream t(lfile);
+    t.seekg(0, std::ios::end);
+    s.clear();
+    s.reserve(t.tellg());
+    t.seekg(0, std::ios::beg);
+    s.assign((std::istreambuf_iterator<char>(t)),
+              std::istreambuf_iterator<char>());
+
+    //std::cout << "Lexicon size: " << s.size() << "\n";
+
+    iss.str( s );
+    Lexicon lex( "query-lex", iss );
+
 //    std::cout << lex << "\n";
 //    std::cout << "Lexicon regex: '" << lex.regex() <<"'\n\n";
 //    std::cout << "Lexicon attachedRegex: '" << lex.attachedRegex() <<"'\n\n";
@@ -66,7 +85,22 @@ int main(int ac, char* av[]) {
     std::cout << "-------------------------------\n";
 
     try {
-        Grammar G( gfile );
+        //Grammar G( gfile );
+
+        // simulate the postgres call, by reading the whole file into a string
+        std::ifstream t(gfile);
+        t.seekg(0, std::ios::end);
+        s.reserve(t.tellg());
+        t.seekg(0, std::ios::beg);
+        s.assign((std::istreambuf_iterator<char>(t)),
+                  std::istreambuf_iterator<char>());
+
+        //std::cout << "Grammar size: " << s.size() << "\n";
+        //std::cout << s <<"\n";
+
+        iss.clear();
+        iss.str( s );
+        Grammar G( iss );
 
         switch (G.status() ) {
             case Grammar::CHECK_FATAL:

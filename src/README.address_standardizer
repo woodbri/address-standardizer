@@ -1,0 +1,23 @@
+# Address Standardizer 2.0
+
+This is total rewrite and redesign of the address standardizer functionality.
+The source repository is located at:
+
+    https://github.com/woodbri/address-standardizer
+
+The build process for this:
+
+    git clone https://github.com/woodbri/address-standardizer.git
+    cd address-standardizer/src
+    make
+    make PGVER=9.3 -f Makefile.pg
+    sudo make PGVER=9.3 -f Makefile.pg install
+
+You can change PGVER= 9.2, 9.3, 9.4, and maybe 9.5
+
+There is a file src/tester/test-1.sql that you can load into a new database
+and it will load a test lexicon and grammar and standardize an address.
+
+More work needs to be done to create lexicons and grammars for specific data
+sets but the basic code is here. Please report issues and I'll try to help.
+

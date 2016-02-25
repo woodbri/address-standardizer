@@ -14,6 +14,7 @@
 #ifndef LEXICON_H
 #define LEXICON_H
 
+#include <stdexcept>
 #include <map>
 #include <vector>
 #include <string>
@@ -33,6 +34,9 @@ public:
     Lexicon();
     Lexicon(std::string name);
     Lexicon(std::string name, std::string file);
+    Lexicon(std::string name, std::istream &is);
+
+    void initialize(std::istream &is);
 
     // getters
     std::string name() const { return name_; };

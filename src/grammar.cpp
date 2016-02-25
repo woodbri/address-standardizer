@@ -51,7 +51,7 @@ void Grammar::initialize( std::istream &is )
 
     boost::smatch what;
     int line_cnt = 0;
-    while (not is.eof()) {
+    while ( is ) {
         ++line_cnt;
         std::getline( is, line );
         //std::cout << "\t" << line_cnt << ": " << line << "\n";

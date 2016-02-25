@@ -32,49 +32,45 @@ Lexicon::Lexicon() {
 }
 
 
-Lexicon::Lexicon(std::string name) {
-    name_ = name;
-    lang_ = InClass::UNKNOWN;
-    locale_ = "";
-    lex_.clear();
+Lexicon::Lexicon(std::string name) :
+    name_(name), lang_(InClass::UNKNOWN), locale_("")
+{}
+
+
+Lexicon::Lexicon(std::string name, std::istream &is ) :
+    name_(name), lang_(InClass::UNKNOWN), locale_("")
+{
+    initialize( is );
 }
 
 
-Lexicon::Lexicon(std::string name, std::string file) {
-    name_ = name;
-    lang_ = InClass::UNKNOWN;
-    locale_ = "";
-    lex_.clear();
+Lexicon::Lexicon(std::string name, std::string file) :
+    name_(name), lang_(InClass::UNKNOWN), locale_("")
+{
+    std::ifstream ifs;
+    ifs.open( file.c_str(), std::ifstream::in);
+    initialize( ifs );
+    ifs.close();
+}
 
+
+void Lexicon::initialize( std::istream &is ) {
     std::string line;
-    std::ifstream is (file.c_str(), std::ifstream::in|std::ifstream::binary);
-    if (not is.is_open()) {
-        std::cerr << "ERROR: Failed to open file: '" << file << "'\n";
-        //throw 1000;
-        return;
-    }
 
-    // read the header
-    std::getline( is, line );
+    // read the header and skip any
+    do {
+        std::getline( is, line );
+    }
+    while (is and line.substr(0,8) != "LEXICON:");
 
     // echo out the read line indented for debugging
     //std::cout << "\t" << line << "\n";
-
-    // replace multiple space chars with a single space
-    // but don't touch tab chars
-    boost::regex re("( +)");
-    const char* replace = " ";
-    std::string tmp = boost::regex_replace(line, re, replace);
-    line = tmp;
 
     std::stringstream buffer(line);
     std::string term;
     std::getline(buffer, term, '\t');
     if (term != "LEXICON:" and term != "Lexicon:") {
-        is.close();
-        std::cout << "ERROR: file format error: '" << file << "'\n";
-        //throw 1001;
-        return;
+        throw std::runtime_error("Lexicon-Invalid-Data-Format:" + line);
     }
 
     std::getline(buffer, term, '\t');   // name (ignored)
@@ -87,9 +83,17 @@ Lexicon::Lexicon(std::string name, std::string file) {
     UErrorCode errorCode;
 
     // ret in the lexicon entries
-    while (not is.eof()) {
+    while ( is ) {
         std::getline( is, line );
-            //std::cout << "\t" << line << "\n";
+        //std::cout << "\t" << line << "\n";
+
+        // replace multiple space chars with a single space
+        // but don't touch tab chars
+        boost::regex re("( +)");
+        const char* replace = " ";
+        std::string tmp = boost::regex_replace(line, re, replace);
+        line = tmp;
+
         if (line.length() == 0) continue;
 
         if ( line.compare(0, 9, "LEXENTRY:") == 0 or
@@ -102,10 +106,9 @@ Lexicon::Lexicon(std::string name, std::string file) {
             insert( le );
         }
         else {
-            std::cout << "WARNING: skipping: " << line << "\n";
+            throw std::runtime_error("Lexicon-Invalid-LexEntry");
         }
     }
-    is.close();
 }
 
 // getters
