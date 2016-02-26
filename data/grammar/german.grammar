@@ -1,0 +1,77 @@
+# german.grammar
+# Initial grammar for Germany
+# Author: Stephen Woodbridge <woodbri@imaptools.com>
+
+[ADDRESS]
+@micro @macro
+@placename @micro @macro
+
+[micro]
+@streetname @housenumber
+@streetname @housenumber @unit
+@pobox
+
+[macro]
+@postal @city @region @country
+@postal @city @country
+@postal @city
+
+[placename]
+PLACEN -> BLDNG -> 0.7
+PLACEN WORD -> BLDNG BLDNG -> 0.6
+PLACEN WORD WORD -> BLDNG BLDNG BLDNG -> 0.5
+PLACEN WORD WORD WORD -> BLDNG BLDNG BLDNG BLDNG -> 0.4
+BUILDT -> BLDNG -> 0.7
+BUILDT WORD -> BLDNG BLDNG -> 0.6
+BUILDT WORD WORD -> BLDNG BLDNG BLDNG -> 0.5
+BUILDT WORD WORD WORD -> BLDNG BLDNG BLDNG BLDNG -> 0.4
+
+[postal]
+QUINT -> POSTAL -> 0.7
+NUMBER -> POSTAL -> 0.4
+SINGLE QUINT -> IGNORE POSTAL -> 0.7
+SINGLE NUMBER -> IGNORE POSTAL -> 0.4
+
+[streetname]
+WORD TYPE -> STREET SUFTYP -> 0.7
+WORD WORD TYPE -> STREET STREET SUFTYP -> 0.6
+WORD WORD WORD TYPE -> STREET STREET STREET SUFTYP -> 0.5
+WORD WORD WORD WORD TYPE -> STREET STREET STREET STREET SUFTYP -> 0.4
+WORD -> STREET -> 0.4
+WORD WORD -> STREET STREET -> 0.3
+WORD WORD WORD -> STREET STREET STREET -> 0.2
+WORD WORD WORD WORD -> STREET STREET STREET STREET -> 0.1
+
+[housenumber]
+NUMBER -> HOUSE -> 0.5
+NUMBER SINGLE -> HOUSE HOUSE -> 0.6
+NUMBER DOUBLE -> HOUSE HOUSE -> 0.5
+MIXED -> HOUSE -> 0.4
+FRACT -> HOUSE -> 0.7
+NUMBER SLASH MIXED -> HOUSE HOUSE HOUSE -> 0.7
+FRACT SINGLE -> HOUSE HOUSE -> 0.8
+FRACT DOUBLE -> HOUSE HOUSE -> 0.7
+NUMBER SINGLE SINGLE -> HOUSE HOUSE HOUSE -> 0.7
+
+[unit]
+UNITH UNITT -> UNITH UNITT -> 0.8
+UNITH WORD -> UNITH UNIT -> 0.7
+UNITH NUMBER -> UNITH UNITT -> 0.7
+UNITH MIXED -> UNITH UNITT -> 0.7
+UNITH WORD WORD -> UNITH UNITT UNITT -> 0.4
+
+[pobox]
+BOXH NUMBER -> BOXH BOXT -> 0.7
+
+[city]
+CITY -> CITY -> 0.9
+WORD -> CITY -> 0.5
+WORD WORD -> CITY CITY -> 0.3
+
+[region]
+PROV -> PROV -> 0.9
+
+[country]
+NATION -> NATION -> 0.9
+
+

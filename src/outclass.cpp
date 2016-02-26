@@ -35,6 +35,7 @@ std::string OutClass::asString(const OutClass::Type &t) {
         case BOXT:      str = "BOXT";       break;
         case UNITH:     str = "UNITH";      break;
         case UNITT:     str = "UNITT";      break;
+        case IGNORE:    str = "IGNORE";     break;
         case BADTOKEN:  str = "BADTOKEN";   break;
     };
     return str;
@@ -65,6 +66,7 @@ OutClass::Type OutClass::asType(const std::string &s) {
     m["BOXT"]      = BOXT;
     m["UNITH"]     = UNITH;
     m["UNITT"]     = UNITT;
+    m["IGNORE"]    = IGNORE;
     m["BADTOKEN"]  = BADTOKEN;
 
     it = m.find(s);
@@ -99,6 +101,7 @@ OutClass::Type OutClass::asType(const int i) {
         case 15: t = BOXT;      break;
         case 16: t = UNITH;     break;
         case 17: t = UNITT;     break;
+        case 98: t = IGNORE;    break;
         default: t = BADTOKEN;  break;
     }
     return t;

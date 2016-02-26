@@ -39,6 +39,7 @@ public:
         BOXT    = 15,   ///< The '3B' in 'BOX 3B'
         UNITH   = 16,   ///< The 'APT' in 'APT 3B'
         UNITT   = 17,   ///< The '3B' in 'APT 3B'
+        IGNORE  = 98,   ///< This token is ignored, ie: it is recognized in input but not assigned to any output slot
         BADTOKEN = 99   ///< An bad token type
     } Type;
 

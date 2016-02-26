@@ -118,6 +118,9 @@ STDADDR *std_standardize( char *address_in, char *grammar_in, char *lexicon_in, 
                     case OutClass::UNITT:
                         v_stdaddr[15] += token.stdtext() + " ";
                         break;
+                    case OutClass::IGNORE:
+                        // do nothing with this
+                        break;
                 }
             }
 
