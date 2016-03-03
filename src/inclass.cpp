@@ -63,6 +63,7 @@ std::string InClass::asString(const InClass::Type &t) {
         case EMDASH:    str = "EMDASH"; break;
         case SLASH:     str = "SLASH";  break;
         case ATSIGN:    str = "ATSIGN"; break;
+        case COMMA:     str = "COMMA";  break;
         default:        str = "BADTOKEN"; break;
     };
     return str;
@@ -107,6 +108,7 @@ InClass::Type InClass::asOneType(const std::string &s) {
     m["EMDASH"]    = EMDASH;
     m["SLASH"]     = SLASH;
     m["ATSIGN"]    = ATSIGN;
+    m["COMMA"]     = COMMA;
     m["BADTOKEN"]  = BADTOKEN;
 
     InClass::Type t;
@@ -189,6 +191,7 @@ InClass::Type InClass::asType(const int i) {
         case 33: t = EMDASH;    break;
         case 34: t = SLASH;     break;
         case 35: t = ATSIGN;    break;
+        case 36: t = COMMA;     break;
         default: t = BADTOKEN;  break;
     }
     return t;
