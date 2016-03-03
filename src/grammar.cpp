@@ -56,6 +56,10 @@ void Grammar::initialize( std::istream &is )
         std::getline( is, line );
         //std::cout << "\t" << line_cnt << ": " << line << "\n";
 
+        // remove UTF8 BOM if one exists
+        if ( line_cnt == 1 and line[0] == '\xEF' and line[1] == '\xBB' and line[2] == '\xBF' )
+            line = line.substr(4);
+
         // skip over comments and blank lines
         if ( boost::regex_match(line, re_comment, boost::match_default) ) 
             continue;

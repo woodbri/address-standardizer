@@ -57,11 +57,18 @@ Lexicon::Lexicon(std::string name, std::string file) :
 void Lexicon::initialize( std::istream &is ) {
     std::string line;
 
+    std::getline( is, line );
+    // remove UTF8 BOM if one exists
+    if (line[0] == '\xEF' && line[1] == '\xBB' && line[2] == '\xBF')
+        line = line.substr(4);
+
     // read the header and skip any
-    do {
+    while (is and line.substr(0,8) != "LEXICON:") {
         std::getline( is, line );
     }
-    while (is and line.substr(0,8) != "LEXICON:");
+
+    if ( not is )
+        throw std::runtime_error("Lexicon-Invalid-File-Format");
 
     // echo out the read line indented for debugging
     //std::cout << "\t" << line << "\n";
