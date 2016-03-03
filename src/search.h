@@ -52,10 +52,10 @@ public:
 
 private:
 
-    SearchPaths match( const std::string &name, const SearchPaths &paths ) const;
-    SearchPaths match( const std::string &name, const SearchPath &path ) const;
-    SearchPaths matchNext( const SearchPaths &paths ) const;
-    SearchPaths matchNext( const SearchPath &path ) const;
+    SearchPaths match( const std::string &name, const SearchPaths &paths, const int level ) const;
+    SearchPaths match( const std::string &name, const SearchPath &path, const int level ) const;
+    SearchPaths matchNext( const SearchPaths &paths, const int level ) const;
+    SearchPaths matchNext( const SearchPath &path, const int level ) const;
     SearchPath matchRule( const Rule &r, const SearchPath &path ) const;
 
 

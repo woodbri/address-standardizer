@@ -41,7 +41,7 @@ SearchPaths Search::search( const std::string &grammarNode, const std::vector<To
     // we need to check if we consumed all the tokens
     // and toss out partial matches
     SearchPaths results;
-    SearchPaths matchs = match( grammarNode, patterns );
+    SearchPaths matchs = match( grammarNode, patterns, 0 );
     for ( const auto match : matchs )
         if ( match.remaining.size() == 0 )
             results.push_back( match );
@@ -148,9 +148,9 @@ std::vector<Token> Search::searchAndReclassBest( const std::vector<std::vector<T
 // ---------------------- PRIVATE ----------------------------
 
 
-SearchPaths Search::match( const std::string &name, const SearchPaths &paths ) const {
+SearchPaths Search::match( const std::string &name, const SearchPaths &paths, const int level ) const {
 #ifdef TRACING_SEARCH
-    std::cout << "Search::match1('" << name << "'[";
+    std::cout << level << ": Search::match1('" << name << "'[";
     for (const auto &t_p : paths ) {
         std::cout << "{";
         for (const auto &t_e : t_p.remaining)
@@ -162,25 +162,33 @@ SearchPaths Search::match( const std::string &name, const SearchPaths &paths ) c
 
     SearchPaths results;
     for ( const auto &path : paths ) {
-        SearchPaths pathResults = match( name, path );
+        SearchPaths pathResults = match( name, path, level );
         for ( const auto result : pathResults )
             results.push_back( result );
     }
 
 #ifdef TRACING_SEARCH
-    std::cout << "\tReturning: Search::match1(" << results.size() << ")\n";
+    std::cout << level <<": Returning: Search::match1(" << results.size() << ")\n";
 #endif
     return results;
 }
 
 
-SearchPaths Search::match( const std::string &name, const SearchPath &path ) const {
+SearchPaths Search::match( const std::string &name, const SearchPath &path, const int level ) const {
 #ifdef TRACING_SEARCH
-    std::cout << "Search::match2('" << name << "'[";
+    std::cout << level << ": Search::match2('" << name << "'[";
     for (const auto &t_e : path.remaining)
         std::cout << InClass::asString(t_e) << " ";
     std::cout << "])\n";
 #endif
+
+    // check for recursion limit
+    if ( level > 20 ) {
+#ifdef TRACING_SEARCH
+        std::cout << level << ": Search::match2(0) hit recurssion limit! ###\n";
+#endif
+        return SearchPaths();
+    }
 
     auto meta = metas_.find( name );
     if ( meta != metas_.end() ) {
@@ -192,13 +200,13 @@ SearchPaths Search::match( const std::string &name, const SearchPath &path ) con
                 current.next.push_back( e );
 
             if ( current.next.size() > 0 ) {
-                auto mresults = matchNext( current );
+                auto mresults = matchNext( current, level );
                 for ( const auto &mr : mresults )
                     results.push_back( mr );
             }
         }
 #ifdef TRACING_SEARCH
-        std::cout << "\tReturning: Search::match2(" << results.size() << ")\n";
+        std::cout << level << ": Returning: Search::match2(" << results.size() << ")\n";
 #endif
         return results;
     }
@@ -212,41 +220,41 @@ SearchPaths Search::match( const std::string &name, const SearchPath &path ) con
                 results.push_back( mr );
         }
 #ifdef TRACING_SEARCH
-        std::cout << "\tReturning: Search::match2(" << results.size() << ")\n";
+        std::cout << level << ": Returning: Search::match2(" << results.size() << ")\n";
 #endif
         return results;
     }
 
 #ifdef TRACING_SEARCH
-    std::cout << "\tReturning: Search::match2(0) [RULE NOT FOUND]\n";
+    std::cout << level << ": Returning: Search::match2(0) [RULE NOT FOUND]\n";
 #endif
     return SearchPaths();
 }
 
 
-SearchPaths Search::matchNext( const SearchPaths &paths ) const {
+SearchPaths Search::matchNext( const SearchPaths &paths, const int level ) const {
 #ifdef TRACING_SEARCH
-    std::cout << "Search::matchNext1(paths)\n";
+    std::cout << level << ": Search::matchNext1(paths)\n";
 #endif
     SearchPaths results;
     for ( const auto &path : paths ) {
         if ( path.next.size() > 0 ) {
-            SearchPaths matches = matchNext( path );
+            SearchPaths matches = matchNext( path, level );
             for ( const auto &match : matches )
                 results.push_back( match );
         }
     }
 
 #ifdef TRACING_SEARCH
-    std::cout << "\tReturning: Search::matchNext1(" << results.size() << ")\n";
+    std::cout << level << ": Returning: Search::matchNext1(" << results.size() << ")\n";
 #endif
     return results;
 }
 
 
-SearchPaths Search::matchNext( const SearchPath &path ) const {
+SearchPaths Search::matchNext( const SearchPath &path, const int level ) const {
 #ifdef TRACING_SEARCH
-    std::cout << "Search::matchNext2(path)\n";
+    std::cout << level << ": Search::matchNext2(path)\n";
     std::cout << "\tNext:";
     for (const auto &t_e : path.next )
         std::cout << " " << t_e;
@@ -257,25 +265,29 @@ SearchPaths Search::matchNext( const SearchPath &path ) const {
 #endif
 
     // we should never call matchNext if there are no next items!
-    if ( path.next.size() == 0 )
+    if ( path.next.size() == 0 ) {
+#ifdef TRACING_SEARCH
+        std::cout << level << ": Returning: Search::matchNext2(0) NO INPUT\n";
+#endif
         return SearchPaths();
+    }
 
     SearchPaths results;
     SearchPath current( path );
     auto word = current.next.front();
     current.next.erase( current.next.begin() );
 
-    SearchPaths mr = match( word, current );
+    SearchPaths mr = match( word, current, level+1 );
     if ( mr.size() == 0 ) {
 #ifdef TRACING_SEARCH
-        std::cout << "\tReturning: Search::matchNext2(0) for '" << word << "'\n";
+        std::cout << level << ": Returning: Search::matchNext2(0) for '" << word << "'\n";
 #endif
         return SearchPaths();
     }
 
     for ( const auto &result : mr ) {
         if ( result.next.size() > 0 ) {
-            SearchPaths nextResults = matchNext( mr );
+            SearchPaths nextResults = matchNext( mr, level );
             for ( const auto &result : nextResults )
                 results.push_back( result );
         }
@@ -285,7 +297,7 @@ SearchPaths Search::matchNext( const SearchPath &path ) const {
     }
 
 #ifdef TRACING_SEARCH
-    std::cout << "\tReturning: Search::matchNext2(" << results.size() << ")\n";
+    std::cout << level << ": Returning: Search::matchNext2(" << results.size() << ")\n";
 #endif
     return results;
 }

@@ -12,9 +12,13 @@
 @pobox
 
 [macro]
-@postal @city @region @country
-@postal @city @country
-@postal @city
+@postal @citywords @region @country
+@postal @citywords @country
+@postal @citywords
+
+[citywords]
+@citywords
+@city
 
 [placename]
 PLACEN -> BLDNG -> 0.7

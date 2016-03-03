@@ -65,6 +65,7 @@ protected:
     // temp storage for analysis and checking of grammar
     std::string issues_;
     std::map<std::string, int> references_;
+    std::set<std::string> checked_;
     Status status_;
 
 };

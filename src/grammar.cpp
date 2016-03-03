@@ -156,6 +156,7 @@ void Grammar::initialize( std::istream &is )
 void Grammar::check() {
     issues_.clear();
     references_.clear();
+    checked_.clear();
     status_ = CHECK_OK;
 
     check( "", "ADDRESS" );
@@ -179,6 +180,9 @@ void Grammar::check( std::string section, std::string key ) {
     auto rule = rules_.find( key );
     auto meta = metas_.find( key );
 
+    // mark this key as checked
+    checked_.insert( key );
+
     if ( rule != rules_.end() ) {
         for ( const auto &r : ((*rule).second).rules() ) {
             if ( not r.isValid() ) {
@@ -191,9 +195,8 @@ void Grammar::check( std::string section, std::string key ) {
         for ( const auto &r : ((*meta).second).rules() ) {
             std::vector<std::string> words = r.refs();
             for ( const auto &word : words ) {
-                // TODO need to check for indirect recursion of rules
-                // don't do direct recursion
-                if ( word != key )
+                // avoid recursive checking of already checked items
+                if ( checked_.find( word ) != checked_.end() )
                     check( key, word );
                 auto ref = references_.find( word );
                 if (ref == references_.end())
