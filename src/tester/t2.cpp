@@ -75,6 +75,7 @@ int main(int ac, char* av[]) {
     tokenizer.addFilter( InClass::SPACE );
     tokenizer.addFilter( InClass::DASH );
     tokenizer.addFilter( InClass::EMDASH );
+    tokenizer.addFilter( InClass::STOPWORD );
 
     std::vector<std::vector<Token> > phrases = tokenizer.getTokens( Ustr );
 

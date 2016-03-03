@@ -1,0 +1,107 @@
+# australia.grammar
+# Initial grammar for Australia
+# Author: Stephen Woodbridge <woodbri@imaptools.com>
+
+[ADDRESS]
+@micro @macro
+@placename @micro @macro
+
+[micro]
+@housenumber @streetname
+@unit @housenumber @streetname
+@pobox
+
+[streetname]
+@prefixtype @basename @suffixtype
+@prefixtype @basename
+@basename @suffixtype
+@basename
+
+[placename]
+PLACEN -> BLDNG -> 0.7
+PLACEN WORD -> BLDNG BLDNG -> 0.6
+PLACEN WORD WORD -> BLDNG BLDNG BLDNG -> 0.5
+PLACEN WORD WORD WORD -> BLDNG BLDNG BLDNG BLDNG -> 0.4
+BUILDT -> BLDNG -> 0.7
+BUILDT WORD -> BLDNG BLDNG -> 0.6
+BUILDT WORD WORD -> BLDNG BLDNG BLDNG -> 0.5
+BUILDT WORD WORD WORD -> BLDNG BLDNG BLDNG BLDNG -> 0.4
+
+[unit]
+UNITH -> UNITH -> 0.5
+UNITH NUMBER -> UNITH UNITT -> 0.4
+UNITH WORD -> UNITH UNITT -> 0.4
+UNITH WORD WORD -> UNITH UNITT UNITT -> 0.4
+
+[housenumber]
+NUMBER -> HOUSE -> 0.3
+NUMBER SLASH NUMBER -> IGNORE IGNORE HOUSE -> 0.3
+NUMBER DASH NUMBER -> HOUSE IGNORE IGNORE -> 0.3
+
+
+[basename]
+WORD -> STREET -> 0.4
+WORD WORD -> STREET STREET -> 0.3
+WORD WORD WORD -> STREET STREET STREET -> 0.2
+WORD WORD WORD WORD -> STREET STREET STREET STREET -> 0.1
+
+[prefixtype]
+@prefix @ptype
+@prefix
+@ptype
+
+[suffixtype]
+@stype @suffix
+@stype
+@suffix
+
+[prefix]
+QUALIF DIRECT -> QUALIF PREDIR -> 0.8
+DIRECT QUALIF -> PREDIR QUALIF -> 0.8
+QUALIF -> QUALIF -> 0.8
+DIRECT -> PREDIR -> 0.7
+
+[suffix]
+DIRECT QUALIF -> SUFDIR QUALIF -> 0.8
+QUALIF DIRECT -> QUALIF SUFDIR -> 0.8
+DIRECT -> SUFDIR -> 0.7
+QUALIF -> QUALIF -> 0.8
+
+[ptype]
+TYPE -> PRETYP -> 0.7
+
+[stype]
+TYPE -> SUFTYP -> 0.7
+
+[pobox]
+NUMBER SINGLE TYPE -> BOXT BOXH BOXH -> 0.2
+BOXH NUMBER -> BOXH BOXT -> 0.8
+
+[macro]
+@city @prov @postal @nation
+@city @prov @nation
+@city @prov @postal
+@city @prov
+
+[city]
+DIRECT CITY -> CITY CITY -> 0.6
+CITY -> CITY -> 0.8
+DIRECT WORD WORD WORD WORD -> CITY CITY CITY CITY CITY -> 0.3
+DIRECT WORD WORD WORD -> CITY CITY CITY CITY -> 0.4
+DIRECT WORD WORD -> CITY CITY CITY -> 0.5
+DIRECT WORD -> CITY CITY -> 0.5
+WORD WORD WORD WORD -> CITY CITY CITY CITY -> 0.3
+WORD WORD WORD -> CITY CITY CITY -> 0.2
+WORD WORD -> CITY CITY -> 0.2
+WORD -> CITY -> 0.2
+
+[postal]
+QUAD -> POSTAL -> 0.7
+NUMBER -> POSTAL -> 0.6
+
+[prov]
+PROV -> PROV -> 0.8
+
+[nation]
+NATION -> NATION -> 0.8
+

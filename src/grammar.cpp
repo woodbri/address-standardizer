@@ -187,7 +187,10 @@ void Grammar::check( std::string section, std::string key ) {
         for ( const auto &r : ((*meta).second).rules() ) {
             std::vector<std::string> words = r.refs();
             for ( const auto &word : words ) {
-                check( key, word );
+                // TODO need to check for indirect recursion of rules
+                // don't do direct recursion
+                if ( word != key )
+                    check( key, word );
                 auto ref = references_.find( word );
                 if (ref == references_.end())
                     references_[word] = 1;

@@ -1,5 +1,5 @@
-# german.grammar
-# Initial grammar for Germany
+# andorra.grammar
+# Initial grammar for Andorra
 # Author: Stephen Woodbridge <woodbri@imaptools.com>
 
 [ADDRESS]
@@ -7,14 +7,16 @@
 @placename @micro @macro
 
 [micro]
-@streetname @housenumber
-@streetname @housenumber @unit
-@pobox
+@housenumber @streetname
+@housenumber @streetname @unit
 
 [macro]
 @postal @city @region @country
 @postal @city @country
 @postal @city
+@city @region @country
+@city @country
+@city
 
 [placename]
 PLACEN -> BLDNG -> 0.7
@@ -26,17 +28,17 @@ BUILDT WORD -> BLDNG BLDNG -> 0.6
 BUILDT WORD WORD -> BLDNG BLDNG BLDNG -> 0.5
 BUILDT WORD WORD WORD -> BLDNG BLDNG BLDNG BLDNG -> 0.4
 
+# Postal format: ADnnn 
 [postal]
-QUINT -> POSTAL -> 0.7
+MIXED -> POSTAL -> 0.7
 NUMBER -> POSTAL -> 0.4
-SINGLE QUINT -> IGNORE POSTAL -> 0.7
-SINGLE NUMBER -> IGNORE POSTAL -> 0.4
+DOUBLE NUMBER -> IGNORE POSTAL -> 0.4
 
 [streetname]
-WORD TYPE -> STREET SUFTYP -> 0.7
-WORD WORD TYPE -> STREET STREET SUFTYP -> 0.6
-WORD WORD WORD TYPE -> STREET STREET STREET SUFTYP -> 0.5
-WORD WORD WORD WORD TYPE -> STREET STREET STREET STREET SUFTYP -> 0.4
+TYPE WORD -> PRETYP STREET -> 0.7
+TYPE WORD WORD -> PRETYP STREET STREET -> 0.6
+TYPE WORD WORD WORD -> PRETYP STREET STREET STREET -> 0.5
+TYPE WORD WORD WORD WORD -> PRETYP STREET STREET STREET STREET -> 0.4
 WORD -> STREET -> 0.4
 WORD WORD -> STREET STREET -> 0.3
 WORD WORD WORD -> STREET STREET STREET -> 0.2
@@ -44,14 +46,8 @@ WORD WORD WORD WORD -> STREET STREET STREET STREET -> 0.1
 
 [housenumber]
 NUMBER -> HOUSE -> 0.5
-NUMBER SINGLE -> HOUSE HOUSE -> 0.6
-NUMBER DOUBLE -> HOUSE HOUSE -> 0.5
-MIXED -> HOUSE -> 0.4
-FRACT -> HOUSE -> 0.7
-NUMBER SLASH MIXED -> HOUSE HOUSE HOUSE -> 0.7
-FRACT SINGLE -> HOUSE HOUSE -> 0.8
-FRACT DOUBLE -> HOUSE HOUSE -> 0.7
-NUMBER SINGLE SINGLE -> HOUSE HOUSE HOUSE -> 0.7
+NUMBER NUMBER -> HOUSE HOUSE -> 0.5
+NUMBER DASH NUMBER -> HOUSE IGNORE HOUSE -> 0.5
 
 [unit]
 UNITH UNITT -> UNITH UNITT -> 0.8
@@ -67,13 +63,12 @@ BOXH NUMBER -> BOXH BOXT -> 0.7
 CITY -> CITY -> 0.9
 WORD -> CITY -> 0.5
 WORD WORD -> CITY CITY -> 0.3
-WORD WORD WORD-> CITY CITY CITY -> 0.3
-WORD WORD WORD WORD -> CITY CITY CITY CITY -> 0.3
 
 [region]
 PROV -> PROV -> 0.9
 
 [country]
 NATION -> NATION -> 0.9
+
 
 
