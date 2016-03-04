@@ -196,7 +196,7 @@ void Grammar::check( std::string section, std::string key ) {
             std::vector<std::string> words = r.refs();
             for ( const auto &word : words ) {
                 // avoid recursive checking of already checked items
-                if ( checked_.find( word ) != checked_.end() )
+                if ( checked_.find( word ) == checked_.end() )
                     check( key, word );
                 auto ref = references_.find( word );
                 if (ref == references_.end())

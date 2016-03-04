@@ -26,10 +26,10 @@ void Tokenizer::removeFilter(InClass::Type filter) {
 std::vector<std::vector<Token> > Tokenizer::getTokens(std::string str) {
     std::vector<std::vector<Token> > phrases;
 
-    std::vector<Token> phrase1 = getTokens( str, false );
+    std::vector<Token> phrase1 = applyFilter( getTokens( str, false ) );
     phrases.push_back( phrase1 );
 
-    std::vector<Token> phrase2 = getTokens( str, true );
+    std::vector<Token> phrase2 = applyFilter( recombine( getTokens( str, true ) ) );
     if ( phrase2.size() > 0 )
         phrases.push_back( phrase2 );
 
@@ -109,16 +109,14 @@ std::vector<Token> Tokenizer::getTokens( std::string str, bool splitTokens ) {
             // token might classify as multiple types
             // or none, in which case make it a word
             lex_.classify(tok, InClass::WORD);
-            if (not tok.isInClass(filter_))
-                outtokens.push_back(tok);
+            outtokens.push_back(tok);
         }
 
         // create a token for the punctuation
         if (what[2].first < what[2].second) {
             Token punct( std::string(what[2].first, what[2].second) );
             lex_.classify(punct, InClass::PUNCT);
-            if (not punct.isInClass(filter_))
-                outtokens.push_back(punct);
+            outtokens.push_back(punct);
         }
 
         // update search position
@@ -131,3 +129,57 @@ std::vector<Token> Tokenizer::getTokens( std::string str, bool splitTokens ) {
     return outtokens;
 }
 
+
+std::vector<Token> Tokenizer::recombine( const std::vector<Token> &in ) {
+    
+    std::vector<Token> out;
+
+    // if there is nothing to do then return
+    if ( in.size() == 0 )
+        return out;
+
+    // push the first token to the output stream
+    out.push_back( in[0] );
+    unsigned long int i=1;
+    for ( ; i<in.size()-1; ++i ) {
+        // if this token is an EMDASH see if we need to rejoin
+        // the tokens to the right and left of it
+        if ( in[i].isInClass( InClass::EMDASH ) ) {
+            std::string text = in[i-1].text() + in[i+1].text();
+
+            // see if the recombined token is in the lexicon
+            auto le = lex_.find( text );
+            if ( le.size() == 0 ) {
+                // not in the lexicon so keep them as is
+                out.push_back( in[i] );
+                continue;
+            }
+            else {
+                // yes recombined token is in the lexicon
+                // so undo the split and toss the emdash
+                out[i-1].text( text );
+                lex_.classify( out[i-1], InClass::WORD );
+                // skip over the emdash AND the next token
+                i += 2;
+                continue;
+            }
+        }
+        out.push_back( in[i] );
+    }
+    // and push the last if we need to
+    if ( i < in.size() )
+        out.push_back( in[in.size()-1] );
+
+    return out;
+}
+
+
+std::vector<Token> Tokenizer::applyFilter( const std::vector<Token> &in ) {
+    std::vector<Token> out;
+
+    for (const auto &t : in )
+        if (not t.isInClass(filter_))
+            out.push_back( t );
+
+    return out;
+}
