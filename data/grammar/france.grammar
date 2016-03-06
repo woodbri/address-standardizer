@@ -1,0 +1,72 @@
+# france.grammar
+# Initial grammar for France
+# Author: Stephen Woodbridge <woodbri@imaptools.com>
+
+[ADDRESS]
+@micro @macro
+@placename @micro @macro
+@placename @pobox @micro @macro
+@pobox @micro @macro
+
+[micro]
+@housenumber @streetname
+@housenumber @streetname @unit
+@pobox
+
+[macro]
+@postal @citywords @country
+@postal @citywords
+
+[citywords]
+@city @citywords
+@city
+
+[placename]
+PLACEN -> BLDNG -> 0.7
+PLACEN WORD -> BLDNG BLDNG -> 0.6
+PLACEN WORD WORD -> BLDNG BLDNG BLDNG -> 0.5
+PLACEN WORD WORD WORD -> BLDNG BLDNG BLDNG BLDNG -> 0.4
+
+[postal]
+QUINT -> POSTAL -> 0.7
+NUMBER -> POSTAL -> 0.4
+NATION QUINT -> IGNORE POSTAL -> 0.7
+NATION NUMBER -> IGNORE POSTAL -> 0.4
+NATION DASH QUINT -> IGNORE IGNORE POSTAL -> 0.7
+NATION DASH NUMBER -> IGNORE IGNORE POSTAL -> 0.4
+
+[streetname]
+TYPE WORD -> PRETYP STREET -> 0.7
+TYPE WORD WORD -> PRETYP STREET STREET -> 0.6
+TYPE WORD WORD WORD -> PRETYP STREET STREET STREET -> 0.5
+TYPE WORD WORD WORD WORD -> PRETYP STREET STREET STREET STREET -> 0.4
+WORD -> STREET -> 0.4
+WORD WORD -> STREET STREET -> 0.3
+WORD WORD WORD -> STREET STREET STREET -> 0.2
+WORD WORD WORD WORD -> STREET STREET STREET STREET -> 0.1
+
+[housenumber]
+NUMBER -> HOUSE -> 0.5
+NUMBER SLASH NUMBER -> HOUSE IGNORE UNITT -> 0.7
+NUMBER DASH NUMBER -> HOUSE IGNORE UNITT -> 0.7
+
+[unit]
+UNITH UNITT -> UNITH UNITT -> 0.8
+UNITH WORD -> UNITH UNIT -> 0.7
+UNITH NUMBER -> UNITH UNITT -> 0.7
+UNITH MIXED -> UNITH UNITT -> 0.7
+UNITH WORD WORD -> UNITH UNITT UNITT -> 0.4
+
+[pobox]
+BOXH NUMBER -> BOXH BOXT -> 0.7
+
+[city]
+CITY -> CITY -> 0.9
+WORD -> CITY -> 0.5
+CITY BOXH NUMBER -> CITY EXTRA EXTRA -> 0.9
+WORD BOXH NUMBER -> CITY EXTRA EXTRA -> 0.5
+
+[country]
+NATION -> NATION -> 0.9
+
+
