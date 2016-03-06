@@ -155,7 +155,7 @@ void Lexicon::standardize( Token& token ) {
     std::string key = token.text();
     std::vector<LexEntry> entries = find( key );
 
-    // if the token has be reclassified
+    // if the token has been reclassified
     // then only that InClass will be set and .begin() will be it
     for ( const auto &entry : entries ) {
         if ( entry.isInClass( *(token.inclass().begin()) ) ) {
@@ -186,7 +186,12 @@ void Lexicon::classify( Token& token, InClass::Type typ ) {
             token.inclass( e );
     }
 
-    if ( not token.isInClassEmpty() ) return;
+    if ( not token.isInClassEmpty() ) {
+        token.inLex(true);
+        return;
+    }
+
+    token.inLex(false);
 
     boost::regex num_exp("^\\d+$");
     boost::regex word_exp("^\\w+$");

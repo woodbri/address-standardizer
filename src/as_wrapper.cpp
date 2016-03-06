@@ -50,7 +50,8 @@ STDADDR *std_standardize( char *address_in, char *grammar_in, char *lexicon_in, 
         Tokenizer tokenizer( lexicon );
         tokenizer.filter( InClass::asType( filter_in ) );
 
-        std::vector<std::vector<Token> > phrases = tokenizer.getTokens( Ustr );
+        std::vector<std::vector<Token> > phrases;
+        phrases.push_back( tokenizer.getTokens( Ustr ) );
 
         Search search( grammar );
 

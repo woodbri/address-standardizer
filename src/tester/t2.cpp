@@ -28,14 +28,18 @@
 
 int main(int ac, char* av[]) {
 
-    if (ac < 4) {
-        std::cerr << "Usage: t2 lex.txt grammar.txt 'address to parse'\n";
+    if (ac < 4 or ac > 5) {
+        std::cerr << "Usage: t2 lex.txt grammar.txt 'address to parse' ['filter']\n";
         return EXIT_FAILURE;
     }
 
     std::string lfile = av[1];
     std::string gfile = av[2];
     std::string str = av[3];
+    std::string filterstr("PUNCT,SPACE,EMDASH,STOPWORD");
+    if (ac == 5)
+        filterstr = av[4];
+
 
     //std::cout << "Lexicon: '" << file << "'\n";
     std::cout << "Address: '" << str << "'\n";
@@ -71,13 +75,10 @@ int main(int ac, char* av[]) {
 //    std::cout << "Lexicon attachedRegex: '" << lex.attachedRegex() <<"'\n\n";
 
     Tokenizer tokenizer( lex );
-    tokenizer.addFilter( InClass::PUNCT );
-    tokenizer.addFilter( InClass::SPACE );
-    tokenizer.addFilter( InClass::DASH );
-    tokenizer.addFilter( InClass::EMDASH );
-    tokenizer.addFilter( InClass::STOPWORD );
+    tokenizer.filter( InClass::asType( filterstr ) );
 
-    std::vector<std::vector<Token> > phrases = tokenizer.getTokens( Ustr );
+    std::vector<std::vector<Token> > phrases;
+    phrases.push_back( tokenizer.getTokens( Ustr ) );
 
     for ( const auto phrase : phrases ) {
         std::cout << "-------------------------------\n";

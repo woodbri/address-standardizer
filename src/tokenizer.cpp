@@ -13,6 +13,8 @@
 
 #include <vector>
 #include <string>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 #include "tokenizer.h"
 #include "utils.h"
@@ -23,21 +25,141 @@ void Tokenizer::removeFilter(InClass::Type filter) {
         filter_.erase(it);
 }
 
-std::vector<std::vector<Token> > Tokenizer::getTokens(std::string str) {
-    std::vector<std::vector<Token> > phrases;
 
-    std::vector<Token> phrase1 = applyFilter( getTokens( str, false ) );
-    phrases.push_back( phrase1 );
+// splitTokens - uses the prefixAtt and suffixAtt regexes to split
+// the string. we can end up with the following cases
+// str: abcdefg
+// case 1: abc ----     : prefix match
+// case 2: ---- efg     : sufix match
+// case 3: abc - efg    : prefix and suffix with middle left over
+// case 4: abcd --- , --- defg  : prefix and suffix but overlapping
+// case 5: abc defg     : prefix and suffix touching
+// For case 3, we will return prefix, middle, suffix.
 
-    std::vector<Token> phrase2 = applyFilter( recombine( getTokens( str, true ) ) );
-    if ( phrase2.size() > 0 )
-        phrases.push_back( phrase2 );
+std::vector<Token> Tokenizer::splitToken( const Token &tok ) {
+    std::vector<Token> outtokens;
+    boost::smatch what;
+    std::string str = tok.text();
 
-    return phrases;
+    // if the token is mixed [0-9] and [A-Z]
+    // then process it here
+    if ( tok.isInClass( InClass::MIXED ) ) {
+        // split mixed alpha digit tokens, eg:
+        // 500W => 500 W or N123 => N 123 or I80 => I 80
+        const char* replace( "$1 $2" );
+        boost::u32regex re = boost::make_u32regex( std::string( "\\<(\\d+)([[:alpha:]\\p{L}])\\>" ) );
+        std::string tmp = boost::u32regex_replace( str, re, replace );
+        str = tmp;
+        re = boost::make_u32regex( std::string( "\\<([[:alpha:]\\p{L}])(\\d+)\\>" ) );
+        tmp = boost::u32regex_replace( str, re, replace );
+        str = tmp;
+
+        std::vector<std::string> words;
+        boost::split(words, str, boost::is_any_of(" "), boost::token_compress_on);
+        for ( const auto &e : words ) {
+            Token ta( e );
+            lex_.classify( ta, InClass::WORD );
+            outtokens.push_back( ta );
+        }
+        return outtokens;
+    }
+
+    // a and b are prefix parts of str if matched
+    // c and d are suffix parts of str if matched
+    std::string a, b, c, d;
+
+    boost::match_flag_type flags = boost::match_default;
+
+    // could not get this to work with auto
+    std::string::const_iterator start, end;
+    start = str.begin();
+    end   = str.end();
+
+    std::string attached = "(" + lex_.regexPrefixAtt() + ")(.+)";
+    if (attached.length() > 6) {
+        boost::u32regex re = boost::make_u32regex( attached );
+        // boost::regex_match can throw std::runtime_error if the
+        // regex is too complex, we catch and and continue as if
+        // we did not match
+        try {
+            if ( boost::regex_match( start, end, what, re, flags ) ) {
+                a = std::string(what[1].first, what[1].second);
+                b = std::string(what[2].first, what[2].second);
+            }
+        }
+        catch (const std::runtime_error &e ) {
+            // we might want to log e.what() while debugging
+            return outtokens;
+        };
+    }
+
+    attached = "(.+)(" + lex_.regexSuffixAtt() + ")";
+    if (attached.length() > 6) {
+        boost::u32regex re = boost::make_u32regex( attached );
+        // boost::regex_match can throw std::runtime_error if the
+        // regex is too complex, we catch and and continue as if
+        // we did not match
+        try {
+            if ( boost::regex_match( start, end , what, re, flags ) ) {
+                c = std::string(what[1].first, what[1].second);
+                d = std::string(what[2].first, what[2].second);
+            }
+        }
+        catch (const std::runtime_error &e ) {
+            // we might want to log e.what() while debugging
+            return outtokens;
+        };
+    }
+
+    // sort out the cases described above
+
+    if ( a.size() > 0 ) {
+        // case 1 and 5: prefix only or prefix touches suffix
+        if ( d.size() == 0 or b.size() == d.size() ) {
+            Token ta( a );
+            lex_.classify( ta, InClass::WORD );
+            outtokens.push_back( ta );
+            Token tb( b );
+            lex_.classify( tb, InClass::WORD );
+            outtokens.push_back( tb );
+        }
+        // case 3: not overlapping
+        else if ( d.size() > 0 and a.size() + d.size() < str.size() ) {
+            Token ta( a );
+            lex_.classify( ta, InClass::WORD );
+            outtokens.push_back( ta );
+            Token middle( str.substr( a.size(), str.size()-a.size()-d.size() ) );
+            lex_.classify( middle, InClass::WORD );
+            outtokens.push_back( middle );
+            Token td( d );
+            lex_.classify( td, InClass::WORD );
+            outtokens.push_back( td );
+        }
+        // case 4: overlapping
+        else if ( d.size() > 0 and a.size() + d.size() > str.size() ) {
+            Token tc( c );
+            lex_.classify( tc, InClass::WORD );
+            outtokens.push_back( tc );
+            Token td( d );
+            lex_.classify( td, InClass::WORD );
+            outtokens.push_back( td );
+        }
+    }
+    // case 2: suffix only
+    else if ( d.size() > 0 ) {
+        Token tc( c );
+        lex_.classify( tc, InClass::WORD );
+        outtokens.push_back( tc );
+        Token td( d );
+        lex_.classify( td, InClass::WORD );
+        outtokens.push_back( td );
+    }
+
+    return outtokens;
 }
 
 
-std::vector<Token> Tokenizer::getTokens( std::string str, bool splitTokens ) {
+std::vector<Token> Tokenizer::getTokens( std::string str ) {
 
     // make sure the text is normalized and UUPERCASE
     std::string locale = lex_.locale();
@@ -45,52 +167,10 @@ std::vector<Token> Tokenizer::getTokens( std::string str, bool splitTokens ) {
     std::string nstr = Utils::normalizeUTF8( str, errorCode );
     str = Utils::upperCaseUTF8( nstr, locale );
 
-    // first see if we have attached tokens that we need to split apart
-    // we place and em dash utf8 char "\xe2\x80\x94" where we split the word
-    // this can later be recognized as EMDASH token if needed
-    bool didSplit = false;
-    std::string attached = "(" + lex_.regexPrefixAtt() + ")";
-    if (attached.length() > 2) {
-        boost::u32regex re = boost::make_u32regex( attached );
-        const char* replace( "$1\xe2\x80\x94" );
-        std::string tmp = boost::u32regex_replace( str, re, replace );
-        str = tmp;
-        didSplit = true;
-    }
-
-    attached = "(" + lex_.regexSuffixAtt() + ")";
-    if (attached.length() > 2) {
-        boost::u32regex re = boost::make_u32regex( attached );
-        const char* replace( "\xe2\x80\x94$1" );
-        std::string tmp = boost::u32regex_replace( str, re, replace );
-        str = tmp;
-        didSplit = true;
-    }
-
-    // if we are asked for to split tokens
-    // but there were no regex for splitting
-    // then we return an empty result.
-    // the rationale is that this would be a duplicate
-    // set of tokens to those returned by not splitTokens
-    if ( splitTokens and not didSplit )
-        return std::vector<Token>();
-
-    // split mixed alpha digit tokens, eg:
-    // 500W => 500 W or N123 => N 123 or I80 => I 80
-    const char* replace( "$1 $2" );
-    attached = "\\<(\\d+)([[:alpha:]\\p{L}])\\>";
-    boost::u32regex re = boost::make_u32regex( attached );
-    std::string tmp = boost::u32regex_replace( str, re, replace );
-    str = tmp;
-    attached = "\\<([[:alpha:]\\p{L}])(\\d+)\\>";
-    re = boost::make_u32regex( attached );
-    tmp = boost::u32regex_replace( str, re, replace );
-    str = tmp;
-
     // build the regex for identifying tokens
     std::string regex = "^\\s*(?!(?:\xe2\x80\x94)+)(" + lex_.regex() + "\\d+/\\d+|\\d+|\\<[[:alpha:]]+\\>|[\\p{L}\\p{Nd}]+|[[:alpha:]\\d]+)([-&\\s\\|[:punct:]]+|\xe2\x80\x94|$)";
 
-    re = boost::make_u32regex( regex, boost::regex::icase );
+    boost::u32regex re = boost::make_u32regex( regex, boost::regex::icase );
 
     std::vector<Token> outtokens;
 
@@ -109,7 +189,17 @@ std::vector<Token> Tokenizer::getTokens( std::string str, bool splitTokens ) {
             // token might classify as multiple types
             // or none, in which case make it a word
             lex_.classify(tok, InClass::WORD);
-            outtokens.push_back(tok);
+            if ( tok.inLex() ) {
+                outtokens.push_back(tok);
+            }
+            else {
+                auto toks = splitToken( tok );
+                if ( toks.size() > 0 )
+                    for ( const auto &t : toks )
+                        outtokens.push_back( t );
+                else
+                    outtokens.push_back(tok);
+            }
         }
 
         // create a token for the punctuation
@@ -119,6 +209,10 @@ std::vector<Token> Tokenizer::getTokens( std::string str, bool splitTokens ) {
             outtokens.push_back(punct);
         }
 
+        // break if there is nothing left
+        if (start == end)
+            break;
+
         // update search position
         start = what[0].second;
 
@@ -126,51 +220,7 @@ std::vector<Token> Tokenizer::getTokens( std::string str, bool splitTokens ) {
         flags |= boost::match_not_bob;
     }
 
-    return outtokens;
-}
-
-
-std::vector<Token> Tokenizer::recombine( const std::vector<Token> &in ) {
-    
-    std::vector<Token> out;
-
-    // if there is nothing to do then return
-    if ( in.size() == 0 )
-        return out;
-
-    // push the first token to the output stream
-    out.push_back( in[0] );
-    unsigned long int i=1;
-    for ( ; i<in.size()-1; ++i ) {
-        // if this token is an EMDASH see if we need to rejoin
-        // the tokens to the right and left of it
-        if ( in[i].isInClass( InClass::EMDASH ) ) {
-            std::string text = in[i-1].text() + in[i+1].text();
-
-            // see if the recombined token is in the lexicon
-            auto le = lex_.find( text );
-            if ( le.size() == 0 ) {
-                // not in the lexicon so keep them as is
-                out.push_back( in[i] );
-                continue;
-            }
-            else {
-                // yes recombined token is in the lexicon
-                // so undo the split and toss the emdash
-                out[i-1].text( text );
-                lex_.classify( out[i-1], InClass::WORD );
-                // skip over the emdash AND the next token
-                i += 2;
-                continue;
-            }
-        }
-        out.push_back( in[i] );
-    }
-    // and push the last if we need to
-    if ( i < in.size() )
-        out.push_back( in[in.size()-1] );
-
-    return out;
+    return applyFilter( outtokens );
 }
 
 

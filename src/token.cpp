@@ -21,6 +21,7 @@ Token::Token() : outclass_(OutClass::BADTOKEN) {
     stdtext_.clear();
     inclass_.clear();
     attached_.clear();
+    inlex_ = false;
 }
 
 
@@ -45,6 +46,7 @@ Token::Token(std::string text) {
     inclass_ = InClass::asType(in_inclass);
     outclass_ = OutClass::asType(in_outclass);
     attached_ = InClass::asAttachType(in_attached);
+    inlex_ = false;
 
 }
 
@@ -59,7 +61,8 @@ std::ostream &operator<<(std::ostream &ss, const Token &token) {
        << token.stdtext_ << "\t"
        << inclass << "\t"
        << outclass << "\t"
-       << attached;
+       << attached << "\t"
+       << token.inlex_;
 
     return ss;
 }

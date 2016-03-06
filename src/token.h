@@ -42,6 +42,7 @@ public:
     bool isInClass( std::set<InClass::Type> test ) const;
     bool isInClass( InClass::Type test ) const;
     bool isInClassEmpty() const { return inclass_.empty(); };
+    bool inLex() const { return inlex_; };
 
     static std::vector< std::vector<InClass::Type> > enumerate( std::vector<Token> tokens );
 
@@ -53,6 +54,7 @@ public:
     void attached(InClass::AttachType attached) { attached_.insert( attached ); };
     void attached(std::set<InClass::AttachType> attached) { attached_ = attached; };
     void outclass(OutClass::Type outclass) { outclass_ = outclass; };
+    void inLex(bool inlex) { inlex_ = inlex; };
 
     // operators
 
@@ -71,6 +73,7 @@ private:
     std::set<InClass::Type> inclass_;
     OutClass::Type outclass_;
     std::set<InClass::AttachType> attached_;
+    bool inlex_;
 
 };
 
