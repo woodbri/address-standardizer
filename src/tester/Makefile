@@ -3,18 +3,18 @@ CPPFLAGS = -O0 -g -Wall -std=c++0x -fPIC -frounding-math -Wno-deprecated -pedant
 
 OBJS = ../grammar.o ../inclass.o ../lexentry.o ../lexicon.o ../metarule.o ../metasection.o ../outclass.o ../rule.o ../rulesection.o ../search.o ../token.o ../tokenizer.o ../utils.o
 
-EXE = t2 t3 t4 t5
+EXE = t2 read-dump-grammar read-dump-lexicon t5
 
 all: $(EXE)
 
-t1: t1.cpp
-	g++ $(CPPFLAGS) -o t1 t1.cpp $(OBJS) -ldl -lm `pkg-config --libs --cflags icu-uc icu-io` -L /usr/lib/x86_64-linux-gnu/ -lboost_regex
+read-dump-lexicon: read-dump-lexicon.cpp $(OBJS)
+	g++ $(CPPFLAGS) -o read-dump-lexicon read-dump-lexicon.cpp $(OBJS) -ldl -lm `pkg-config --libs --cflags icu-uc icu-io` -L /usr/lib/x86_64-linux-gnu/ -lboost_regex
 
 t2: t2.cpp $(OBJS)
 	g++ $(CPPFLAGS) -D_FORTIFY_SOURCE=2 -D_REENTRANT  -DU_HAVE_ELF_H=1 -DU_HAVE_ATOMIC=1 -L /usr/lib/x86_64-linux-gnu/ `pkg-config --libs --cflags icu-uc icu-io` -Wl,-Bsymbolic-functions -Wl,-z,relro -o t2 t2.cpp $(OBJS) -ldl -lm `pkg-config --libs --cflags icu-uc icu-io` -L /usr/lib/x86_64-linux-gnu/ -lboost_regex
 
-t3: t3.cpp $(OBJS)
-	g++ $(CPPFLAGS) -D_FORTIFY_SOURCE=2 -D_REENTRANT  -DU_HAVE_ELF_H=1 -DU_HAVE_ATOMIC=1 -L /usr/lib/x86_64-linux-gnu/ `pkg-config --libs --cflags icu-uc icu-io` -Wl,-Bsymbolic-functions -Wl,-z,relro -o t3 t3.cpp $(OBJS) -ldl -lm `pkg-config --libs --cflags icu-uc icu-io` -L /usr/lib/x86_64-linux-gnu/ -lboost_regex
+read-dump-grammar: read-dump-grammar.cpp $(OBJS)
+	g++ $(CPPFLAGS) -D_FORTIFY_SOURCE=2 -D_REENTRANT  -DU_HAVE_ELF_H=1 -DU_HAVE_ATOMIC=1 -L /usr/lib/x86_64-linux-gnu/ `pkg-config --libs --cflags icu-uc icu-io` -Wl,-Bsymbolic-functions -Wl,-z,relro -o read-dump-grammar read-dump-grammar.cpp $(OBJS) -ldl -lm `pkg-config --libs --cflags icu-uc icu-io` -L /usr/lib/x86_64-linux-gnu/ -lboost_regex
 
 t4: t4.cpp $(OBJS)
 	g++ $(CPPFLAGS) -D_FORTIFY_SOURCE=2 -D_REENTRANT  -DU_HAVE_ELF_H=1 -DU_HAVE_ATOMIC=1 -L /usr/lib/x86_64-linux-gnu/ `pkg-config --libs --cflags icu-uc icu-io` -Wl,-Bsymbolic-functions -Wl,-z,relro -o t4 t4.cpp $(OBJS) -ldl -lm `pkg-config --libs --cflags icu-uc icu-io` -L /usr/lib/x86_64-linux-gnu/ -lboost_regex

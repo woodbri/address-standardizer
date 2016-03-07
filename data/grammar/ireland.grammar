@@ -1,0 +1,144 @@
+# ireland.grammar
+# Initial grammar for Ireland
+# Author: Stephen Woodbridge <woodbri@imaptools.com>
+
+[ADDRESS]
+@micro @macro
+@building @micro @macro
+
+[micro]
+@housenumber @street
+@unit @housenumber @street
+@pobox
+
+[macro]
+@citywords @prov @postal @country
+@citywords @prov @country
+@citywords @prov @postal
+@citywords @prov
+@citywords @postal @country
+@citywords @country
+@citywords @postal
+@citywords
+
+[citywords]
+@city @citywords
+@city @cityext
+@city
+
+[cityext]
+NUMBER -> POSTAL -> 0.5
+NUMBER SINGLE -> POSTAL POSTAL -> 0.5
+
+[building]
+@buildt @buildn
+@buildn @buildt
+@buildn @buildt @buildt
+
+[buildt]
+BUILDT -> BLDNG -> 0.4
+PLACEN -> BLDNG -> 0.4
+
+[buildn]
+WORD -> BLDNG -> 0.4
+WORD WORD -> BLDNG BLDNG -> 0.3
+WORD WORD WORD -> BLDNG BLDNG BLDNG -> 0.2
+WORD WORD WORD WORD -> BLDNG BLDNG BLDNG BLDNG -> 0.1
+
+[pobox]
+BOXH NUMBER -> BOXH BOXT -> 0.7
+
+[housenumber]
+NUMBER -> HOUSE -> 0.6
+NUMBER SINGLE -> HOUSE HOUSE -> 0.7
+MIXED -> HOUSE -> 0.7
+NUMBER DASH NUMBER -> HOUSE IGNORE IGNORE -> 0.7
+
+[street]
+@prefixtype @basename @suffixtype
+@prefix @road @basename @suffix
+@prefix @road @basename
+@road @basename @suffix
+@prefixtype @basename
+@road @basename
+@basename @suffixtype
+@basename
+
+[basename]
+SINGLE AMPERS SINGLE WORD WORD -> STREET STREET STREET STREET STREET -> 0.5
+SINGLE AMPERS SINGLE WORD -> STREET STREET STREET STREET -> 0.5
+SINGLE AMPERS SINGLE -> STREET STREET STREET -> 0.5
+WORD AMPERS WORD -> STREET STREET STREET -> 0.5
+WORD WORD WORD WORD WORD -> STREET STREET STREET STREET STREET -> 0.1
+WORD WORD WORD WORD -> STREET STREET STREET STREET -> 0.1
+WORD WORD WORD -> STREET STREET STREET -> 0.1
+WORD WORD -> STREET STREET -> 0.1
+ORD -> STREET -> 0.4
+NUMBER SINGLE -> STREET STREET -> 0.3
+NUMBER DOUBLE -> STREET STREET -> 0.3
+NUMBER -> STREET -> 0.3
+SINGLE -> STREET -> 0.3
+DOUBLE -> STREET -> 0.3
+MIXED -> STREET -> 0.3
+WORD -> STREET -> 0.2
+
+[prefixtype]
+@prefix @ptype
+@prefix
+@ptype
+
+[suffixtype]
+@stype @suffix
+@stype
+@suffix
+
+[prefix]
+QUALIF DIRECT -> QUALIF PREDIR -> 0.8
+DIRECT QUALIF -> PREDIR QUALIF -> 0.8
+QUALIF -> QUALIF -> 0.8
+DIRECT -> PREDIR -> 0.7
+
+[suffix]
+DIRECT QUALIF -> SUFDIR QUALIF -> 0.8
+QUALIF DIRECT -> QUALIF SUFDIR -> 0.8
+DIRECT -> SUFDIR -> 0.7
+QUALIF -> QUALIF -> 0.8
+
+[ptype]
+TYPE -> PRETYP -> 0.7
+
+[stype]
+TYPE -> SUFTYP -> 0.7
+
+[road]
+PROV ROAD -> EXTRA PRETYP -> 0.8
+ROAD -> PRETYP -> 0.8
+
+[unit]
+ORD UNITH -> UNITT UNITH -> 0.7
+UNITT UNITH -> UNITT UNITH -> 0.7
+UNITH UNITT -> UNITH UNITT -> 0.7
+NUMBER SINGLE WORD PLACEN -> UNITT UNITT UNITH UNITH -> 0.3
+
+[city]
+DIRECT CITY -> CITY CITY -> 0.6
+CITY -> CITY -> 0.8
+DIRECT WORD WORD WORD WORD -> CITY CITY CITY CITY CITY -> 0.3
+DIRECT WORD WORD WORD -> CITY CITY CITY CITY -> 0.4
+DIRECT WORD WORD -> CITY CITY CITY -> 0.5
+DIRECT WORD -> CITY CITY -> 0.5
+WORD WORD WORD WORD -> CITY CITY CITY CITY -> 0.3
+WORD WORD WORD -> CITY CITY CITY -> 0.2
+WORD WORD -> CITY CITY -> 0.2
+WORD -> CITY -> 0.2
+
+[postal]
+MIXED -> POSTAL -> 0.7
+MIXED MIXED -> POSTAL POSTAL -> 0.8
+
+[prov]
+PROV -> PROV -> 0.8
+
+[country]
+NATION -> NATION -> 0.8
+

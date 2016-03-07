@@ -10,27 +10,27 @@
  * the terms of the MIT License. Please file LICENSE for details.
  *
  ***************************************************ADDRESS_STANDARDIZER**/
-// test the grammar reader and check()
+// test the lexicon reader and dump
 
 #include <iostream>
 #include <string>
 
-#include "grammar.h"
+#include "lexicon.h"
 
 
 
 int main(int ac, char* av[])
 {
     if (ac < 2) {
-        std::cerr << "Usage: t3 test.grammar\n";
+        std::cerr << "Usage: read-dump-lexicon lexicon.txt\n";
         return EXIT_FAILURE;
     }
 
     std::string file = av[1];
 
-    Grammar g(file);
+    Lexicon lex(file, file);
 
-    std::cout << g << "\n";
+    std::cout << lex << "\n";
 
     return EXIT_SUCCESS;
 }

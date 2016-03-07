@@ -56,15 +56,21 @@ Lexicon::Lexicon(std::string name, std::string file) :
 
 void Lexicon::initialize( std::istream &is ) {
     std::string line;
+    unsigned long int cnt = 0;
 
     std::getline( is, line );
     // remove UTF8 BOM if one exists
     if (line[0] == '\xEF' && line[1] == '\xBB' && line[2] == '\xBF')
         line = line.substr(4);
+    ++cnt;
 
     // read the header and skip any
     while (is and line.substr(0,8) != "LEXICON:") {
+        if (line.substr(0,9) == "LEXENTRY:") {
+            throw std::runtime_error("Lexicon-LexEntry-Before-Lexicon");
+        }
         std::getline( is, line );
+        ++cnt;
     }
 
     if ( not is )
@@ -76,8 +82,9 @@ void Lexicon::initialize( std::istream &is ) {
     std::stringstream buffer(line);
     std::string term;
     std::getline(buffer, term, '\t');
+    ++cnt;
     if (term != "LEXICON:" and term != "Lexicon:") {
-        throw std::runtime_error("Lexicon-Invalid-Data-Format:" + line);
+        throw std::runtime_error("Lexicon-Invalid-Data-Format: " + std::to_string(cnt) + ": " + line);
     }
 
     std::getline(buffer, term, '\t');   // name (ignored)
@@ -92,6 +99,7 @@ void Lexicon::initialize( std::istream &is ) {
     // ret in the lexicon entries
     while ( is ) {
         std::getline( is, line );
+        ++cnt;
         //std::cout << "\t" << line << "\n";
 
         // replace multiple space chars with a single space
@@ -113,7 +121,7 @@ void Lexicon::initialize( std::istream &is ) {
             insert( le );
         }
         else {
-            throw std::runtime_error("Lexicon-Invalid-LexEntry");
+            throw std::runtime_error("Lexicon-Invalid-LexEntry: "+ std::to_string(cnt) + ": " + line);
         }
     }
 }
