@@ -1,5 +1,7 @@
 *.d
 *.o
 tester/t?
+tester/read-dump-grammar
+tester/read-dump-lexicon
 test/*-test
 .*.swp
