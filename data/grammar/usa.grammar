@@ -19,16 +19,16 @@ WORD WORD WORD WORD -> BLDNG BLDNG BLDNG BLDNG -> 0.1
 @housenum @street @unit
 @housenum @street
 @ruralroute
-#@street @housenum @unit
-#@street @housenum
-#@street @atsign @street
-#@street @ampersand @street
+@ruralroute @pobox
+@pobox
 
 [macro]
 @city @prov @postal @nation
 @city @prov @nation
-#@postal @city @prov @nation
-#@postal @city @nation
+
+[pobox]
+BOXH NUMBER -> BOXH BOXT -> 0.7
+BOXH NUMBER SINGLE -> BOXH BOXT BOXT -> 0.7
 
 [housenum]
 NUMBER SLASH SINGLE -> HOUSE HOUSE HOUSE -> 0.3
@@ -120,9 +120,11 @@ RR -> RR -> 0.8
 [road]
 PROV ROAD -> EXTRA PRETYP -> 0.8
 ROAD -> PRETYP -> 0.8
+WORD ROAD -> EXTRA PRETYP -> 0.6
 
 [unit]
-UNITH MIXED -> UNITH UNITT -> 0.6
+UNITH NUMBER -> UNITH UNITT -> 0.6
+UNITH NUMBER WORD -> UNITH UNITT UNITT -> 0.6
 UNITH UNITH -> UNITH UNITT -> 0.6
 UNITH WORD WORD WORD -> UNITH UNITT UNITT UNITT -> 0.4
 UNITH WORD WORD -> UNITH UNITT UNITT -> 0.4
@@ -141,7 +143,7 @@ WORD WORD -> CITY CITY -> 0.2
 WORD -> CITY -> 0.2
 
 [postal]
-QUINT DASH QUAD -> POSTAL POSTAL POSTAL -> 0.7
+QUINT DASH QUAD -> POSTAL IGNORE POSTAL -> 0.7
 QUINT QUAD -> POSTAL POSTAL -> 0.7
 PCH PCT -> POSTAL POSTAL -> 0.7
 PCH -> POSTAL -> 0.6
@@ -155,9 +157,9 @@ PROV -> PROV -> 0.8
 [nation]
 NATION -> NATION -> 0.8
 
-[atsign]
-ATSIGN -> ATSIGN -> 0.8
+#[atsign]
+#ATSIGN -> ATSIGN -> 0.8
 
-[ampersand]
-AMPERS -> STREET -> 0.7
+#[ampersand]
+#AMPERS -> STREET -> 0.7
 
