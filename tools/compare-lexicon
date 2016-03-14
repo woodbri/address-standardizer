@@ -1,0 +1,68 @@
+#!/usr/bin/perl -w
+use strict;
+
+sub Usage {
+    die "Usage: compare-lexicon lex-a.txt lex-b.txt\n" .
+        "    reports all lex-b.txt entries not in lex-a.txt\n";
+}
+
+my $fa = shift @ARGV || Usage();
+my $fb = shift @ARGV || Usage();
+
+my %a = ();
+
+open(LEX, $fa) || die "ERROR: failed to open '$fa' : $!\n";
+my $state = 0;
+while ( my $line = <LEX> ) {
+    # skip comments and blank lines
+    next if $line =~ /^\s*$|^\s*#/;
+    chomp($line);
+    if ( $state == 0 ) {
+        if ( $line =~ /^LEXICON:/ ) {
+            $state = 1;
+            next;
+        }
+        else {
+            die "ERROR: '$line' file syntax error processing '$fa'!\n";
+        }
+    }
+    elsif ( $state == 1 ) {
+        my @fields = split(/\t/, $line);
+        shift @fields if $fields[0] eq 'LEXENTRY:';
+        my $key = shift @fields;
+        push @{$a{key}}, \@fields;
+    }
+    else {
+        die "ERROR: logic error processing '$fa'!\n";
+    }
+}
+close(LEX);
+
+open(LEX, $fb) || die "ERROR: failed to open '$fb' : $!\n";
+$state = 0;
+while ( my $line = <LEX> ) {
+    # skip comments and blank lines
+    next if $line =~ /^\s*$|^\s*#/;
+    chomp($line);
+    if ( $state == 0 ) {
+        if ( $line =~ /^LEXICON:/ ) {
+            $state = 1;
+            next;
+        }
+        else {
+            die "ERROR: '$line' file syntax error processing '$fb'!\n";
+        }
+    }
+    elsif ( $state == 1 ) {
+        my @fields = split(/\t/, $line);
+        shift @fields if $fields[0] eq 'LEXENTRY:';
+        my $key = shift @fields;
+        if ( ! defined $a{key} ) {
+            print "$line\n";
+        }
+    }
+    else {
+        die "ERROR: logic error processing '$fb'!\n";
+    }
+}
+close(LEX);

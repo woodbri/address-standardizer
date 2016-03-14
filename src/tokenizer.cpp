@@ -47,7 +47,7 @@ std::vector<Token> Tokenizer::splitToken( const Token &tok ) {
         // split mixed alpha digit tokens, eg:
         // 500W => 500 W or N123 => N 123 or I80 => I 80
         const char* replace( "$1 $2" );
-        boost::u32regex re = boost::make_u32regex( std::string( "\\<(\\d+)([[:alpha:]\\p{L}])\\>" ) );
+        boost::u32regex re = boost::make_u32regex( std::string( "^(\\d+)([[:alpha:]\\p{L}°])$" ) );
         std::string tmp = boost::u32regex_replace( str, re, replace );
         str = tmp;
         re = boost::make_u32regex( std::string( "\\<([[:alpha:]\\p{L}])(\\d+)\\>" ) );
