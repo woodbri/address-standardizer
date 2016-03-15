@@ -49,9 +49,6 @@ BOXH NUMBER -> BOXH BOXT -> 0.7
 CITY -> CITY -> 0.9
 WORD -> CITY -> 0.5
 
-[region]
-PROV -> PROV -> 0.9
-
 [country]
 NATION -> NATION -> 0.9
 
