@@ -25,6 +25,7 @@
 #include <streambuf>
 #include <string>
 #include <vector>
+#include <chrono>
 
 int main(int ac, char* av[]) {
 
@@ -53,6 +54,7 @@ int main(int ac, char* av[]) {
     std::cout << "UpperCase: '" << Ustr << "'\n";
 
     //Lexicon lex("test-lex", lfile);
+    auto t0 = std::chrono::system_clock::now();
 
     // simulate the postgres call, by reading the whole file into a string
     std::istringstream iss;
@@ -64,21 +66,41 @@ int main(int ac, char* av[]) {
     t.seekg(0, std::ios::beg);
     s.assign((std::istreambuf_iterator<char>(t)),
               std::istreambuf_iterator<char>());
-
+    iss.str( s );
     //std::cout << "Lexicon size: " << s.size() << "\n";
 
-    iss.str( s );
+    auto t1 = std::chrono::system_clock::now();
+    auto diff = t1 - t0;
+    auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
+    std::cout << "Timer: read lexicon: " << dt.count() << " ms\n";
+
+    t0 = std::chrono::system_clock::now();
     Lexicon lex( "query-lex", iss );
+    t1 = std::chrono::system_clock::now();
+    diff = t1 - t0;
+    dt = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
+    std::cout << "Timer: load lexicon: " << dt.count() << " ms\n";
+
 
 //    std::cout << lex << "\n";
 //    std::cout << "Lexicon regex: '" << lex.regex() <<"'\n\n";
 //    std::cout << "Lexicon attachedRegex: '" << lex.attachedRegex() <<"'\n\n";
 
+    t0 = std::chrono::system_clock::now();
     Tokenizer tokenizer( lex );
     tokenizer.filter( InClass::asType( filterstr ) );
+    t1 = std::chrono::system_clock::now();
+    diff = t1 - t0;
+    dt = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
+    std::cout << "Timer: init tokenizer: " << dt.count() << " ms\n";
 
     std::vector<std::vector<Token> > phrases;
+    t0 = std::chrono::system_clock::now();
     phrases.push_back( tokenizer.getTokens( Ustr ) );
+    t1 = std::chrono::system_clock::now();
+    diff = t1 - t0;
+    dt = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
+    std::cout << "Timer: tokenizer::getTokens: " << dt.count() << " ms\n";
 
     for ( const auto phrase : phrases ) {
         std::cout << "-------------------------------\n";
@@ -91,6 +113,7 @@ int main(int ac, char* av[]) {
         //Grammar G( gfile );
 
         // simulate the postgres call, by reading the whole file into a string
+        t0 = std::chrono::system_clock::now();
         std::ifstream t(gfile);
         t.seekg(0, std::ios::end);
         s.reserve(t.tellg());
@@ -103,7 +126,17 @@ int main(int ac, char* av[]) {
 
         iss.clear();
         iss.str( s );
+        t1 = std::chrono::system_clock::now();
+        diff = t1 - t0;
+        dt = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
+        std::cout << "Timer: read grammar file: " << dt.count() << " ms\n";
+
+        t0 = std::chrono::system_clock::now();
         Grammar G( iss );
+        t1 = std::chrono::system_clock::now();
+        diff = t1 - t0;
+        dt = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
+        std::cout << "Timer: init Grammar: " << dt.count() << " ms\n";
 
         switch (G.status() ) {
             case Grammar::CHECK_FATAL:
@@ -119,7 +152,13 @@ int main(int ac, char* av[]) {
         Search S( G );
 
         float bestCost = -1.0;
+        t0 = std::chrono::system_clock::now();
         auto best = S.searchAndReclassBest( phrases, bestCost );
+        t1 = std::chrono::system_clock::now();
+        diff = t1 - t0;
+        dt = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
+        std::cout << "Timer: Search::searchAndReclassBest: " << dt.count() << " ms\n";
+
         if ( bestCost < 0.0 ) {
             std::cout << "#### Failed to find a match (searchAndReclassBest)(" << bestCost << ")\n";
             return(1);
