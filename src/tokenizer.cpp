@@ -170,7 +170,7 @@ std::vector<Token> Tokenizer::getTokens( std::string str ) {
     str = Utils::upperCaseUTF8( nstr, locale );
 
     // build the regex for identifying tokens
-    std::string regex = "^\\s*(?!(?:\xe2\x80\x94)+)(" + lex_.regex() + "\\d+/\\d+|\\d+|\\<[[:alpha:]]+\\>|[\\p{L}\\p{Nd}]+|[[:alpha:]\\d]+)([-&\\s\\|[:punct:]]+|\xe2\x80\x94|$)";
+    std::string regex = "^\\s*(?!(?:\xe2\x80\x94)+)(" + lex_.regex() + "\\d+/\\d+|\\d+[,\\.]\\d+|\\d+|\\<[[:alpha:]]+\\>|[\\p{L}\\p{Nd}]+|[[:alpha:]\\d]+)([-&\\s\\|[:punct:]]+|\xe2\x80\x94|$)";
 
     boost::u32regex re = boost::make_u32regex( regex, boost::regex::icase );
 

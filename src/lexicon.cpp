@@ -202,6 +202,7 @@ void Lexicon::classify( Token& token, InClass::Type typ ) {
     token.inLex(false);
 
     auto num_exp    = boost::make_u32regex("^\\d+$");
+    auto float_exp  = boost::make_u32regex("^\\d+[,\\.]\\d+$");
     auto word_exp   = boost::make_u32regex("^\\w+$");
     auto has_digit  = boost::make_u32regex("^.*\\d.*$");
     auto dash_exp   = boost::make_u32regex("^[-]+$");
@@ -213,7 +214,15 @@ void Lexicon::classify( Token& token, InClass::Type typ ) {
     auto pct_exp    = boost::make_u32regex("^(\\d[A-Z]\\d|\\d[A-Z]{2})$", boost::regex::icase);
 
     // is it a number
-    if (boost::u32regex_match( text, num_exp )) {
+    if (boost::u32regex_match( text, float_exp )) {
+        token.inclass( InClass::NUMBER );
+        auto pos = text.find_first_of(",");
+        if ( pos != std::string::npos ) {
+            text[pos] = '.';
+            token.text(text);
+        }
+    }
+    else if (boost::u32regex_match( text, num_exp )) {
         token.inclass( InClass::NUMBER );
         if (text.length() == 4)
             token.inclass( InClass::QUAD );
