@@ -3,5 +3,6 @@
 tester/t?
 tester/read-dump-grammar
 tester/read-dump-lexicon
+tester/regex-tester
 test/*-test
 .*.swp

@@ -15,6 +15,7 @@
 #include <iostream>
 #include <sstream>
 #include <boost/regex.hpp>
+#include <boost/regex/icu.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include "grammar.h"
@@ -39,9 +40,9 @@ Grammar::Grammar( std::istream &is )
 void Grammar::initialize( std::istream &is )
 {
 
-    boost::regex re_comment("^\\s*#.*|^\\s*$");
-    boost::regex re_section("^\\s*\\[(.+)\\]\\s*$");
-    boost::regex re_ismeta("^(?:\\s*@(?:[\\w_])+)+\\s*$");
+    auto re_comment = boost::make_u32regex( "^\\s*#.*|^\\s*$" );
+    auto re_section = boost::make_u32regex( "^\\s*\\[(.+)\\]\\s*$" );
+    auto re_ismeta  = boost::make_u32regex( "^(?:\\s*@(?:[\\w_])+)+\\s*$" );
 
     std::string gotSection;
     RuleType ruleType = UNKNWN;
@@ -61,10 +62,10 @@ void Grammar::initialize( std::istream &is )
             line = line.substr(4);
 
         // skip over comments and blank lines
-        if ( boost::regex_match(line, re_comment, boost::match_default) ) 
+        if ( boost::u32regex_match( line, re_comment ) ) 
             continue;
         // handle a section header
-        else if ( boost::regex_match(line, what, re_section, boost::match_extra) ) {
+        else if ( boost::u32regex_match( line, what, re_section, boost::regex_constants::match_extra ) ) {
             // the current data if any
             if ( ruleType != UNKNWN and gotSection == "") {
                     throw std::runtime_error("Grammar-Empty-Section-Defined");
@@ -107,7 +108,7 @@ void Grammar::initialize( std::istream &is )
                 ruleType = ISMETA;
 
                 // make sure all tokens are meta
-                if (boost::regex_match(line, re_ismeta, boost::match_default) ) {
+                if (boost::u32regex_match( line, re_ismeta ) ) {
                     MetaRule rule( line );
                     mrules.push_back( rule );
                 }

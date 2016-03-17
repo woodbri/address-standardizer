@@ -47,7 +47,7 @@ std::vector<Token> Tokenizer::splitToken( const Token &tok ) {
         // split mixed alpha digit tokens, eg:
         // 500W => 500 W or N123 => N 123 or I80 => I 80
         const char* replace( "$1 $2" );
-        boost::u32regex re = boost::make_u32regex( std::string( "^(\\d+)([[:alpha:]\\p{L}°])$" ) );
+        boost::u32regex re = boost::make_u32regex( std::string( "^(\\d+)([[:alpha:]\\p{L}])$" ) );
         std::string tmp = boost::u32regex_replace( str, re, replace );
         str = tmp;
         re = boost::make_u32regex( std::string( "\\<([[:alpha:]\\p{L}])(\\d+)\\>" ) );
@@ -72,17 +72,17 @@ std::vector<Token> Tokenizer::splitToken( const Token &tok ) {
 
     // could not get this to work with auto
     std::string::const_iterator start, end;
-    start = str.begin();
-    end   = str.end();
 
     std::string attached = "(" + lex_.regexPrefixAtt() + ")(.+)";
     if (attached.length() > 6) {
         boost::u32regex re = boost::make_u32regex( attached );
-        // boost::regex_match can throw std::runtime_error if the
+        // boost::u32regex_match can throw std::runtime_error if the
         // regex is too complex, we catch and and continue as if
         // we did not match
         try {
-            if ( boost::regex_match( start, end, what, re, flags ) ) {
+            start = str.begin();
+            end   = str.end();
+            if ( boost::u32regex_match( start, end, what, re, flags ) ) {
                 a = std::string(what[1].first, what[1].second);
                 b = std::string(what[2].first, what[2].second);
             }
@@ -95,12 +95,14 @@ std::vector<Token> Tokenizer::splitToken( const Token &tok ) {
 
     attached = "(.+)(" + lex_.regexSuffixAtt() + ")";
     if (attached.length() > 6) {
-        boost::u32regex re = boost::make_u32regex( attached );
-        // boost::regex_match can throw std::runtime_error if the
+        boost::u32regex re2 = boost::make_u32regex( attached );
+        // boost::u32regex_match can throw std::runtime_error if the
         // regex is too complex, we catch and and continue as if
         // we did not match
         try {
-            if ( boost::regex_match( start, end , what, re, flags ) ) {
+            start = str.begin();
+            end   = str.end();
+            if ( boost::u32regex_match( start, end , what, re2, flags ) ) {
                 c = std::string(what[1].first, what[1].second);
                 d = std::string(what[2].first, what[2].second);
             }

@@ -20,6 +20,7 @@
 #include <string>
 #include <iostream>
 #include <boost/regex.hpp>
+#include <boost/regex/icu.hpp>
 
 #include "inclass.h"
 #include "token.h"

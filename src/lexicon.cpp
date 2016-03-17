@@ -96,7 +96,7 @@ void Lexicon::initialize( std::istream &is ) {
 
     UErrorCode errorCode;
 
-    // ret in the lexicon entries
+    // read in the lexicon entries
     while ( is ) {
         std::getline( is, line );
         ++cnt;
@@ -104,18 +104,18 @@ void Lexicon::initialize( std::istream &is ) {
 
         // replace multiple space chars with a single space
         // but don't touch tab chars
-        boost::regex re("( +)");
+        auto re = boost::make_u32regex( "( +)" );
         const char* replace = " ";
-        std::string tmp = boost::regex_replace(line, re, replace);
+        std::string tmp = boost::u32regex_replace(line, re, replace);
         line = tmp;
 
         if (line.length() == 0) continue;
 
         if ( line.compare(0, 9, "LEXENTRY:") == 0 or
              line.compare(0, 9, "LexEntry:") == 0 ) {
+            line = Utils::normalizeUTF8( line, errorCode );
             if (locale_ != "") {
-                std::string nstr = Utils::normalizeUTF8( line, errorCode );
-                line = Utils::upperCaseUTF8( nstr, locale_ );
+                line = Utils::upperCaseUTF8( line, locale_ );
             }
             LexEntry le( line );
             insert( le );
@@ -201,19 +201,19 @@ void Lexicon::classify( Token& token, InClass::Type typ ) {
 
     token.inLex(false);
 
-    boost::regex num_exp("^\\d+$");
-    boost::regex word_exp("^\\w+$");
-    boost::regex has_digit("^.*\\d.*$");
-    boost::regex dash_exp("^[-]+$");
-    boost::regex emdash_exp("^\xe2\x80\x94$");
-    boost::regex punct_exp("^[\\|[:punct:]]+$");
-    boost::regex space_exp("^\\s+$");
-    boost::regex fract_exp("^\\d+/\\d+$");
-    boost::regex pch_exp("^[A-Z]{1,2}\\d{1,2}[A-Z]{0,1}$", boost::regex::icase);
-    boost::regex pct_exp("^(\\d[A-Z]\\d|\\d[A-Z]{2})$", boost::regex::icase);
+    auto num_exp    = boost::make_u32regex("^\\d+$");
+    auto word_exp   = boost::make_u32regex("^\\w+$");
+    auto has_digit  = boost::make_u32regex("^.*\\d.*$");
+    auto dash_exp   = boost::make_u32regex("^[-]+$");
+    auto emdash_exp = boost::make_u32regex("^\xe2\x80\x94$");
+    auto punct_exp  = boost::make_u32regex("^[\\|[:punct:]]+$");
+    auto space_exp  = boost::make_u32regex("^\\s+$");
+    auto fract_exp  = boost::make_u32regex("^\\d+/\\d+$");
+    auto pch_exp    = boost::make_u32regex("^[A-Z]{1,2}\\d{1,2}[A-Z]{0,1}$", boost::regex::icase);
+    auto pct_exp    = boost::make_u32regex("^(\\d[A-Z]\\d|\\d[A-Z]{2})$", boost::regex::icase);
 
     // is it a number
-    if (boost::regex_match(text, num_exp, boost::match_default)) {
+    if (boost::u32regex_match( text, num_exp )) {
         token.inclass( InClass::NUMBER );
         if (text.length() == 4)
             token.inclass( InClass::QUAD );
@@ -227,23 +227,23 @@ void Lexicon::classify( Token& token, InClass::Type typ ) {
         token.inclass( InClass::SLASH );
     }
     // is it a fract
-    else if (boost::regex_match(text, fract_exp, boost::match_default)) {
+    else if (boost::u32regex_match( text, fract_exp )) {
         token.inclass( InClass::FRACT );
     }
     // is it pch
-    else if (boost::regex_match(text, pch_exp, boost::match_default)) {
+    else if (boost::u32regex_match( text, pch_exp )) {
         token.inclass( InClass::MIXED );
         token.inclass( InClass::PCH );
     }
     // is it pct
-    else if (boost::regex_match(text, pct_exp, boost::match_default)) {
+    else if (boost::u32regex_match( text, pct_exp )) {
         token.inclass( InClass::MIXED );
         token.inclass( InClass::PCT );
     }
     // is it alpha
     // is mixed alpha and digit
-    else if (boost::regex_match(text, word_exp, boost::match_default)) {
-        if (boost::regex_match(text, has_digit, boost::match_default))
+    else if (boost::u32regex_match( text, word_exp )) {
+        if (boost::u32regex_match( text, has_digit ))
             token.inclass( InClass::MIXED );
         else {
             if (text.length() == 2)
@@ -255,11 +255,11 @@ void Lexicon::classify( Token& token, InClass::Type typ ) {
         }
     }
     // is it emdash
-    else if (boost::regex_match(text, emdash_exp, boost::match_default)) {
+    else if (boost::u32regex_match( text, emdash_exp )) {
         token.inclass( InClass::EMDASH );
     }
     // is it dash
-    else if (boost::regex_match(text, dash_exp, boost::match_default)) {
+    else if (boost::u32regex_match( text, dash_exp )) {
         token.inclass( InClass::DASH );
     }
     // is it ampersand
@@ -267,11 +267,11 @@ void Lexicon::classify( Token& token, InClass::Type typ ) {
         token.inclass( InClass::AMPERS );
     }
     // is it whitespace
-    else if (boost::regex_match(text, space_exp, boost::match_default)) {
+    else if (boost::u32regex_match( text, space_exp )) {
         token.inclass( InClass::SPACE );
     }
     // is it punct
-    else if (boost::regex_match(text, punct_exp, boost::match_default)) {
+    else if (boost::u32regex_match( text, punct_exp )) {
         token.inclass( InClass::PUNCT );
     }
 
@@ -423,7 +423,7 @@ std::string Lexicon::regexSuffixAtt() {
         std::string str;
         for ( const auto &e : suffix ) {
             std::string ee = escapeRegex( e );
-            str += "\\B" + ee + "\\b|";
+            str += ee + "|";
         }
 
         // remove trailing '|' char
@@ -445,13 +445,13 @@ static const char* special_chars_replace = "\\\\$1";
 
 std::string Lexicon::escapeRegex( const std::string &str ) {
 
-    boost::regex re(special_chars_regex);
-    boost::regex re2("(\\s+)");
+    auto re  = boost::make_u32regex( special_chars_regex );
+    auto re2 = boost::make_u32regex( "(\\s+)" );
 
     // escape all characters that have special meaning in a regex
     // .+*-~^$()[]\|?
-    std::string tmp = boost::regex_replace(str, re, special_chars_replace);
-    std::string outstr = boost::regex_replace(tmp, re2, "\\\\s+");
+    std::string tmp = boost::u32regex_replace(str, re, special_chars_replace);
+    std::string outstr = boost::u32regex_replace(tmp, re2, "\\\\s+");
 
     return outstr;
 }

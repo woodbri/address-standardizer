@@ -12,6 +12,7 @@
  ***************************************************ADDRESS_STANDARDIZER**/
 
 #include <boost/regex.hpp>
+#include <boost/regex/icu.hpp>
 #include "metarule.h"
 
 
@@ -19,14 +20,14 @@ MetaRule::MetaRule( const std::string &line ) {
     std::string token;
     std::stringstream buffer(line);
 
-    boost::regex re_meta("@([\\w_]+)");
+    auto re_meta = boost::make_u32regex( "@([\\w_]+)" );
     boost::smatch what;
 
     std::string::const_iterator start, end;
     start = line.begin();
     end   = line.end();
 
-    while ( boost::regex_search( start, end, what, re_meta ) ) {
+    while ( boost::u32regex_search( start, end, what, re_meta ) ) {
         if (what[1].first < what[1].second)
             refs_.push_back( std::string( what[1].first, what[1].second ) );
         start = what[0].second;

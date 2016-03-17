@@ -36,12 +36,14 @@ struct TestFixture
 {
     TestFixture() :
         lexi(
-            "LEXICON:\ttext-lexicon-2\tENG\ten_US\t5\n"
+            "LEXICON:\ttext-lexicon-2\tENG\ten_US\t6\n"
             "LEXENTRY:\tAK\tALASKA\tPROV\t\n"
             "LEXENTRY:\tAL\tALABAMA\tPROV\t\n"
             "LEXENTRY:\tALLEE\tALY\tTYPE\tDET_SUF\n"
             "LEXENTRY:\tALLEY\tALY\tTYPE\tDET_SUF\n"
-            "LEXENTRY:\tALLY\tALY\tTYPE\tDET_SUF\n"),
+            "LEXENTRY:\tALLY\tALY\tTYPE\tDET_SUF\n"
+            "LEXENTRY:\t°\t°\tUNITH\tDET_SUF,ATT_SUF\n"
+        ),
         lexicon("text-lexicon-2", "lex-test.txt")
     {
         // Put test initialization here, the constructor will be called
@@ -51,6 +53,7 @@ struct TestFixture
         //verify lexicon loaded correctly
         os.str(""); // clear os
         os << lexicon;
+        printf("'%s'\n", os.str().c_str());
         BOOST_CHECK(os.str() == lexi);
     }
     ~TestFixture() {

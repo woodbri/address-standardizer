@@ -3,7 +3,7 @@ CPPFLAGS = -O0 -g -Wall -std=c++0x -fPIC -frounding-math -Wno-deprecated -pedant
 
 OBJS = ../grammar.o ../inclass.o ../lexentry.o ../lexicon.o ../metarule.o ../metasection.o ../outclass.o ../rule.o ../rulesection.o ../search.o ../token.o ../tokenizer.o ../utils.o
 
-EXE = t2 read-dump-grammar read-dump-lexicon t5
+EXE = t2 read-dump-grammar read-dump-lexicon t5 regex-tester
 
 all: $(EXE)
 
@@ -21,6 +21,9 @@ t4: t4.cpp $(OBJS)
 
 t5: t5.cpp $(OBJS)
 	g++ $(CPPFLAGS) -D_FORTIFY_SOURCE=2 -D_REENTRANT  -DU_HAVE_ELF_H=1 -DU_HAVE_ATOMIC=1 -L /usr/lib/x86_64-linux-gnu/ `pkg-config --libs --cflags icu-uc icu-io` -Wl,-Bsymbolic-functions -Wl,-z,relro -o t5 t5.cpp $(OBJS) -ldl -lm `pkg-config --libs --cflags icu-uc icu-io` -L /usr/lib/x86_64-linux-gnu/ -lboost_regex
+
+regex-tester: regex-tester.cpp ../utils.o
+	g++ $(CPPFLAGS) -D_FORTIFY_SOURCE=2 -D_REENTRANT  -DU_HAVE_ELF_H=1 -DU_HAVE_ATOMIC=1 -L /usr/lib/x86_64-linux-gnu/ `pkg-config --libs --cflags icu-uc icu-io ` -Wl,-Bsymbolic-functions -Wl,-z,relro -o regex-tester regex-tester.cpp ../utils.o -ldl -lm `pkg-config --libs --cflags icu-uc icu-io` -L /usr/lib/x86_64-linux-gnu/ -lboost_regex
 
 test: $(EXE)
 	./t4 lex-en.txt '11 radcliff rd, north chelmsford, ma 01863-2313 usa'

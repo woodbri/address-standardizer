@@ -11,6 +11,7 @@
 [micro]
 @streetname @housenumber
 @streetname @housenumber @unit
+@streetname @housenumber @unit @unit
 @pobox
 
 
@@ -75,6 +76,8 @@ NUMBER WORD SINGLE -> HOUSE UNITT UNITT -> 0.5
 
 [unit]
 UNITH NUMBER -> UNITH UNITT -> 0.7
+NUMBER UNITH -> UNITT UNITH -> 0.7
+NUMBER UNITH SINGLE -> UNITT UNITH UNITT -> 0.7
 UNITH NUMBER NUMBER UNITH -> UNITH UNITT UNITT IGNORE -> 0.7
 UNITH NUMBER WORD -> UNITH UNITT UNITT -> 0.7
 UNITH NUMBER SINGLE -> UNITH UNITT UNITT -> 0.7

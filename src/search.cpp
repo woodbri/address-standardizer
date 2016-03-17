@@ -16,10 +16,13 @@
 #include "search.h"
 
 
-SearchPaths Search::search( const std::string &grammarNode, const std::vector<Token> &phrase ) const {
+SearchPaths Search::search( const std::string &grammarNode, const std::vector<Token> &phrase ) {
+    recursion_limit_ = ( phrase.size() / 4  > 20 ) ? 20 : phrase.size() / 4;
+
     // tracing
 #ifdef TRACING_SEARCH
-    std::cout << "Calling Search()\nPhrase:";
+    std::cout << "Calling Search(): recursion_limit: " << recursion_limit_
+        << "\nPhrase:";
     for (const auto &t : phrase)
         std::cout << t << "\n";
     std::cout << "\n";
@@ -51,7 +54,7 @@ SearchPaths Search::search( const std::string &grammarNode, const std::vector<To
 }
 
 
-SearchPaths Search::search( const std::vector<Token> &phrase ) const {
+SearchPaths Search::search( const std::vector<Token> &phrase ) {
     return search( std::string("ADDRESS"), phrase );
 }
 
@@ -89,7 +92,7 @@ bool Search::reclassTokens( std::vector<Token> &tokens, const SearchPath &result
 }
 
 
-std::vector<Token> Search::searchAndReclassBest( const std::vector<Token> &phrase, float &score ) const {
+std::vector<Token> Search::searchAndReclassBest( const std::vector<Token> &phrase, float &score ) {
     
     SearchPaths results = search( phrase );
     // if we failed to match against the grammar
@@ -126,7 +129,7 @@ std::vector<Token> Search::searchAndReclassBest( const std::vector<Token> &phras
 }
 
 
-std::vector<Token> Search::searchAndReclassBest( const std::vector<std::vector<Token> > &phrases, float &score ) const {
+std::vector<Token> Search::searchAndReclassBest( const std::vector<std::vector<Token> > &phrases, float &score ) {
     
     std::vector<Token> best;
     float bestScore = -1.;
