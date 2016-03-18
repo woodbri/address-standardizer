@@ -40,8 +40,10 @@ public:
     Grammar( std::istream &is );
 
     void initialize( std::istream &is );
-    void check();
-    void check( std::string section, std::string key );
+//    void check();
+//    void check( std::string section, std::string key );
+    void updatePointers();
+
     Status status() const { return status_; };
     std::string issues() const { return issues_; } ;
 

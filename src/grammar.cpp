@@ -143,7 +143,7 @@ void Grammar::initialize( std::istream &is )
         rules.clear();
     }
 
-    check();
+    updatePointers();
 
 //    if ( status_ != 0 )
 //        std::cerr << "Grammar::Grammar(): " << issues_ << "\n";
@@ -154,6 +154,7 @@ void Grammar::initialize( std::istream &is )
 }
 
 
+/*
 void Grammar::check() {
     issues_.clear();
     references_.clear();
@@ -174,7 +175,6 @@ void Grammar::check() {
     // done with reference vector so clear it
     references_.clear();
 }
-
 
 void Grammar::check( std::string section, std::string key ) {
 
@@ -213,6 +213,81 @@ void Grammar::check( std::string section, std::string key ) {
         status_ = CHECK_FATAL;
         return;
     }
+}
+*/
+
+
+void Grammar::updatePointers() {
+    issues_.clear();
+    references_.clear();
+    status_ = CHECK_OK;
+    for ( auto &meta : metas_ ) {
+        std::string metaName = meta.second.name();
+        for ( const auto &rules : meta.second.rules() ) {
+            for ( auto &ref : rules.refs() ) {
+                std::string word = ref.name();
+                if ( references_.find( word ) == references_.end() )
+                    references_[word] = 1;
+                else
+                    references_[word] = references_[word] + 1;
+
+                if ( ref.name() == metaName )
+                    ref.mptr( &( meta.second ) );
+                else {
+                    auto m = metas_.find( ref.name() );
+                    if ( m != metas_.end() )
+                        ref.mptr( &( m->second ) );
+                    else {
+                        auto r = rules_.find( ref.name() );
+                        if ( r != rules_.end() ) {
+                            ref.rptr( &( r->second ) );
+                            for ( const auto &a : r->second.rules() ) {
+                                if ( not a.isValid() ) {
+                                    issues_ += "Invalid rule at [" + ref.name() + "]\n";
+                                    status_ = CHECK_FATAL;
+                                }
+                            }
+
+                        }
+                        else {
+                            issues_ += "Missing rule: " + ref.name() +
+                                " : referenced at [" + metaName + "]\n";
+                            status_ = CHECK_FATAL;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // check the status of all references and make sure we have 'ADDRESS'
+
+    const auto addr = metas_.find( "ADDRESS" );
+    if ( addr == metas_.end() ) {
+        issues_ += "Rule 'ADDRESS' is not defined!\n";
+        status_ = CHECK_FATAL;
+    }
+
+    for ( const auto &e : metas_ ) {
+        auto ref = references_.find( e.first );
+        if ( ref == references_.end() and e.first != "ADDRESS" ) {
+            issues_ += "Rule '" + e.first + "' defined by not referenced!\n";
+            if ( status_ == CHECK_OK )
+                status_ = CHECK_WARN;
+        }
+    }
+
+    for ( const auto &e : rules_ ) {
+        auto ref = references_.find( e.first );
+        if ( ref == references_.end() and e.first != "ADDRESS" ) {
+            issues_ += "Rule '" + e.first + "' defined by not referenced!\n";
+            if ( status_ == CHECK_OK )
+                status_ = CHECK_WARN;
+        }
+    }
+
+    // done with reference vector so clear it
+    references_.clear();
 }
 
 

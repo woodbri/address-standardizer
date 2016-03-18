@@ -13,6 +13,30 @@
 
 #include "utils.h"
 
+void Utils::count( const std::string key ) {
+    auto it = counts_.find( key );
+    if ( it == counts_.end() ) {
+        counts_[key] = 1;
+    }
+    else {
+        (it->second)++;
+    }
+}
+
+
+void Utils::clear( const std::string key ) {
+    counts_.erase( key );
+}
+
+unsigned long int Utils::getCount( const std::string key ) {
+    auto it = counts_.find( key );
+    if ( it == counts_.end() ) 
+        return 0;
+    else
+        return it->second;
+}
+
+
 using icu::UnicodeSet;
 using icu::UnicodeString;
 

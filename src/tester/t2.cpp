@@ -27,6 +27,8 @@
 #include <vector>
 #include <chrono>
 
+std::map<std::string, unsigned long int> Utils::counts_;
+
 int main(int ac, char* av[]) {
 
     if (ac < 4 or ac > 5) {
@@ -146,8 +148,12 @@ int main(int ac, char* av[]) {
                 std::cout << "WARNING loading grammar: " << G.issues() << "\n";
                 break;
             case Grammar::CHECK_OK:
+                std::cout << "OK loading grammar: " << G.issues() << "\n";
                 break;
         }
+
+        std::cout << "--Gramar-------------------\n" << G
+                << "\n---------------------------\n";
 
         Search S( G );
 
@@ -158,6 +164,10 @@ int main(int ac, char* av[]) {
         diff = t1 - t0;
         dt = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
         std::cout << "Timer: Search::searchAndReclassBest: " << dt.count() << " ms\n";
+
+        std::cout << "Stats: findMetas: " << Utils::getCount("findMetas") << "\n";
+        std::cout << "Stats: findRules: " << Utils::getCount("findRules") << "\n";
+
 
         if ( bestCost < 0.0 ) {
             std::cout << "#### Failed to find a match (searchAndReclassBest)(" << bestCost << ")\n";

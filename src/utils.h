@@ -15,6 +15,7 @@
 #define UTILS_H
 
 #include <string>
+#include <map>
 #include <unicode/utypes.h>
 #include <unicode/uchar.h>
 #include <unicode/locid.h>
@@ -31,6 +32,14 @@ public:
     static std::string unaccentUTF8( const std::string &str );
     static std::string upperCaseUTF8( const std::string &str, const std::string lang );
     static std::string normalizeUTF8( const std::string &str, UErrorCode &errorCode);
+
+    static void count( const std::string );
+    static void clear( const std::string );
+    static unsigned long int getCount( const std::string );
+
+private:
+
+    static std::map<std::string, unsigned long int> counts_;
 
 };
 

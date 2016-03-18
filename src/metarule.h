@@ -19,6 +19,7 @@
 #include <string>
 #include <sstream>
 
+#include "sectionptr.h"
 
 class MetaRule {
 
@@ -26,15 +27,15 @@ public:
     MetaRule() {};
     MetaRule( const std::string &line );
     long unsigned int size() const { return refs_.size(); };
-    std::vector<std::string> refs() const { return refs_; };
+    std::vector<SectionPtr> refs() const { return refs_; };
 
-    void refs( const std::vector<std::string> &refs ) { refs_ = refs; };
-    void push_back( std::string &str ) { refs_.push_back( str ); };
+    void refs( const std::vector<SectionPtr> &refs ) { refs_ = refs; };
+    void push_back( SectionPtr &ptr ) { refs_.push_back( ptr ); };
 
     friend std::ostream &operator<<(std::ostream &ss, const MetaRule &r);
 
 private:
-    std::vector<std::string> refs_;
+    std::vector<SectionPtr> refs_;
 
 };
 
