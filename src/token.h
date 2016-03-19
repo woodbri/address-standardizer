@@ -27,7 +27,7 @@ class Token {
 public:
 
     Token();
-    Token(std::string text);
+    explicit Token(std::string text);
 
     // getters
     std::string text() const { return text_; };

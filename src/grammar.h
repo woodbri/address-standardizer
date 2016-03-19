@@ -36,8 +36,8 @@ public:
     } Status;
 
     Grammar( const Grammar& ) = default;
-    Grammar( const std::string &file );
-    Grammar( std::istream &is );
+    explicit Grammar( const std::string &file );
+    explicit Grammar( std::istream &is );
 
     void initialize( std::istream &is );
 //    void check();

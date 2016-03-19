@@ -221,10 +221,10 @@ void Grammar::updatePointers() {
     issues_.clear();
     references_.clear();
     status_ = CHECK_OK;
-    for ( auto &meta : metas_ ) {
-        std::string metaName = meta.second.name();
-        for ( const auto &rules : meta.second.rules() ) {
-            for ( auto &ref : rules.refs() ) {
+    for ( auto &metaSection : metas_ ) {
+        std::string metaName = metaSection.second.name();
+        for ( const auto &metaRules : metaSection.second.rules() ) {
+            for ( auto &ref : metaRules.refs() ) {
                 std::string word = ref.name();
                 if ( references_.find( word ) == references_.end() )
                     references_[word] = 1;
@@ -232,7 +232,7 @@ void Grammar::updatePointers() {
                     references_[word] = references_[word] + 1;
 
                 if ( ref.name() == metaName )
-                    ref.mptr( &( meta.second ) );
+                    ref.mptr( &( metaSection.second ) );
                 else {
                     auto m = metas_.find( ref.name() );
                     if ( m != metas_.end() )
@@ -241,11 +241,14 @@ void Grammar::updatePointers() {
                         auto r = rules_.find( ref.name() );
                         if ( r != rules_.end() ) {
                             ref.rptr( &( r->second ) );
-                            for ( const auto &a : r->second.rules() ) {
-                                if ( not a.isValid() ) {
-                                    issues_ += "Invalid rule at [" + ref.name() + "]\n";
-                                    status_ = CHECK_FATAL;
+                            if ( checked_.find( ref.name() ) == checked_.end() ) {
+                                for ( const auto &a : r->second.rules() ) {
+                                    if ( not a.isValid() ) {
+                                        issues_ += "Invalid rule at [" + ref.name() + "]\n";
+                                        status_ = CHECK_FATAL;
+                                    }
                                 }
+                                checked_.insert( ref.name() );
                             }
 
                         }
@@ -274,6 +277,19 @@ void Grammar::updatePointers() {
             issues_ += "Rule '" + e.first + "' defined by not referenced!\n";
             if ( status_ == CHECK_OK )
                 status_ = CHECK_WARN;
+        }
+
+        // check all the pointers are set correctly
+
+        for ( const auto &rules : e.second.rules() ) {
+            for ( const auto &r : rules.refs() ) {
+                if ( r.mptr() == NULL )
+                    std::cout << "POINTERS: " << e.second.name() << "."
+                        << r.name() << " mptr is NULL!\n";
+                if ( r.rptr() != NULL )
+                    std::cout << "POINTERS: " << e.second.name() << "."
+                        << r.name() << " rptr is not NULL!\n";
+            }
         }
     }
 

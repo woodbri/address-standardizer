@@ -26,7 +26,7 @@ class RuleSection {
 
 public:
     RuleSection() {};
-    RuleSection( const std::string &name ) : name_(name) {};
+    explicit RuleSection( const std::string &name ) : name_(name) {};
     std::string name() const { return name_; };
     long unsigned int size() const { return rules_.size(); };
     Rule rule( long unsigned int index ) const;

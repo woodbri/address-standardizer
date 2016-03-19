@@ -27,7 +27,7 @@ public:
     // constructors
     Rule( const Rule &rule ) = default;
     Rule() : score_(0.0) {};
-    Rule( const std::string &line );
+    explicit Rule( const std::string &line );
 
     // accessors
     std::vector<InClass::Type> in() const { return inClass_; };

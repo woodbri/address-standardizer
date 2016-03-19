@@ -25,7 +25,7 @@ class MetaRule {
 
 public:
     MetaRule() {};
-    MetaRule( const std::string &line );
+    explicit MetaRule( const std::string &line );
     long unsigned int size() const { return refs_.size(); };
     std::vector<SectionPtr> refs() const { return refs_; };
 

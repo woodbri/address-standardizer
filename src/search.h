@@ -54,10 +54,11 @@ public:
 
 private:
 
-    SearchPaths match( const SectionPtr &ptr, const SearchPaths &paths, const int level ) const;
-    SearchPaths match( const SectionPtr &ptr, const SearchPath &path, const int level ) const;
-    SearchPaths matchNext( const SearchPaths &paths, const int level ) const;
-    SearchPaths matchNext( const SearchPath &path, const int level ) const;
+    SectionPtr stringToSectionPtr( std::string str );
+    SearchPaths match( const SectionPtr &ptr, const SearchPaths &paths, const unsigned long int level ) const;
+    SearchPaths match( const SectionPtr &ptr, const SearchPath &path, const unsigned long int level ) const;
+    SearchPaths matchNext( const SearchPaths &paths, const unsigned long int level ) const;
+    SearchPaths matchNext( const SearchPath &path, const unsigned long int level ) const;
     SearchPath matchRule( const Rule &r, const SearchPath &path ) const;
 
 protected:

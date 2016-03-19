@@ -17,7 +17,8 @@ class SectionPtr
 {
 public:
 
-    SectionPtr(std::string name) : name_( name ) , mptr_( NULL ) , rptr_( NULL ) {};
+    SectionPtr( const SectionPtr& ) = default;
+    explicit SectionPtr(std::string name) : name_( name ) , mptr_( NULL ) , rptr_( NULL ) {};
 
     MetaSection * mptr() const { return mptr_; };
     RuleSection * rptr() const { return rptr_; };
@@ -25,6 +26,11 @@ public:
 
     void mptr( MetaSection * ptr ) { mptr_ = ptr; };
     void rptr( RuleSection * ptr ) { rptr_ = ptr; };
+
+    inline friend std::ostream &operator<<(std::ostream &ss, const SectionPtr &p) {
+        ss << " " << p.name_;
+        return ss;
+    };
 
 private:
 
