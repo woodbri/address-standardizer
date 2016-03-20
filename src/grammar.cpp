@@ -73,7 +73,8 @@ void Grammar::initialize( std::istream &is )
             else if ( ruleType == ISMETA ) {
                 MetaSection ms(gotSection);
                 ms.rules(mrules);
-                metas_[gotSection] = ms;
+                sectionIndex_[gotSection] = metas_.size();
+                metas_.push_back( ms );
                 ruleType = UNKNWN;
                 mrules.clear();
                 rules.clear();
@@ -81,7 +82,8 @@ void Grammar::initialize( std::istream &is )
             else if ( ruleType == ISRULE ) {
                 RuleSection rs(gotSection);
                 rs.rules(rules);
-                rules_[gotSection] = rs;
+                sectionIndex_[gotSection] = rules_.size();
+                rules_.push_back( rs );
                 ruleType = UNKNWN;
                 mrules.clear();
                 rules.clear();
@@ -91,8 +93,7 @@ void Grammar::initialize( std::istream &is )
             gotSection = what[1];
     
             // check if the section already exists
-            if ( metas_.find(gotSection) != metas_.end() or
-                 rules_.find(gotSection) != rules_.end() )
+            if ( sectionIndex_.find(gotSection) != sectionIndex_.end() )
                 throw std::runtime_error("Grammar-Duplicate-Section_Name");
         }
         // load data into section
@@ -125,17 +126,19 @@ void Grammar::initialize( std::istream &is )
             }
         }
     }
-    // save the last section with read in
+    // save the last section we read in
     if (gotSection.length() > 0) {
         if ( ruleType == ISMETA ) {
             MetaSection ms(gotSection);
             ms.rules(mrules);
-            metas_[gotSection] = ms;
+            sectionIndex_[gotSection] = metas_.size();
+            metas_.push_back( ms );
         }
         else if ( ruleType == ISRULE ) {
             RuleSection rs(gotSection);
             rs.rules(rules);
-            rules_[gotSection] = rs;
+            sectionIndex_[gotSection] = rules_.size();
+            rules_.push_back( rs );
         }
 
         ruleType = UNKNWN;
@@ -154,171 +157,141 @@ void Grammar::initialize( std::istream &is )
 }
 
 
-/*
-void Grammar::check() {
-    issues_.clear();
-    references_.clear();
-    checked_.clear();
-    status_ = CHECK_OK;
-
-    check( "", "ADDRESS" );
-
-    for ( const auto &e : rules_ ) {
-        auto ref = references_.find( e.first );
-        if ( ref == references_.end() and e.first != "ADDRESS" ) {
-            issues_ += "Rule '" + e.first + "' defined by not referenced!\n";
-            if ( status_ == CHECK_OK )
-                status_ = CHECK_WARN;
-        }
-    }
-
-    // done with reference vector so clear it
-    references_.clear();
-}
-
-void Grammar::check( std::string section, std::string key ) {
-
-    auto rule = rules_.find( key );
-    auto meta = metas_.find( key );
-
-    // mark this key as checked
-    checked_.insert( key );
-
-    if ( rule != rules_.end() ) {
-        for ( const auto &r : ((*rule).second).rules() ) {
-            if ( not r.isValid() ) {
-                issues_ += "Invalid rule at [" + key + "]\n";
-                status_ = CHECK_FATAL;
-            }
-        }
-    }
-    else if ( meta != metas_.end() ) {
-        for ( const auto &r : ((*meta).second).rules() ) {
-            std::vector<std::string> words = r.refs();
-            for ( const auto &word : words ) {
-                // avoid recursive checking of already checked items
-                if ( checked_.find( word ) == checked_.end() )
-                    check( key, word );
-                auto ref = references_.find( word );
-                if (ref == references_.end())
-                    references_[word] = 1;
-                else
-                    references_[word] = references_[word] + 1;
-            }
-        }
-    }
-    else {
-        issues_ += "Missing rule: " + key +
-            " : referenced at [" + section + "]\n";
-        status_ = CHECK_FATAL;
-        return;
-    }
-}
-*/
-
-
 void Grammar::updatePointers() {
     issues_.clear();
     references_.clear();
     status_ = CHECK_OK;
-    for ( auto &metaSection : metas_ ) {
-        std::string metaName = metaSection.second.name();
-        for ( const auto &metaRules : metaSection.second.rules() ) {
-            for ( auto &ref : metaRules.refs() ) {
-                std::string word = ref.name();
+
+    // for each MetaSection
+    for ( unsigned long int i=0; i<metas_.size(); i++ ) {
+        // get the name and a copy of this MetaSections rules
+        const std::string& metaName = metas_[i].name();
+        auto metaRules = metas_[i].rules();
+
+        // for each metaRules
+        for ( unsigned long int j=0; j<metaRules.size(); j++ ) {
+            // get a copy of this metaRule SectionPtrs as refs
+            auto refs = metaRules[j].refs();
+
+            // for each SectionPtr in refs
+            for ( auto &ref : refs ) {
+                // get the name of this SectionPtr
+                const std::string word = ref.name();
+
+                // update the reference stats
                 if ( references_.find( word ) == references_.end() )
                     references_[word] = 1;
                 else
                     references_[word] = references_[word] + 1;
 
-                if ( ref.name() == metaName )
-                    ref.mptr( &( metaSection.second ) );
+                if ( word == metaName )
+                    // if this is self referential then point to self
+                    ref.mptr( &( metas_[i] ) );
                 else {
-                    auto m = metas_.find( ref.name() );
-                    if ( m != metas_.end() )
-                        ref.mptr( &( m->second ) );
+                    // otherwise find the SectionPtr this refers to
+                    auto m = sectionIndex_.find( word );
+                    if ( m != sectionIndex_.end() ) {
+                        // see if it refers to a metaSection
+                        if ( m->second < metas_.size()
+                             and metas_[m->second].name() == word ) {
+                            ref.mptr( &( metas_[m->second] ) );
+                        }
+                        // see if it refers to a ruleSection
+                        else if ( m->second < rules_.size()
+                                  and rules_[m->second].name() == word ) {
+                            ref.rptr( &( rules_[m->second] ) );
+                        }
+                        // otherwise something really bad is happening
+                        else
+                            throw std::runtime_error( "Grammar-updatePointers-consistency-check-failed" );
+                    }
+                    // or flag it as an issue if it is missing
                     else {
-                        auto r = rules_.find( ref.name() );
-                        if ( r != rules_.end() ) {
-                            ref.rptr( &( r->second ) );
-                            if ( checked_.find( ref.name() ) == checked_.end() ) {
-                                for ( const auto &a : r->second.rules() ) {
-                                    if ( not a.isValid() ) {
-                                        issues_ += "Invalid rule at [" + ref.name() + "]\n";
-                                        status_ = CHECK_FATAL;
-                                    }
-                                }
-                                checked_.insert( ref.name() );
-                            }
-
-                        }
-                        else {
-                            issues_ += "Missing rule: " + ref.name() +
-                                " : referenced at [" + metaName + "]\n";
-                            status_ = CHECK_FATAL;
-                        }
+                        issues_ += "Missing rule: " + word +
+                            " : referenced at [" + metaName + "]\n";
+                        status_ = CHECK_FATAL;
                     }
                 }
             }
+            // now that we have updated our local copy of refs
+            // save it back into the appropriate metaRule
+            metaRules[j].refs( refs );
         }
+        // now that all the metaRules have been updated in our local copy
+        // save them back into the original metaSection
+        metas_[i].rules( metaRules );
     }
 
     // check the status of all references and make sure we have 'ADDRESS'
 
-    const auto addr = metas_.find( "ADDRESS" );
-    if ( addr == metas_.end() ) {
+    const auto addr = sectionIndex_.find( "ADDRESS" );
+    if ( addr == sectionIndex_.end() ) {
         issues_ += "Rule 'ADDRESS' is not defined!\n";
         status_ = CHECK_FATAL;
     }
 
     for ( const auto &e : metas_ ) {
-        auto ref = references_.find( e.first );
-        if ( ref == references_.end() and e.first != "ADDRESS" ) {
-            issues_ += "Rule '" + e.first + "' defined by not referenced!\n";
+        auto ref = references_.find( e.name() );
+        if ( ref == references_.end() and e.name() != "ADDRESS" ) {
+            issues_ += "Rule '" + e.name() + "' defined by not referenced!\n";
             if ( status_ == CHECK_OK )
                 status_ = CHECK_WARN;
         }
 
         // check all the pointers are set correctly
 
-        for ( const auto &rules : e.second.rules() ) {
+        for ( const auto &rules : e.rules() ) {
             for ( const auto &r : rules.refs() ) {
-                if ( r.mptr() == NULL )
-                    std::cout << "POINTERS: " << e.second.name() << "."
-                        << r.name() << " mptr is NULL!\n";
-                if ( r.rptr() != NULL )
-                    std::cout << "POINTERS: " << e.second.name() << "."
-                        << r.name() << " rptr is not NULL!\n";
+                if ( r.mptr() == NULL and r.rptr() == NULL )
+                    std::cout << "POINTERS: " << e.name() << "."
+                        << r.name() << " both pointers are NULL!\n";
+                if ( r.rptr() != NULL and r.mptr() != NULL )
+                    std::cout << "POINTERS: " << e.name() << "."
+                        << r.name() << " both are not NULL!\n";
             }
         }
     }
 
+    // check all the rules and make sure they are valid
+
     for ( const auto &e : rules_ ) {
-        auto ref = references_.find( e.first );
-        if ( ref == references_.end() and e.first != "ADDRESS" ) {
-            issues_ += "Rule '" + e.first + "' defined by not referenced!\n";
+        auto ref = references_.find( e.name() );
+        if ( ref == references_.end() and e.name() != "ADDRESS" ) {
+            issues_ += "Rule '" + e.name() + "' defined by not referenced!\n";
             if ( status_ == CHECK_OK )
                 status_ = CHECK_WARN;
         }
+        if ( checked_.find( e.name() ) == checked_.end() ) {
+            int pos = 1;
+            for ( const auto &rule : e.rules() ) {
+                if ( not rule.isValid() ) {
+                    issues_ += "Invalid rule at [" + e.name() + "]["
+                        + std::to_string(pos) + "]\n";
+                    status_ = CHECK_FATAL;
+                }
+                ++pos;
+            }
+            checked_.insert( e.name() );
+        }
     }
 
-    // done with reference vector so clear it
+    // done with reference_ and checked_ so clear them
     references_.clear();
+    checked_.clear();
 }
 
 
 
 std::ostream &operator<<(std::ostream &ss, const Grammar &g) {
     for ( const auto &e : g.metas_ ) {
-//        ss << "[" << e.first << "]\n";
-        ss << e.second << "\n";
-//        ss << "\n";
+        ss << e << "\n";
     }
     for ( const auto &e : g.rules_ ) {
-//        ss << "[" << e.first << "]\n";
-        ss << e.second << "\n";
-//        ss << "\n";
+        ss << e << "\n";
     }
 
     return ss;
 }
+
+
+

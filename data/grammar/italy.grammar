@@ -21,6 +21,10 @@
 @city @citywords
 @city
 
+[city]
+CITY -> CITY -> 0.9
+WORD -> CITY -> 0.5
+
 [placename]
 PLACEN -> BLDNG -> 0.7
 PLACEN WORD -> BLDNG BLDNG -> 0.6
@@ -67,10 +71,6 @@ UNITH NUMBER SINGLE UNITH NUMBER -> UNITH UNITT UNITT UNITH UNITT -> 0.7
 
 [pobox]
 BOXH NUMBER -> BOXH BOXT -> 0.7
-
-[city]
-CITY -> CITY -> 0.9
-WORD -> CITY -> 0.5
 
 [region]
 PROV -> PROV -> 0.9

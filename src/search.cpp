@@ -17,7 +17,8 @@
 
 
 SearchPaths Search::search( const std::string &grammarNode, const std::vector<Token> &phrase ) {
-    recursion_limit_ = ( phrase.size() / 4 + 2  > 20 ) ? 20 : phrase.size() / 4 + 2;
+    recursion_limit_ = phrase.size() + 2;
+    //recursion_limit_ = 40;
 
     // tracing
 #ifdef TRACING_SEARCH
@@ -153,20 +154,24 @@ std::vector<Token> Search::searchAndReclassBest( const std::vector<std::vector<T
 
 
 SectionPtr Search::stringToSectionPtr( std::string str ) {
-    auto meta = metas_.find( str );
-    if ( meta != metas_.end() ) {
-        SectionPtr ptr( str );
-        ptr.mptr( & meta->second );
-        return ptr;
-    }
+    auto idx = sectionIndex_.find( str );
+    if ( idx != sectionIndex_.end() ) {
 
-    auto rule = rules_.find( str );
-    if ( rule != rules_.end() ) {
-        SectionPtr ptr( str );
-        ptr.rptr( & rule->second );
-        return ptr;
-    }
+        if ( idx->second < metas_.size() 
+             and str == metas_[idx->second].name() ) {
+            SectionPtr ptr( str );
+            ptr.mptr( & metas_[idx->second] );
+            return ptr;
+        }
 
+        if ( idx->second < rules_.size() 
+             and str == rules_[idx->second].name() ) {
+            SectionPtr ptr( str );
+            ptr.rptr( & rules_[idx->second] );
+            return ptr;
+        }
+
+    }
     throw std::runtime_error( std::string("Search-Rule-Not-Found:")+str );
 }
 
@@ -201,7 +206,7 @@ SearchPaths Search::match( const SectionPtr &sectionPtr, const SearchPath &path,
 #ifdef TRACING_SEARCH
     std::cout << level << ": Search::match2('" << sectionPtr.name()
         << "'(" << sectionPtr.mptr() << ","
-        << sectionPtr.mptr() << ")" << "[";
+        << sectionPtr.rptr() << ")" << "[";
     for (const auto &t_e : path.remaining)
         std::cout << InClass::asString(t_e) << " ";
     std::cout << "])\n";

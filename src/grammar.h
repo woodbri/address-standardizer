@@ -61,8 +61,9 @@ private:
 
 protected:
 
-    std::map<std::string, MetaSection> metas_;
-    std::map<std::string, RuleSection> rules_;
+    std::vector<MetaSection> metas_;
+    std::vector<RuleSection> rules_;
+    std::map<std::string,unsigned long int> sectionIndex_;
 
     // temp storage for analysis and checking of grammar
     std::string issues_;
