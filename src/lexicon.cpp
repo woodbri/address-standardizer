@@ -311,9 +311,11 @@ void Lexicon::insert( const LexEntry &le ) {
     // save it back in the lexicon
     lex_[key] = entries;
 
-    // set cached regex string to empty
+    // set cached regex strings to empty
     // so it will get regenerated
-    regex_ = "";
+    regex_.clear();
+    regexPrefix_.clear();
+    regexSuffix_.clear();
 }
 
 
@@ -328,7 +330,7 @@ void Lexicon::remove( const LexEntry &le ) {
     if (entries.size() == 0)
         return;
 
-    // see if it is already here and do nothing if it is
+    // see if it is already here and erase it if it is
     for( auto entry=entries.begin(); entry!=entries.end(); entry++ ) {
         if ( *entry == le ) {
             entries.erase( entry );
@@ -367,7 +369,7 @@ std::string Lexicon::regex() {
         for ( const auto &e : lex_ )
             keys.push_back( e.first );
 
-        // sort them based on length desc
+        // sort them based on longest to shortest
         std::sort(keys.begin(), keys.end(), sortByStringLength);
 
         // concat them into a regex fragment
@@ -394,7 +396,7 @@ std::string Lexicon::regexPrefixAtt() {
                 if ( le.isPrefixAttached() )
                         prefix.push_back(e.first);
 
-        // sort them based on length desc
+        // sort them based on longest to shortest
         std::sort(prefix.begin(), prefix.end(), sortByStringLength);
 
         // concat them into a regex fragment
@@ -425,7 +427,7 @@ std::string Lexicon::regexSuffixAtt() {
                 if ( le.isSuffixAttached() )
                         suffix.push_back(e.first);
 
-        // sort them based on length desc
+        // sort them based on longest to shortest
         std::sort(suffix.begin(), suffix.end(), sortByStringLength);
 
         // concat them into a regex fragment
@@ -464,3 +466,5 @@ std::string Lexicon::escapeRegex( const std::string &str ) {
 
     return outstr;
 }
+
+
