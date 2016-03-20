@@ -24,7 +24,9 @@ WORD WORD WORD WORD -> BLDNG BLDNG BLDNG BLDNG -> 0.1
 
 [macro]
 @city @prov @postal @nation
+@city @prov @postal
 @city @prov @nation
+@city @prov
 
 [pobox]
 BOXH NUMBER -> BOXH BOXT -> 0.7
