@@ -17,7 +17,8 @@
 
 
 SearchPaths Search::search( const std::string &grammarNode, const std::vector<Token> &phrase ) {
-    recursion_limit_ = ( phrase.size() / 4  > 20 ) ? 20 : phrase.size() / 4;
+    recursion_limit_ = phrase.size() + 2;
+    //recursion_limit_ = 40;
 
     // tracing
 #ifdef TRACING_SEARCH
@@ -44,7 +45,8 @@ SearchPaths Search::search( const std::string &grammarNode, const std::vector<To
     // we need to check if we consumed all the tokens
     // and toss out partial matches
     SearchPaths results;
-    SearchPaths matchs = match( grammarNode, patterns, 0 );
+    auto grammarNodePtr = stringToSectionPtr( grammarNode );
+    SearchPaths matchs = match( grammarNodePtr, patterns, 0 );
     for ( const auto match : matchs )
         if ( match.remaining.size() == 0 )
             results.push_back( match );
@@ -151,9 +153,32 @@ std::vector<Token> Search::searchAndReclassBest( const std::vector<std::vector<T
 // ---------------------- PRIVATE ----------------------------
 
 
-SearchPaths Search::match( const std::string &name, const SearchPaths &paths, const int level ) const {
+SectionPtr Search::stringToSectionPtr( std::string str ) {
+    auto idx = sectionIndex_.find( str );
+    if ( idx != sectionIndex_.end() ) {
+
+        if ( idx->second < metas_.size() 
+             and str == metas_[idx->second].name() ) {
+            SectionPtr ptr( str );
+            ptr.mptr( & metas_[idx->second] );
+            return ptr;
+        }
+
+        if ( idx->second < rules_.size() 
+             and str == rules_[idx->second].name() ) {
+            SectionPtr ptr( str );
+            ptr.rptr( & rules_[idx->second] );
+            return ptr;
+        }
+
+    }
+    throw std::runtime_error( std::string("Search-Rule-Not-Found:")+str );
+}
+
+
+SearchPaths Search::match( const SectionPtr &sectionPtr, const SearchPaths &paths, const unsigned long int level ) const {
 #ifdef TRACING_SEARCH
-    std::cout << level << ": Search::match1('" << name << "'[";
+    std::cout << level << ": Search::match1('" << sectionPtr.name() << "'[";
     for (const auto &t_p : paths ) {
         std::cout << "{";
         for (const auto &t_e : t_p.remaining)
@@ -165,7 +190,7 @@ SearchPaths Search::match( const std::string &name, const SearchPaths &paths, co
 
     SearchPaths results;
     for ( const auto &path : paths ) {
-        SearchPaths pathResults = match( name, path, level );
+        SearchPaths pathResults = match( sectionPtr, path, level );
         for ( const auto result : pathResults )
             results.push_back( result );
     }
@@ -177,26 +202,29 @@ SearchPaths Search::match( const std::string &name, const SearchPaths &paths, co
 }
 
 
-SearchPaths Search::match( const std::string &name, const SearchPath &path, const int level ) const {
+SearchPaths Search::match( const SectionPtr &sectionPtr, const SearchPath &path, const unsigned long int level ) const {
 #ifdef TRACING_SEARCH
-    std::cout << level << ": Search::match2('" << name << "'[";
+    std::cout << level << ": Search::match2('" << sectionPtr.name()
+        << "'(" << sectionPtr.mptr() << ","
+        << sectionPtr.rptr() << ")" << "[";
     for (const auto &t_e : path.remaining)
         std::cout << InClass::asString(t_e) << " ";
     std::cout << "])\n";
 #endif
 
     // check for recursion limit
-    if ( level > 20 ) {
+    if ( level > recursion_limit_ ) {
 #ifdef TRACING_SEARCH
         std::cout << level << ": Search::match2(0) hit recurssion limit! ###\n";
 #endif
         return SearchPaths();
     }
 
-    auto meta = metas_.find( name );
-    if ( meta != metas_.end() ) {
+    auto meta = sectionPtr.mptr();
+    if ( meta != NULL ) {
+        Utils::count("findMetas");
         SearchPaths results;
-        for ( const auto &r : (meta->second).rules() ) {
+        for ( const auto &r : meta->rules() ) {
             SearchPath current( path );
             current.next = r.refs();
             for ( const auto &e : path.next )
@@ -214,10 +242,11 @@ SearchPaths Search::match( const std::string &name, const SearchPath &path, cons
         return results;
     }
 
-    auto rule = rules_.find( name );
-    if ( rule != rules_.end() ) {
+    auto rule = sectionPtr.rptr();
+    if ( rule != NULL ) {
+        Utils::count("findRules");
         SearchPaths results;
-        for ( const auto &r : (rule->second).rules() ) {
+        for ( const auto &r : rule->rules() ) {
             auto mr = matchRule( r, path );
             if ( mr.rules.size() > 0 )
                 results.push_back( mr );
@@ -235,7 +264,7 @@ SearchPaths Search::match( const std::string &name, const SearchPath &path, cons
 }
 
 
-SearchPaths Search::matchNext( const SearchPaths &paths, const int level ) const {
+SearchPaths Search::matchNext( const SearchPaths &paths, const unsigned long int level ) const {
 #ifdef TRACING_SEARCH
     std::cout << level << ": Search::matchNext1(paths)\n";
 #endif
@@ -255,7 +284,7 @@ SearchPaths Search::matchNext( const SearchPaths &paths, const int level ) const
 }
 
 
-SearchPaths Search::matchNext( const SearchPath &path, const int level ) const {
+SearchPaths Search::matchNext( const SearchPath &path, const unsigned long int level ) const {
 #ifdef TRACING_SEARCH
     std::cout << level << ": Search::matchNext2(path)\n";
     std::cout << "\tNext:";
@@ -277,13 +306,13 @@ SearchPaths Search::matchNext( const SearchPath &path, const int level ) const {
 
     SearchPaths results;
     SearchPath current( path );
-    auto word = current.next.front();
+    auto sectionPtr = current.next.front();
     current.next.erase( current.next.begin() );
 
-    SearchPaths mr = match( word, current, level+1 );
+    SearchPaths mr = match( sectionPtr, current, level+1 );
     if ( mr.size() == 0 ) {
 #ifdef TRACING_SEARCH
-        std::cout << level << ": Returning: Search::matchNext2(0) for '" << word << "'\n";
+        std::cout << level << ": Returning: Search::matchNext2(0) for '" << sectionPtr.name() << "'\n";
 #endif
         return SearchPaths();
     }

@@ -29,7 +29,7 @@ MetaRule::MetaRule( const std::string &line ) {
 
     while ( boost::u32regex_search( start, end, what, re_meta ) ) {
         if (what[1].first < what[1].second)
-            refs_.push_back( std::string( what[1].first, what[1].second ) );
+            refs_.push_back( SectionPtr( std::string( what[1].first, what[1].second ) ) );
         start = what[0].second;
     }
 }
@@ -41,7 +41,7 @@ std::ostream &operator<<(std::ostream &ss, const MetaRule &r) {
     for (const auto &e : r.refs_) {
         if (not first)
             ss << " ";
-        ss << "@" << e;
+        ss << "@" << e.name();
         first = false;
     }
 

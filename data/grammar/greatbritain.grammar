@@ -12,17 +12,17 @@
 @pobox
 
 [macro]
-@citywords @prov @postal @country
-@citywords @prov @country
-@citywords @prov @postal
-@citywords @prov
-@citywords @postal @country
-@citywords @country
-@citywords @postal
+@city @prov @postal @country
+@city @prov @country
+@city @prov @postal
+@city @prov
+@city @postal @country
+@city @country
+@city @postal
 
-[citywords]
-@city @citywords
-@city
+#[citywords]
+#@city @citywords
+#@city
 
 [building]
 @buildt @buildn

@@ -33,7 +33,7 @@ protected:
 public:
     // constructors
     Lexicon();
-    Lexicon(std::string name);
+    explicit Lexicon(std::string name);
     Lexicon(std::string name, std::string file);
     Lexicon(std::string name, std::istream &is);
 

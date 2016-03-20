@@ -21,12 +21,14 @@
 #include "outclass.h"
 #include "token.h"
 #include "rule.h"
+#include "utils.h"
+#include "sectionptr.h"
 #include "grammar.h"
 
 class SearchPath {
 public:
     std::vector<Rule> rules;
-    std::vector<std::string> next;
+    std::vector<SectionPtr> next;
     std::vector<InClass::Type> remaining;
 };
 
@@ -52,10 +54,11 @@ public:
 
 private:
 
-    SearchPaths match( const std::string &name, const SearchPaths &paths, const int level ) const;
-    SearchPaths match( const std::string &name, const SearchPath &path, const int level ) const;
-    SearchPaths matchNext( const SearchPaths &paths, const int level ) const;
-    SearchPaths matchNext( const SearchPath &path, const int level ) const;
+    SectionPtr stringToSectionPtr( std::string str );
+    SearchPaths match( const SectionPtr &ptr, const SearchPaths &paths, const unsigned long int level ) const;
+    SearchPaths match( const SectionPtr &ptr, const SearchPath &path, const unsigned long int level ) const;
+    SearchPaths matchNext( const SearchPaths &paths, const unsigned long int level ) const;
+    SearchPaths matchNext( const SearchPath &path, const unsigned long int level ) const;
     SearchPath matchRule( const Rule &r, const SearchPath &path ) const;
 
 protected:

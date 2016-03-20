@@ -26,7 +26,7 @@ class MetaSection {
 
 public:
     MetaSection() {};
-    MetaSection( const std::string &name ) : name_(name) {};
+    explicit MetaSection( const std::string &name ) : name_(name) {};
     std::string name() const { return name_; };
     long unsigned int size() const { return rules_.size(); };
     MetaRule rule( long unsigned int index ) const;
