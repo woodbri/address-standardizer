@@ -62,8 +62,13 @@ int main(int ac, char* av[]) {
     std::istringstream iss;
     std::string s;
     std::ifstream t(lfile);
+    if ( t.fail() ) {
+        std::cout << "ERROR: failed to open '" << lfile << "' for read!\n";
+        return 1;
+    }
     t.seekg(0, std::ios::end);
     s.clear();
+    std::cout << "t.tellg() = " << t.tellg() << "\n";
     s.reserve(t.tellg());
     t.seekg(0, std::ios::beg);
     s.assign((std::istreambuf_iterator<char>(t)),
@@ -117,6 +122,10 @@ int main(int ac, char* av[]) {
         // simulate the postgres call, by reading the whole file into a string
         t0 = std::chrono::system_clock::now();
         std::ifstream t(gfile);
+        if ( t.fail() ) {
+            std::cout << "ERROR: failed to open '" << gfile << "' for read!\n";
+            return 1;
+        }
         t.seekg(0, std::ios::end);
         s.reserve(t.tellg());
         t.seekg(0, std::ios::beg);
