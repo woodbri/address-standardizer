@@ -16,8 +16,9 @@
 #include <string>
 
 #include "grammar.h"
+#include "utils.h"
 
-
+std::map<std::string, unsigned long int> Utils::counts_;
 
 int main(int ac, char* av[])
 {

@@ -22,6 +22,8 @@
 #include <string>
 #include <vector>
 
+std::map<std::string, unsigned long int> Utils::counts_;
+
 int main(int ac, char* av[]) {
 
     if (ac < 3) {
