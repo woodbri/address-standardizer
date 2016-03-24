@@ -22,6 +22,7 @@
 #include <boost/regex.hpp>
 #include <boost/regex/icu.hpp>
 
+#include "trie.h"
 #include "inclass.h"
 #include "token.h"
 #include "lexentry.h"
