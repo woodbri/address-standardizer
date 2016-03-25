@@ -30,6 +30,12 @@ mDirty(source.mDirty)
 
 
 
+std::string Utf8Iterator::substr( Utf8Iterator &to ) {
+    return std::string( mStringIterator, to.mStringIterator );
+}
+
+
+
 Utf8Iterator& Utf8Iterator::operator=(const Utf8Iterator& rhs)
 {
     mStringIterator = rhs.mStringIterator;
@@ -230,7 +236,7 @@ bool Utf8Iterator::operator!=(std::string::const_iterator rhs) const
 
 std::string CodePointToUtf8( char32_t codePoint )
 {
-    if ( codePoint < 0x110000 )
+    if ( codePoint >= 0x110000 )
         throw std::runtime_error( "Invalid-Unicode-Code-Point" );
  
     std::string utf8Bytes;

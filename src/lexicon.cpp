@@ -367,7 +367,7 @@ std::string Lexicon::regex() {
 
 #define USE_TRIE
 #ifdef USE_TRIE
-        Trie trie;
+        TrieUtf8 trie;
         for ( const auto &e : lex_ )
             trie.addWord( e.first );
 
@@ -400,7 +400,7 @@ std::string Lexicon::regexPrefixAtt() {
 
     if (regexPrefix_.length() == 0) {
 #ifdef USE_TRIE
-        Trie trie;
+        TrieUtf8 trie;
         for ( const auto &e : lex_ )
             for ( const auto &le : e.second )
                 if ( le.isPrefixAttached() )
@@ -441,7 +441,7 @@ std::string Lexicon::regexSuffixAtt() {
 
     if (regexSuffix_.length() == 0) {
 #ifdef USE_TRIE
-        Trie trie;
+        TrieUtf8 trie;
         for ( const auto &e : lex_ )
             for ( const auto &le : e.second )
                 if ( le.isSuffixAttached() )

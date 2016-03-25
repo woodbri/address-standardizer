@@ -22,20 +22,21 @@
 
 void TrieUtf8::addWord( const std::string &word ) {
     Utf8Iterator it = word.begin();
-    if ( it != word.end() ) {
+    Utf8Iterator end = word.end();
+    if ( it != end ) {
         ++_size;
         // get the code point for the trie
         char32_t c = *it;
         ++it;  // step to the next code point
-        std::string subword( word.begin(), it );
+        std::string subword = it.substr( end );
         if ( _children[ c ] ) {
-            if ( it == word.end() )
-                _children[ c ]->isEnd = true;
+            if ( it == end )
+                _children[ c ]->_isEnd = true;
             else
-                _children[ c ]->addWord( subword )l
+                _children[ c ]->addWord( subword );
         }
         else {
-            TrieUtf8 *tmp = new TrieUtf8( it == word.end() );
+            TrieUtf8 *tmp = new TrieUtf8( it == end );
             tmp->addWord( subword );
             _children[ c ] = tmp;
         }
@@ -45,15 +46,16 @@ void TrieUtf8::addWord( const std::string &word ) {
 
 
 bool TrieUtf8::isPrefix( const std::string &pref ) const {
-    Utf8Iterator it = word.begin();
-    if ( it == pref.end() )
+    Utf8Iterator it = pref.begin();
+    Utf8Iterator end = pref.end();
+    if ( it == end )
         return true;
 
     char32_t c = *it;
     ++it;
     if ( _children.find( c ) != _children.end() ) {
         return _children.find( c )->second
-            ->isPrefix( std::string( it, pref.end() );
+            ->isPrefix( it.substr( end ) );
     }
     return false;
 }
@@ -68,12 +70,13 @@ bool TrieUtf8::isWord( const std::string &word ) const {
     const TrieUtf8 *tmp = this;
 
     while ( cursub.length() > 0 ) {
-        Utf8Iterator it = cursub.begin();
+        Utf8Iterator it( cursub.begin() );
+        Utf8Iterator end( cursub.end() );
         char32_t c = *it;
         ++it;
         if ( tmp->_children.find( c ) != tmp->_children.end() ) {
             tmp = tmp->_children.find( c )->second;
-            cursub = std::string( it, cursub.end() );
+            cursub = it.substr( end );
         } else {
             return false;
         }
@@ -98,15 +101,16 @@ void TrieUtf8::getWords( WordSet &words, std::string wordSoFar ) const {
 
 
 
-void TrieUtf8::getWordsStartingWith( std::string prefix, WordSet &words, std::string wordSoFar ) const {
+void TrieUtf8::getWordsStartingWith( const std::string &prefix, WordSet &words, std::string wordSoFar ) const {
     if ( prefix.size() == 0 ) {
         getWords( words, wordSoFar );
         return;
     }
-    Utf8Iterator it = prefix,begin();
+    Utf8Iterator it = prefix.begin();
+    Utf8Iterator end = prefix.end();
     char32_t c = *it;
     ++it;
-    std::string subword = std::string( it, prefix.end() );
+    std::string subword = it.substr( end );
     if ( _children.find( c ) != _children.end() ) {
         TrieUtf8 *tmp = _children.find( c )->second;
         std::string nwsf = wordSoFar + CodePointToUtf8( c );
@@ -116,14 +120,14 @@ void TrieUtf8::getWordsStartingWith( std::string prefix, WordSet &words, std::st
 
 
 
-std::string TrieUtf8::quoteMeta( const std:string &str ) const {
+std::string TrieUtf8::quoteMeta( const std::string &str ) const {
     static std::string special( "-.+*~$()[]\\|?" );
 
     std::string tmp;
     size_t last = 0;
     auto pos = str.find_first_of( special );
 
-    while ( pos != std::string:npos ) {
+    while ( pos != std::string::npos ) {
         tmp += std::string( str.begin()+last, str.begin()+pos )
             + "\\" + str[pos];
         last = pos + 1;

@@ -11,6 +11,7 @@
 #include <iterator>
 #include <stdexcept>
 
+typedef std::iterator<std::bidirectional_iterator_tag, char32_t, std::string::difference_type, const char32_t*, const char32_t&> StringItr;
 
 class Utf8Iterator : public std::iterator<std::bidirectional_iterator_tag, char32_t, std::string::difference_type, const char32_t*, const char32_t&>
 {
@@ -19,6 +20,8 @@ public:
     Utf8Iterator(std::string::const_iterator it);
     Utf8Iterator(const Utf8Iterator& source);
     ~Utf8Iterator();
+
+    std::string substr( Utf8Iterator &to );
 
     Utf8Iterator& operator=(const Utf8Iterator& rhs);
     Utf8Iterator& operator++();

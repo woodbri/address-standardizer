@@ -49,7 +49,7 @@ public:
     bool isWord( const std::string &word ) const;
     size_t size() const { return _size; };
     void getWords( WordSet &words, std::string wordSoFar="" ) const;
-    void getWordsStartingWith( std::string prefix, WordSet &words, std::string wordSoFar="" ) const;
+    void getWordsStartingWith( const std::string &prefix, WordSet &words, std::string wordSoFar="" ) const;
     std::string quoteMeta( const std::string &str ) const;
     std::string getRegexp() const;
     friend std::ostream &operator<<( std::ostream &ss, const TrieUtf8 &t );
