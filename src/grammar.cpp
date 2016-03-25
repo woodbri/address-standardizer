@@ -238,8 +238,9 @@ void Grammar::updatePointers() {
                 status_ = CHECK_WARN;
         }
 
-        // check all the pointers are set correctly
+#ifdef DEBUG
 
+        // check all the pointers are set correctly
         for ( const auto &rules : e.rules() ) {
             for ( const auto &r : rules.refs() ) {
                 if ( r.mptr() == NULL and r.rptr() == NULL )
@@ -250,6 +251,7 @@ void Grammar::updatePointers() {
                         << r.name() << " both are not NULL!\n";
             }
         }
+#endif
     }
 
     // check all the rules and make sure they are valid

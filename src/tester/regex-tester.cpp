@@ -18,8 +18,6 @@
 
 using namespace std;
 
-std::map<std::string, unsigned long int> Utils::counts_;
-
 int main( ) {
 
    std::string str, sre;

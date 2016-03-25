@@ -8,7 +8,7 @@ PG_CPPFLAGS = -O0 -g -Wall -std=c++0x -fPIC -frounding-math -Wno-deprecated -ped
 CPP = g++
 
 AS_VERSION = 2.0
-OBJS = address_standardizer.o as_wrapper.o grammar.o inclass.o lexentry.o lexicon.o metarule.o metasection.o outclass.o rule.o rulesection.o search.o token.o tokenizer.o utils.o
+OBJS = address_standardizer.o as_wrapper.o grammar.o inclass.o lexentry.o lexicon.o metarule.o metasection.o outclass.o rule.o rulesection.o search.o token.o tokenizer.o utils.o trieutf8.o utf8iterator.o
 MODULE_big = address_standardizer-$(AS_VERSION)
 EXTENSION = address_standardizer
 DATA = address_standardizer--$(AS_VERSION).sql

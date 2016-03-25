@@ -13,6 +13,8 @@
 
 #include "utils.h"
 
+std::map<std::string, unsigned long int> Utils::counts_;
+
 void Utils::count( const std::string key ) {
     auto it = counts_.find( key );
     if ( it == counts_.end() ) {
