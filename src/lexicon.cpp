@@ -364,6 +364,15 @@ std::string Lexicon::regex() {
 
     // if the regex string is empty, regenerate it
     if (regex_.length() == 0) {
+
+#define USE_TRIE
+#ifdef USE_TRIE
+        TrieUtf8 trie;
+        for ( const auto &e : lex_ )
+            trie.addWord( e.first );
+
+        regex_ = trie.getRegexp() + "|";
+#else
         // collect all lexicon keys in vector
         std::vector<std::string> keys;
         for ( const auto &e : lex_ )
@@ -380,6 +389,7 @@ std::string Lexicon::regex() {
         }
 
         regex_ = str;
+#endif
     }
     
     return regex_;
@@ -389,6 +399,15 @@ std::string Lexicon::regex() {
 std::string Lexicon::regexPrefixAtt() {
 
     if (regexPrefix_.length() == 0) {
+#ifdef USE_TRIE
+        TrieUtf8 trie;
+        for ( const auto &e : lex_ )
+            for ( const auto &le : e.second )
+                if ( le.isPrefixAttached() )
+                    trie.addWord( e.first );
+        regexPrefix_ = "^" + trie.getRegexp() + "\\B";
+#else
+
         std::vector<std::string> prefix;
 
         for ( const auto &e : lex_ )
@@ -411,6 +430,7 @@ std::string Lexicon::regexPrefixAtt() {
             str.pop_back();
 
         regexPrefix_ = str;
+#endif
     }
 
     return regexPrefix_;
@@ -420,6 +440,15 @@ std::string Lexicon::regexPrefixAtt() {
 std::string Lexicon::regexSuffixAtt() {
 
     if (regexSuffix_.length() == 0) {
+#ifdef USE_TRIE
+        TrieUtf8 trie;
+        for ( const auto &e : lex_ )
+            for ( const auto &le : e.second )
+                if ( le.isSuffixAttached() )
+                    trie.addWord( e.first );
+
+        regexSuffix_ = trie.getRegexp();
+#else
         std::vector<std::string> suffix;
 
         for ( const auto &e : lex_ )
@@ -442,6 +471,7 @@ std::string Lexicon::regexSuffixAtt() {
             str.pop_back();
 
         regexSuffix_ = str;
+#endif
     }
 
     return regexSuffix_;
