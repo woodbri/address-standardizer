@@ -38,10 +38,10 @@ MetaRule::MetaRule( const std::string &line ) {
 
 std::ostream &operator<<(std::ostream &ss, const MetaRule &r) {
     bool first = true;
-    for (const auto &e : r.refs_) {
+    for ( auto e = r.begin(); e != r.end(); e++ ) {
         if (not first)
             ss << " ";
-        ss << "@" << e.name();
+        ss << "@" << e->name();
         first = false;
     }
 

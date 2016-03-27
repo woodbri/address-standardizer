@@ -23,7 +23,7 @@ MetaRule MetaSection::rule( long unsigned int index ) const {
 
 std::ostream &operator<<(std::ostream &ss, const MetaSection &e) {
     ss << "[" << e.name() << "]\n";
-    for ( const auto &r : e.rules() ) 
-        ss << r << "\n";
+    for ( auto r = e.begin(); r != e.end(); ++r )
+        ss << *r << "\n";
     return ss;
 }

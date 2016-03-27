@@ -34,6 +34,17 @@ public:
 
     friend std::ostream &operator<<(std::ostream &ss, const MetaRule &r);
 
+    // iterator access to refs_
+
+    typedef typename std::vector<SectionPtr>::iterator iterator;
+    typedef typename std::vector<SectionPtr>::const_iterator const_iterator;
+
+    iterator begin() { return refs_.begin(); };
+    iterator end() { return refs_.end(); };
+    const_iterator begin() const { return refs_.begin(); };
+    const_iterator end() const { return refs_.end(); };
+
+
 private:
     std::vector<SectionPtr> refs_;
 

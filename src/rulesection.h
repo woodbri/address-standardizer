@@ -38,6 +38,17 @@ public:
 
     friend std::ostream &operator<<(std::ostream &ss, const RuleSection &rs);
 
+    // iterator access to rules_
+
+    typedef typename std::vector<Rule>::iterator iterator;
+    typedef typename std::vector<Rule>::const_iterator const_iterator;
+
+    iterator begin() { return rules_.begin(); };
+    iterator end() { return rules_.end(); };
+    const_iterator begin() const { return rules_.begin(); };
+    const_iterator end() const { return rules_.end(); };
+
+
 private:
     std::string name_;
     std::vector<Rule> rules_;

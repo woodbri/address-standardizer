@@ -139,28 +139,14 @@ void Rule::score( const float s ) {
 }
 
 
-/*
-void Rule::in( const std::vector<InClass::Type> &in ) {
-    inClass_ = in;
-}
-
-
-void Rule::out( const std::vector<OutClass::Type>  &out ) {
-    outClass_ = out;
-}
-*/
-
-
 std::ostream &operator<<(std::ostream &ss, const Rule &r) {
     std::string word;
 
-    std::vector<InClass::Type> inClass = r.in();
-    for ( const auto &e : inClass )
-        ss << InClass::asString(e) << " ";
+    for ( long unsigned int pos = 0; pos < r.inSize(); ++pos )
+        ss << InClass::asString( r.in( pos ) ) << " ";
     ss << "-> ";
-    std::vector<OutClass::Type> outClass = r.out();
-    for ( const auto &e : outClass )
-        ss << OutClass::asString(e) << " ";
+    for ( long unsigned int pos = 0; pos < r.outSize(); ++pos )
+        ss << OutClass::asString( r.out( pos ) ) << " ";
     ss << "-> " << r.score();
 
     return ss;

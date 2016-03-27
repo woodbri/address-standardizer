@@ -59,14 +59,6 @@ private:
     void score( const float s );
 
 
-/*
-    // TODO these probably are not needed so made private
-    // clean up later
-
-    void in( const std::vector<InClass::Type> &in );
-    void out( const std::vector<OutClass::Type>  &out );
-*/
-
 private:
 
     std::vector<InClass::Type> inClass_;

@@ -222,11 +222,13 @@ SearchPaths Search::match( const SectionPtr &sectionPtr, const SearchPath &path,
 
     auto meta = sectionPtr.mptr();
     if ( meta != NULL ) {
+#ifdef TRACING_SEARCH
         Utils::count("findMetas");
+#endif
         SearchPaths results;
-        for ( const auto &r : meta->rules() ) {
+        for ( auto r = meta->begin(); r != meta->end(); ++r ) {
             SearchPath current( path );
-            current.next = r.refs();
+            current.next = r->refs();
             for ( const auto &e : path.next )
                 current.next.push_back( e );
 
@@ -244,10 +246,12 @@ SearchPaths Search::match( const SectionPtr &sectionPtr, const SearchPath &path,
 
     auto rule = sectionPtr.rptr();
     if ( rule != NULL ) {
+#ifdef TRACING_SEARCH
         Utils::count("findRules");
+#endif
         SearchPaths results;
-        for ( const auto &r : rule->rules() ) {
-            auto mr = matchRule( r, path );
+        for ( auto r = rule->begin(); r != rule->end(); ++r ) {
+            auto mr = matchRule( *r, path );
             if ( mr.rules.size() > 0 )
                 results.push_back( mr );
         }
@@ -340,18 +344,17 @@ SearchPath Search::matchRule( const Rule &r, const SearchPath &path ) const {
     std::cout << "Search::matchRule\n";
 #endif
     auto &pattern = path.remaining;
-    auto it = pattern.begin();
-    for (const auto &e : r.in()) {
-        if ( it == pattern.end() ) {
-            // failed to match, rules has more items than pattern
-            // return an empty result
+    if ( r.inSize() > pattern.size() ) {
+        // failed to match, rules has more items than pattern
+        // return an empty result
 #ifdef TRACING_SEARCH
-            std::cout << "\tReturning: Search::matchRule: Failed 1\n";
+        std::cout << "\tReturning: Search::matchRule: Failed 1\n";
 #endif
-            return SearchPath();
-        }
-
-        if ( *it == e )
+        return SearchPath();
+    }
+    auto it = pattern.begin();
+    for ( long unsigned int pos = 0; pos < r.inSize(); ++pos ) {
+        if ( *it == r.in( pos ) )
             it++;
         else {
             // failed to match

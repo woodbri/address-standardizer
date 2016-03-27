@@ -163,20 +163,16 @@ void Grammar::updatePointers() {
     status_ = CHECK_OK;
 
     // for each MetaSection
-    for ( unsigned long int i=0; i<metas_.size(); i++ ) {
-        // get the name and a copy of this MetaSections rules
-        const std::string& metaName = metas_[i].name();
-        auto metaRules = metas_[i].rules();
+    for ( auto meta = metas_.begin(); meta != metas_.end(); ++meta ) {
+        const std::string& metaName = meta->name();
 
         // for each metaRules
-        for ( unsigned long int j=0; j<metaRules.size(); j++ ) {
-            // get a copy of this metaRule SectionPtrs as refs
-            auto refs = metaRules[j].refs();
+        for ( auto refs = meta->begin(); refs != meta->end(); ++refs ) {
 
             // for each SectionPtr in refs
-            for ( auto &ref : refs ) {
+            for ( auto ref = refs->begin(); ref != refs->end(); ++ref ) {
                 // get the name of this SectionPtr
-                const std::string word = ref.name();
+                const std::string word = ref->name();
 
                 // update the reference stats
                 if ( references_.find( word ) == references_.end() )
@@ -186,7 +182,7 @@ void Grammar::updatePointers() {
 
                 if ( word == metaName )
                     // if this is self referential then point to self
-                    ref.mptr( &( metas_[i] ) );
+                    ref->mptr( &( *meta ) );
                 else {
                     // otherwise find the SectionPtr this refers to
                     auto m = sectionIndex_.find( word );
@@ -194,12 +190,12 @@ void Grammar::updatePointers() {
                         // see if it refers to a metaSection
                         if ( m->second < metas_.size()
                              and metas_[m->second].name() == word ) {
-                            ref.mptr( &( metas_[m->second] ) );
+                            ref->mptr( &( metas_[m->second] ) );
                         }
                         // see if it refers to a ruleSection
                         else if ( m->second < rules_.size()
                                   and rules_[m->second].name() == word ) {
-                            ref.rptr( &( rules_[m->second] ) );
+                            ref->rptr( &( rules_[m->second] ) );
                         }
                         // otherwise something really bad is happening
                         else
@@ -213,13 +209,7 @@ void Grammar::updatePointers() {
                     }
                 }
             }
-            // now that we have updated our local copy of refs
-            // save it back into the appropriate metaRule
-            metaRules[j].refs( refs );
         }
-        // now that all the metaRules have been updated in our local copy
-        // save them back into the original metaSection
-        metas_[i].rules( metaRules );
     }
 
     // check the status of all references and make sure we have 'ADDRESS'
@@ -238,17 +228,18 @@ void Grammar::updatePointers() {
                 status_ = CHECK_WARN;
         }
 
+#define DEBUG
 #ifdef DEBUG
 
         // check all the pointers are set correctly
-        for ( const auto &rules : e.rules() ) {
-            for ( const auto &r : rules.refs() ) {
-                if ( r.mptr() == NULL and r.rptr() == NULL )
+        for ( auto rules = e.begin(); rules != e.end(); ++rules ) {
+            for ( auto r = rules->begin(); r != rules->end(); ++r ) {
+                if ( r->mptr() == NULL and r->rptr() == NULL )
                     std::cout << "POINTERS: " << e.name() << "."
-                        << r.name() << " both pointers are NULL!\n";
-                if ( r.rptr() != NULL and r.mptr() != NULL )
+                        << r->name() << " both pointers are NULL!\n";
+                if ( r->rptr() != NULL and r->mptr() != NULL )
                     std::cout << "POINTERS: " << e.name() << "."
-                        << r.name() << " both are not NULL!\n";
+                        << r->name() << " both are not NULL!\n";
             }
         }
 #endif
@@ -256,7 +247,7 @@ void Grammar::updatePointers() {
 
     // check all the rules and make sure they are valid
 
-    for ( const auto &e : rules_ ) {
+    for ( const auto e : rules_ ) {
         auto ref = references_.find( e.name() );
         if ( ref == references_.end() and e.name() != "ADDRESS" ) {
             issues_ += "Rule '" + e.name() + "' defined by not referenced!\n";
@@ -265,8 +256,8 @@ void Grammar::updatePointers() {
         }
         if ( checked_.find( e.name() ) == checked_.end() ) {
             int pos = 1;
-            for ( const auto &rule : e.rules() ) {
-                if ( not rule.isValid() ) {
+            for ( auto rule = e.begin(); rule != e.end(); ++rule ) {
+                if ( not rule->isValid() ) {
                     issues_ += "Invalid rule at [" + e.name() + "]["
                         + std::to_string(pos) + "]\n";
                     status_ = CHECK_FATAL;
