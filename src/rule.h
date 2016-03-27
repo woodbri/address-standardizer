@@ -42,7 +42,7 @@ public:
 
     // algorithms
     Rule concat( const Rule &r ) const;
-    bool match( const std::vector<InClass::Type> pat ) const;
+    bool match( const std::vector<InClass::Type> &pat ) const;
 
     // operators
     inline Rule operator+( const Rule &rhs ) const { return concat( rhs ); };
@@ -50,6 +50,17 @@ public:
 
     // setters
     void clear();
+
+    // iterator access to inClass_
+
+    typedef typename std::vector<InClass::Type>::iterator iterator;
+    typedef typename std::vector<InClass::Type>::const_iterator const_iterator;
+
+    iterator begin() { return inClass_.begin(); };
+    iterator end() { return inClass_.end(); };
+    const_iterator begin() const { return inClass_.begin(); };
+    const_iterator end() const { return inClass_.end(); };
+
 
 private:
 

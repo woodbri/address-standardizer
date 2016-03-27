@@ -98,10 +98,13 @@ Rule Rule::concat( const Rule &r ) const {
 // see if we can match the start of pattern to this rule
 // if we run out of tokens in pattern then it fails to match
 
-bool Rule::match( const std::vector<InClass::Type> pat ) const {
+bool Rule::match( const std::vector<InClass::Type> &pat ) const {
+    if ( pat.size() < inClass_.size() )
+        return false;
+
     auto it = pat.begin();
-    for (const auto &e : inClass_) {
-        if ( it == pat.end() or e != *it )
+    for (auto e = inClass_.begin(); e != inClass_.end(); ++e ) {
+        if ( *e != *it )
             return false;
         ++it;
     }

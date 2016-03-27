@@ -344,6 +344,23 @@ SearchPath Search::matchRule( const Rule &r, const SearchPath &path ) const {
     std::cout << "Search::matchRule\n";
 #endif
     auto &pattern = path.remaining;
+
+#if 0
+    // for whatever reason the follow is code is slower
+    // then the else clause
+
+    if (  r.inSize() > pattern.size() or not r.match( pattern ) ) {
+        // failed to match
+#ifdef TRACING_SEARCH
+        std::cout << "\tReturning: Search::matchRule: Failed 2\n";
+#endif
+        return SearchPath();
+    }
+
+    // we have a match so update result and return it
+    auto it = pattern.begin() + r.inSize();
+#else
+
     if ( r.inSize() > pattern.size() ) {
         // failed to match, rules has more items than pattern
         // return an empty result
@@ -364,8 +381,8 @@ SearchPath Search::matchRule( const Rule &r, const SearchPath &path ) const {
             return SearchPath();
         }
     }
+#endif
 
-    // we have a match so update result and return it
     SearchPath result( path );
     result.rules.push_back(r);
     result.remaining.clear();
