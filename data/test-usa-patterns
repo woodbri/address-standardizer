@@ -1,0 +1,505 @@
+#!/usr/bin/perl -w
+use strict;
+use Data::Dumper;
+$Data::Dumper::Sortkeys = 1;
+
+my %expect = (
+    '1/2 N Oak ave chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    '1/2 Oak Street chelmsford ma usa'
+    => 'HOUSE STREET SUFTYP CITY PROV NATION',
+    '10609 southwest California hwy 2 chelmsford ma usa'
+    => 'HOUSE PREDIR EXTRA PRETYP STREET CITY PROV NATION',
+    '10609 southwest California hwy 2a chelmsford ma usa'
+    => 'HOUSE PREDIR EXTRA PRETYP STREET STREET CITY PROV NATION',
+    '10609 southwest hwy 2 chelmsford ma usa'
+    => 'HOUSE PREDIR PRETYP STREET CITY PROV NATION',
+    '10609 southwest hwy 2a chelmsford ma usa'
+    => 'HOUSE PREDIR PRETYP STREET STREET CITY PROV NATION',
+    '10609 southwest hwy a chelmsford ma usa'
+    => 'HOUSE PREDIR PRETYP STREET CITY PROV NATION',
+    '11YY North main Street chelmsford ma usa'
+    => 'HOUSE HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    '123 & 27 Oak Street chelmsford ma usa'
+    => 'HOUSE EXTRA EXTRA STREET SUFTYP CITY PROV NATION',
+    '123 1 Street chelmsford ma usa'
+    => 'HOUSE STREET SUFTYP CITY PROV NATION',
+    '123 1 chelmsford ma usa'
+    => 'HOUSE STREET CITY PROV NATION',
+    '123 1/2 Ave of the americas blvd chelmsford ma usa'
+    => 'HOUSE HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    '123 1/2 Avenida 1 chelmsford ma usa'
+    => 'HOUSE HOUSE PRETYP STREET CITY PROV NATION',
+    '123 1/2 Avenida B chelmsford ma usa'
+    => 'HOUSE HOUSE PRETYP STREET CITY PROV NATION',
+    '123 1/2 Avenida Oak chelmsford ma usa'
+    => 'HOUSE HOUSE PRETYP STREET CITY PROV NATION',
+    '123 1/2 B Street chelmsford ma usa'
+    => 'HOUSE HOUSE STREET SUFTYP CITY PROV NATION',
+    '123 1/2 B chelmsford ma usa'
+    => 'HOUSE HOUSE STREET CITY PROV NATION',
+    '123 1/2 Street chelmsford ma usa'
+    => 'HOUSE STREET SUFTYP CITY PROV NATION',
+    '123 1/2 Terrace Street chelmsford ma usa'
+    => 'HOUSE HOUSE STREET SUFTYP CITY PROV NATION',
+    '123 8 1/2 street chelmsford ma usa'
+    => 'HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    '123 Avenida 1 & Green Cove chelmsford ma usa'
+    => 'HOUSE PRETYP STREET EXTRA EXTRA EXTRA CITY PROV NATION',
+    '123 Avenida 1 B chelmsford ma usa'
+    => 'HOUSE PRETYP STREET STREET CITY PROV NATION',
+    '123 Avenida 1 Oak chelmsford ma usa'
+    => 'HOUSE PRETYP STREET STREET CITY PROV NATION',
+    '123 Avenida 1 chelmsford ma usa'
+    => 'HOUSE PRETYP STREET CITY PROV NATION',
+    '123 Avenida B 1 chelmsford ma usa'
+    => 'HOUSE PRETYP STREET STREET CITY PROV NATION',
+    '123 Avenida B D Oak chelmsford ma usa'
+    => 'HOUSE PRETYP STREET STREET STREET CITY PROV NATION',
+    '123 Avenida B Oak chelmsford ma usa'
+    => 'HOUSE PRETYP STREET STREET CITY PROV NATION',
+    '123 Avenida B chelmsford ma usa'
+    => 'HOUSE PRETYP STREET CITY PROV NATION',
+    '123 Avenida Oak B Park chelmsford ma usa'
+    => 'HOUSE PRETYP STREET STREET STREET CITY PROV NATION',
+    '123 Avenida Oak B chelmsford ma usa'
+    => 'HOUSE PRETYP STREET STREET CITY PROV NATION',
+    '123 Avenida Oak Street chelmsford ma usa'
+    => 'HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    '123 B 1 Street chelmsford ma usa'
+    => 'HOUSE HOUSE STREET SUFTYP CITY PROV NATION',
+    '123 B 1 chelmsford ma usa'
+    => 'HOUSE HOUSE STREET CITY PROV NATION',
+    '123 B Avenida 1 chelmsford ma usa'
+    => 'HOUSE HOUSE PRETYP STREET CITY PROV NATION',
+    '123 B Avenida D Oak chelmsford ma usa'
+    => 'HOUSE HOUSE PRETYP STREET STREET CITY PROV NATION',
+    '123 B Avenida D chelmsford ma usa'
+    => 'HOUSE HOUSE PRETYP STREET CITY PROV NATION',
+    '123 B Avenida Oak D chelmsford ma usa'
+    => 'HOUSE HOUSE PRETYP STREET STREET CITY PROV NATION',
+    '123 B Avenida Oak chelmsford ma usa'
+    => 'HOUSE HOUSE PRETYP STREET CITY PROV NATION',
+    '123 B Beck chelmsford ma usa'
+    => 'HOUSE HOUSE STREET CITY PROV NATION',
+    '123 B D Oak Street chelmsford ma usa'
+    => 'HOUSE HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    '123 B D Oak chelmsford ma usa'
+    => 'HOUSE HOUSE STREET STREET CITY PROV NATION',
+    '123 B D Street chelmsford ma usa'
+    => 'HOUSE HOUSE STREET SUFTYP CITY PROV NATION',
+    '123 B D chelmsford ma usa'
+    => 'HOUSE HOUSE STREET CITY PROV NATION',
+    '123 B North Street chelmsford ma usa'
+    => 'HOUSE HOUSE STREET SUFTYP CITY PROV NATION',
+    '123 B North chelmsford ma usa'
+    => 'HOUSE HOUSE STREET CITY PROV NATION',
+    '123 B Oak & Park Street chelmsford ma usa'
+    => 'HOUSE HOUSE STREET STREET STREET SUFTYP CITY PROV NATION',
+    '123 B Oak D chelmsford ma usa'
+    => 'HOUSE HOUSE STREET STREET CITY PROV NATION',
+    '123 B Oak North Street chelmsford ma usa'
+    => 'HOUSE HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    '123 B Oak Street chelmsford ma usa'
+    => 'HOUSE HOUSE STREET SUFTYP CITY PROV NATION',
+    '123 B Oak Terrace Street chelmsford ma usa'
+    => 'HOUSE HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    '123 B Oak West chelmsford ma usa'
+    => 'HOUSE HOUSE STREET SUFDIR CITY PROV NATION',
+    '123 B South 1 Street chelmsford ma usa'
+    => 'HOUSE HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    '123 B South 1 chelmsford ma usa'
+    => 'HOUSE HOUSE PREDIR STREET CITY PROV NATION',
+    '123 B South Avenida 1 chelmsford ma usa'
+    => 'HOUSE HOUSE PREDIR PRETYP STREET CITY PROV NATION',
+    '123 B South Avenida D chelmsford ma usa'
+    => 'HOUSE HOUSE PREDIR PRETYP STREET CITY PROV NATION',
+    '123 B South Avenida Oak chelmsford ma usa'
+    => 'HOUSE HOUSE PREDIR PRETYP STREET CITY PROV NATION',
+    '123 B South D Oak Street chelmsford ma usa'
+    => 'HOUSE HOUSE PREDIR STREET STREET SUFTYP CITY PROV NATION',
+    '123 B South D Street chelmsford ma usa'
+    => 'HOUSE HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    '123 B South D chelmsford ma usa'
+    => 'HOUSE HOUSE PREDIR STREET CITY PROV NATION',
+    '123 B South North Street chelmsford ma usa'
+    => 'HOUSE HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    '123 B South North chelmsford ma usa'
+    => 'HOUSE HOUSE PREDIR STREET CITY PROV NATION',
+    '123 B South Oak Street chelmsford ma usa'
+    => 'HOUSE HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    '123 B South Oak Terrace Street chelmsford ma usa'
+    => 'HOUSE HOUSE PREDIR STREET STREET SUFTYP CITY PROV NATION',
+    '123 B South Oak chelmsford ma usa'
+    => 'HOUSE HOUSE PREDIR STREET CITY PROV NATION',
+    '123 B South Terrace Street chelmsford ma usa'
+    => 'HOUSE HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    '123 B Street chelmsford ma usa'
+    => 'HOUSE STREET SUFTYP CITY PROV NATION',
+    '123 B Terrace Street chelmsford ma usa'
+    => 'HOUSE HOUSE STREET SUFTYP CITY PROV NATION',
+    '123 B Terrace West Street chelmsford ma usa'
+    => 'HOUSE HOUSE STREET SUFDIR SUFTYP CITY PROV NATION',
+    '123 B Tower Street chelmsford ma usa'
+    => 'HOUSE HOUSE STREET SUFTYP CITY PROV NATION',
+    '123 Box road chelmsford ma usa'
+    => 'HOUSE STREET SUFTYP CITY PROV NATION',
+    '123 C circle hill drive chelmsford ma usa'
+    => 'HOUSE HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    '123 California state route 1 chelmsford ma usa'
+    => 'HOUSE EXTRA PRETYP STREET CITY PROV NATION',
+    '123 California state route 1a chelmsford ma usa'
+    => 'HOUSE EXTRA PRETYP STREET CITY PROV NATION',
+    '123 California state route B chelmsford ma usa'
+    => 'HOUSE EXTRA PRETYP STREET CITY PROV NATION',
+    '123 Calle anything chelmsford ma usa'
+    => 'HOUSE PRETYP STREET CITY PROV NATION',
+    '123 Circle hill chelmsford ma usa'
+    => 'HOUSE PRETYP STREET CITY PROV NATION',
+    '123 County rd aa chelmsford ma usa'
+    => 'HOUSE PRETYP STREET CITY PROV NATION',
+    '123 E 40 N st chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFDIR SUFTYP CITY PROV NATION',
+    '123 E 40N st chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFDIR SUFTYP CITY PROV NATION',
+    '123 Forest Park Rd chelmsford ma usa'
+    => 'HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    '123 Karen e. lane dr chelmsford ma usa'
+    => 'HOUSE STREET STREET STREET SUFTYP CITY PROV NATION',
+    '123 M & M road chelmsford ma usa'
+    => 'HOUSE STREET STREET STREET SUFTYP CITY PROV NATION',
+    '123 N business 80 chelmsford ma usa'
+    => 'HOUSE PREDIR QUALIF STREET CITY PROV NATION',
+    '123 N old hwy 80 chelmsford ma usa'
+    => 'HOUSE PREDIR QUALIF PRETYP STREET CITY PROV NATION',
+    '123 N old hwy 80a chelmsford ma usa'
+    => 'HOUSE PREDIR QUALIF PRETYP STREET CITY PROV NATION',
+    '123 North Street chelmsford ma usa'
+    => 'HOUSE STREET SUFTYP CITY PROV NATION',
+    '123 North ave of the americas chelmsford ma usa'
+    => 'HOUSE PREDIR PRETYP STREET CITY PROV NATION',
+    '123 North chelmsford ma usa'
+    => 'HOUSE STREET CITY PROV NATION',
+    '123 Oak & Green chelmsford ma usa'
+    => 'HOUSE STREET EXTRA EXTRA CITY PROV NATION',
+    '123 Oak 1 Street chelmsford ma usa'
+    => 'HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    '123 Oak B Park Street chelmsford ma usa'
+    => 'HOUSE STREET STREET STREET SUFTYP CITY PROV NATION',
+    '123 Oak B Park West chelmsford ma usa'
+    => 'HOUSE STREET STREET STREET SUFDIR CITY PROV NATION',
+    '123 Oak B Park chelmsford ma usa'
+    => 'HOUSE STREET STREET STREET CITY PROV NATION',
+    '123 Oak B Street chelmsford ma usa'
+    => 'HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    '123 Oak B chelmsford ma usa'
+    => 'HOUSE STREET STREET CITY PROV NATION',
+    '123 Oak North Street chelmsford ma usa'
+    => 'HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    '123 Oak Street chelmsford ma usa'
+    => 'HOUSE STREET SUFTYP CITY PROV NATION',
+    '123 Oak Tower Manor Street chelmsford ma usa'
+    => 'HOUSE STREET STREET STREET SUFTYP CITY PROV NATION',
+    '123 Oak Tower Park Street chelmsford ma usa'
+    => 'HOUSE STREET STREET STREET SUFTYP CITY PROV NATION',
+    '123 Oak Tower Street chelmsford ma usa'
+    => 'HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    '123 Oak chelmsford ma usa'
+    => 'HOUSE STREET CITY PROV NATION',
+    '123 S 20th w ave chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFDIR SUFTYP CITY PROV NATION',
+    '123 South 1 Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    '123 South 1 chelmsford ma usa'
+    => 'HOUSE PREDIR STREET CITY PROV NATION',
+    '123 South 1/2 Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    '123 South 3 1/2 Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET SUFTYP CITY PROV NATION',
+    '123 South Avenida 1 West chelmsford ma usa'
+    => 'HOUSE PREDIR PRETYP STREET SUFDIR CITY PROV NATION',
+    '123 South Avenida 1 chelmsford ma usa'
+    => 'HOUSE PREDIR PRETYP STREET CITY PROV NATION',
+    '123 South Avenida B Oak chelmsford ma usa'
+    => 'HOUSE PREDIR PRETYP STREET STREET CITY PROV NATION',
+    '123 South Avenida Oak B chelmsford ma usa'
+    => 'HOUSE PREDIR PRETYP STREET STREET CITY PROV NATION',
+    '123 South B D Oak Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET STREET SUFTYP CITY PROV NATION',
+    '123 South B D Oak chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET STREET CITY PROV NATION',
+    '123 South B Oak Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET SUFTYP CITY PROV NATION',
+    '123 South B Oak chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET CITY PROV NATION',
+    '123 South B Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    '123 South B Terrace Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET SUFTYP CITY PROV NATION',
+    '123 South B chelmsford ma usa'
+    => 'HOUSE PREDIR STREET CITY PROV NATION',
+    '123 South North Oak Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET SUFTYP CITY PROV NATION',
+    '123 South North Oak chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET CITY PROV NATION',
+    '123 South North Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    '123 South North chelmsford ma usa'
+    => 'HOUSE PREDIR STREET CITY PROV NATION',
+    '123 South Oak & East Green chelmsford ma usa'
+    => 'HOUSE PREDIR STREET EXTRA EXTRA EXTRA CITY PROV NATION',
+    '123 South Oak & Green chelmsford ma usa'
+    => 'HOUSE PREDIR STREET EXTRA EXTRA CITY PROV NATION',
+    '123 South Oak & Park Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET STREET SUFTYP CITY PROV NATION',
+    '123 South Oak B Park Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET STREET SUFTYP CITY PROV NATION',
+    '123 South Oak B Park chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET STREET CITY PROV NATION',
+    '123 South Oak B Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET SUFTYP CITY PROV NATION',
+    '123 South Oak North Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET SUFTYP CITY PROV NATION',
+    '123 South Oak Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    '123 South Oak Terrace Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET SUFTYP CITY PROV NATION',
+    '123 South Oak Tower Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET SUFTYP CITY PROV NATION',
+    '123 South Oak chelmsford ma usa'
+    => 'HOUSE PREDIR STREET CITY PROV NATION',
+    '123 South Terrace 1 Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET SUFTYP CITY PROV NATION',
+    '123 South Terrace Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    '123 South Tower Manor Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET SUFTYP CITY PROV NATION',
+    '123 South Tower Oak Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET SUFTYP CITY PROV NATION',
+    '123 South Tower Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    '123 South Tower Terrace Street chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET SUFTYP CITY PROV NATION',
+    '123 South box hill road chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET SUFTYP CITY PROV NATION',
+    '123 South cardboard box road chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET SUFTYP CITY PROV NATION',
+    '123 State Route 1 chelmsford ma usa'
+    => 'HOUSE PRETYP STREET CITY PROV NATION',
+    '123 State Route 1a chelmsford ma usa'
+    => 'HOUSE PRETYP STREET CITY PROV NATION',
+    '123 State Route B chelmsford ma usa'
+    => 'HOUSE PRETYP STREET CITY PROV NATION',
+    '123 Terrace 1 Street chelmsford ma usa'
+    => 'HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    '123 Terrace Street chelmsford ma usa'
+    => 'HOUSE STREET SUFTYP CITY PROV NATION',
+    '123 Terrace West Street chelmsford ma usa'
+    => 'HOUSE STREET SUFDIR SUFTYP CITY PROV NATION',
+    '123 Tower Manor Street chelmsford ma usa'
+    => 'HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    '123 Tower Oak Street chelmsford ma usa'
+    => 'HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    '123 Tower Street chelmsford ma usa'
+    => 'HOUSE STREET SUFTYP CITY PROV NATION',
+    '123 Tower Terrace Street chelmsford ma usa'
+    => 'HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    '123 box hill road chelmsford ma usa'
+    => 'HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    '123 business 80 chelmsford ma usa'
+    => 'HOUSE QUALIF STREET CITY PROV NATION',
+    '123 cardboard box road chelmsford ma usa'
+    => 'HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    '123 circle 10 chelmsford ma usa'
+    => 'HOUSE PRETYP STREET CITY PROV NATION',
+    '123 e circle hill drive chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET SUFTYP CITY PROV NATION',
+    '123 hwy i80 chelmsford ma usa'
+    => 'HOUSE EXTRA PRETYP STREET CITY PROV NATION',
+    '123 main st hwy 4 chelmsford ma usa'
+    => 'HOUSE STREET SUFTYP EXTRA EXTRA CITY PROV NATION',
+    '123 n main w chelmsford ma usa'
+    => 'HOUSE PREDIR STREET UNITT CITY PROV NATION',
+    '123 north box road chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    '123 old California hwy 80 chelmsford ma usa'
+    => 'HOUSE QUALIF EXTRA PRETYP STREET CITY PROV NATION',
+    '123 old California hwy 80a chelmsford ma usa'
+    => 'HOUSE QUALIF EXTRA PRETYP STREET CITY PROV NATION',
+    '123 old hwy 80 chelmsford ma usa'
+    => 'HOUSE QUALIF PRETYP STREET CITY PROV NATION',
+    '123 old hwy 80a chelmsford ma usa'
+    => 'HOUSE QUALIF PRETYP STREET CITY PROV NATION',
+    '123 old north stamford rd chelmsford ma usa'
+    => 'HOUSE STREET STREET STREET SUFTYP CITY PROV NATION',
+    '123 s ave n chelmsford ma usa'
+    => 'HOUSE STREET SUFTYP SUFDIR CITY PROV NATION',
+    '123 us rt 56w chelmsford ma usa'
+    => 'HOUSE PRETYP STREET SUFDIR CITY PROV NATION',
+    '123A edward h ross drive chelmsford ma usa'
+    => 'HOUSE HOUSE STREET STREET STREET SUFTYP CITY PROV NATION',
+    '123E 40 N st chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFDIR SUFTYP CITY PROV NATION',
+    '123E 40N st chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFDIR SUFTYP CITY PROV NATION',
+    '123a California state route 1 chelmsford ma usa'
+    => 'HOUSE HOUSE EXTRA PRETYP STREET CITY PROV NATION',
+    '123a California state route 1a chelmsford ma usa'
+    => 'HOUSE HOUSE EXTRA PRETYP STREET CITY PROV NATION',
+    '123a state route 1 chelmsford ma usa'
+    => 'HOUSE HOUSE PRETYP STREET CITY PROV NATION',
+    '123a state route 1a chelmsford ma usa'
+    => 'HOUSE HOUSE PRETYP STREET CITY PROV NATION',
+    '16 will o wisp street expy chelmsford ma usa'
+    => 'HOUSE STREET STREET STREET STREET SUFTYP CITY PROV NATION',
+    '20YY11 North main Street chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    '26 w 415 oak dr chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE STREET SUFTYP CITY PROV NATION',
+    '26 w 415 pky dr chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE STREET SUFTYP CITY PROV NATION',
+    '26w415 oak dr chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE STREET SUFTYP CITY PROV NATION',
+    '26w415 pky dr chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE STREET SUFTYP CITY PROV NATION',
+    '3643 apt 16 n main st chelmsford ma usa'
+    => 'HOUSE UNITH UNITT PREDIR STREET SUFTYP CITY PROV NATION',
+    '3643 apt 16 southmont dr chelmsford ma usa'
+    => 'HOUSE UNITH UNITT STREET SUFTYP CITY PROV NATION',
+    '3643 rr 1 southmont drive chelmsford ma usa'
+    => 'HOUSE RR RR STREET SUFTYP CITY PROV NATION',
+    '4268 1 hwy 2 chelmsford ma usa'
+    => 'HOUSE HOUSE PRETYP STREET CITY PROV NATION',
+    '5439 S 500 Harriet chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE STREET CITY PROV NATION',
+    '5439 S 500 W chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFDIR CITY PROV NATION',
+    '5439 S 500W chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFDIR CITY PROV NATION',
+    '5439 S fifth w chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFDIR CITY PROV NATION',
+    '5439S 500 W chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFDIR CITY PROV NATION',
+    '5439S 500W chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFDIR CITY PROV NATION',
+    '5439S fifth w chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFDIR CITY PROV NATION',
+    '800 N 400 E 1 E chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFDIR UNITT UNITT CITY PROV NATION',
+    '800 N 400 E E 1 chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFDIR UNITT UNITT CITY PROV NATION',
+    '800N 400E 1 E chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFDIR UNITT UNITT CITY PROV NATION',
+    '800N 400E E 1 chelmsford ma usa'
+    => 'HOUSE PREDIR STREET SUFDIR UNITT UNITT CITY PROV NATION',
+    '806 n march d sea ave pike chelmsford ma usa'
+    => 'HOUSE PREDIR STREET STREET STREET STREET SUFTYP CITY PROV NATION',
+    'A2-1 s springdale rd chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    'N 108 W 60 country club ct chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    'N 108 W 60 hwy 55 chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE PRETYP STREET CITY PROV NATION',
+    'N 108 W 60 hwy 8a chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE PRETYP STREET CITY PROV NATION',
+    'N 108 W 60 hwy k chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE PRETYP STREET CITY PROV NATION',
+    'N 108 W 60 main chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE STREET CITY PROV NATION',
+    'N 108 W 60 main st chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE STREET SUFTYP CITY PROV NATION',
+    'N 108 W 60 n hwy 44 chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE PREDIR PRETYP STREET CITY PROV NATION',
+    'N 108 W 60 n main st chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    'N 108 W60 main st chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE STREET SUFTYP CITY PROV NATION',
+    'N108 W 60 main st chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE STREET SUFTYP CITY PROV NATION',
+    'N108 W 60 s main st chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    'N108 W60 country club ct chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE STREET STREET SUFTYP CITY PROV NATION',
+    'N108 W60 hwy 55 chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE PRETYP STREET CITY PROV NATION',
+    'N108 W60 hwy aa chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE PRETYP STREET CITY PROV NATION',
+    'N108 W60 hwy k chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE PRETYP STREET CITY PROV NATION',
+    'N108 W60 main chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE STREET CITY PROV NATION',
+    'N108 W60 main st chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE STREET SUFTYP CITY PROV NATION',
+    'N108 W60 n hwy 55 chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE PREDIR PRETYP STREET CITY PROV NATION',
+    'N108 W60 n main st chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    'Rural Route chelmsford ma usa'
+    => 'RR CITY PROV NATION',
+    'South 123 B Oak chelmsford ma usa'
+    => 'PREDIR HOUSE STREET STREET CITY PROV NATION',
+    'South 123 B chelmsford ma usa'
+    => 'PREDIR HOUSE STREET CITY PROV NATION',
+    'YY11 North main Street chelmsford ma usa'
+    => 'HOUSE HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    'e 101 n 103 chelmsford ma usa'
+    => 'HOUSE HOUSE PREDIR STREET CITY PROV NATION',
+    'e101 n103 chelmsford ma usa'
+    => 'HOUSE HOUSE PREDIR STREET CITY PROV NATION',
+    'us rt 1 280 lafayette rd chelmsford ma usa'
+    => 'EXTRA EXTRA HOUSE STREET SUFTYP CITY PROV NATION',
+    'w 220 1551 s springdale rd chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    'w 220 1551 springdale rd chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE STREET SUFTYP CITY PROV NATION',
+    'w220 1551 s springdale rd chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
+    'w220 1551 springdale rd chelmsford ma usa'
+    => 'HOUSE HOUSE HOUSE STREET SUFTYP CITY PROV NATION'
+          );
+
+
+sub Usage {
+    die "Usage: test-usa-patterns [filter]\n";
+}
+
+my $filter = shift @ARGV || 'PUNCT,SPACE,EMDASH';
+
+my $fail = 0;
+my $match = 0;
+
+for my $x (sort keys %expect) {
+    my $addr = $x;
+    my $cmd = "../src/tester/t2 sample/usa.lex sample/usa.gmr '$addr' '$filter' 2>/dev/null ";
+    my $res = `$cmd`;
+    $res = parseResults( $res );
+    my $expect = $expect{$x};
+
+    if ($res eq $expect) {
+        $match++;
+    }
+    else {
+        print "$addr\nEXPT: $expect\nBEST: $res\n\n";
+        $fail++;
+    }
+}
+
+print "SUMMARY: MATCH: $match, FAILED: $fail\n";
+
+exit;
+
+sub parseResults {
+    my $r = shift;
+
+    return '' if $r =~ /#### Failed/;
+
+    $r =~ s/.*\nbestCost: [^\n]+\n//s;
+    my @lines = split(/\n/, $r);
+    my @best = ();
+    for my $x (@lines) {
+        my @ln = split(/\t/, $x);
+        push @best, $ln[4];
+    }
+    return join(" ", @best);
+}
+
