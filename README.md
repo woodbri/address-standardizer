@@ -1,5 +1,5 @@
 # address-standardizer
-An addrees parser and standardizer in C++
+An address parser and standardizer in C++
 
 The goal is to be able to take an address string and parse it into tokens
 classify and standardize the tokens using an appropriate lexicon, then map the
