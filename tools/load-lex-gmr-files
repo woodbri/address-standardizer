@@ -1,0 +1,97 @@
+#! /usr/bin/perl -w
+    eval 'exec /usr/bin/perl -S $0 ${1+"$@"}'
+        if 0; #$running_under_some_shell
+
+use strict;
+use File::Find ();
+use File::Basename;
+
+use vars qw/*name *dir *prune/;
+*name   = *File::Find::name;
+*dir    = *File::Find::dir;
+*prune  = *File::Find::prune;
+
+sub wanted;
+
+sub Usage {
+    die "Usage: load-lex-gmr-files [-c] dataset dir dbname\n"
+      . "    -c  - drop and recreate config table\n";
+}
+
+my $create = '';
+$create = shift @ARGV if @ARGV && $ARGV[0] eq '-c';
+
+my $dataset = shift @ARGV || Usage();
+my $dir =     shift @ARGV || Usage();
+my $DBNAME =  shift @ARGV || Usage();
+
+my $DBPORT = '5433';
+my $DBUSER = 'postgres';
+my $DBHOST = 'localhost';
+
+my @files = ();
+
+# Traverse desired filesystems
+File::Find::find({wanted => \&wanted}, $dir);
+
+my $PSQL;
+open($PSQL, "|psql -U $DBUSER -h $DBHOST -p $DBPORT $DBNAME") ||
+    die "ERROR: Failed to connect to database : $!\n";
+print $PSQL "begin;\n";
+
+createTable() if @files;
+for my $f (@files) {
+    loadFile( $f );
+}
+
+print $PSQL "commit;\n";
+close($PSQL);
+
+exit;
+
+
+sub wanted {
+    /^.*\.lex\z/s &&
+    push @files, $name;
+}
+
+sub createTable {
+
+    print $PSQL <<EOF;
+drop table if exists as_config cascade;
+create table as_config (
+    id serial not null primary key,
+    countrycode char(2),
+    countryname text,
+    dataset text,
+    lexicon text,
+    grammar text,
+    filter text
+);
+EOF
+}
+
+sub loadFile {
+    my $flex = shift;
+    my $country = basename($flex, '.lex');
+
+    my $fgmr = $flex;
+    $fgmr =~ s/lex$/gmr/;
+
+    if ( -f $flex && -f $fgmr ) {
+        my $lex = `cat '$flex'`;
+        my $gmr = `cat '$fgmr'`;
+        $lex =~ s/'/''/g;
+        $gmr =~ s/'/''/g;
+        my $head = `grep LEXICON: $flex `;
+        chomp($head);
+        $head = (split(/\t/, $head))[3];
+        $head =~ s/^[^_]+_//;
+        $head = lc($head);
+        print $PSQL "insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( '$head', '$country', '$dataset', '$lex', '$gmr' );\n";
+    }
+    else {
+        warn "ERROR: '$flex' or '$fgmr' files is missing!\n";
+    }
+}
+

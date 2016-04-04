@@ -1,2 +1,3 @@
 *.swp
 *.so
+data/.gitignore

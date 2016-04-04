@@ -3,13 +3,6 @@ use strict;
 use Data::Dumper;
 $Data::Dumper::Sortkeys = 1;
 
-# AU TY AU BU                         01   main st oak apts
-# NA ST BN BT                         B* 85
-#
-# DR AU TY AU BU                      01   n main st oak apts
-# PD NA ST BN BT                      B* 85
-#
-
 my %expect = (
     '1/2 N Oak ave chelmsford ma usa'
     => 'HOUSE PREDIR STREET SUFTYP CITY PROV NATION',
@@ -466,131 +459,20 @@ my %expect = (
           );
 
 
-my %itok = (
-           'A1' => 'SINGLE',
-           'A2' => 'DOUBLE',
-           'A3' => 'WORD',
-           'AM' => 'AMPERS',
-           'AN' => 'MIXED',
-           'AU' => 'WORD',
-           'B*' => '[building]',
-           'BU' => 'BUILDT',
-           'BX' => 'BOXH',
-           'D1' => 'DIRECT',
-           'DA' => 'DASH',
-           'DR' => 'DIRECT',
-           'EX' => 'QUALIF',
-           'FC' => 'FRACT',
-           'H*' => '[house]',
-           'HR' => 'ROAD',
-           'MP' => 'MILE',
-           'N*' => '[number]',
-           'NU' => 'NUMBER',
-           'OT' => 'ORD',
-           'P*' => '[pobox]',
-           'PT' => 'TYPE',
-           'R*' => '[ruralroute]',
-           'RR' => 'RR',
-           'SA' => 'PROV',
-           'T*' => '[streetname]',
-           'TY' => 'TYPE',
-           'W*' => '[within]',
-           'WD' => 'UNITH',
-           'WI' => 'UNITT',
-         );
-
-my %otok = (
-           '1P' => 'HOUSE',
-           'B*' => '@building',
-           'BD' => 'BLDNG',
-           'BI' => 'BLDNG',
-           'BN' => 'BLDNG',
-           'BS' => 'BLDNG',
-           'BT' => 'BLDNG',
-           'BX' => 'BOXH',
-           'BY' => 'BLDNG',
-           'DB' => 'BLDNG',
-           'EI' => 'EXTRA',
-           'EX' => 'QUALIF',
-           'H*' => '@house',
-           'H1' => 'HOUSE',
-           'H2' => 'HOUSE',
-           'HN' => 'HOUSE',
-           'HS' => 'HOUSE',
-           'NA' => 'STREET',
-           'NB' => 'BLDNG',
-           'P*' => '@pobox',
-           'P1' => 'HOUSE',
-           'P2' => 'HOUSE',
-           'PD' => 'PREDIR',
-           'PT' => 'PRETYP',
-           'R*' => '@ruralroute',
-           'RN' => 'RR',
-           'RR' => 'RR',
-           'SD' => 'SUFDIR',
-           'ST' => 'SUFTYP',
-           'T*' => '@streetname',
-           'TB' => 'BLDNG',
-           'W*' => '@within',
-           'WD' => 'UNITH',
-           'WI' => 'UNITT',
-           'XN' => 'BOXT',
-          );
-
 sub Usage {
-    die "Usage: convert-patterns patterns.dat\n";
+    die "Usage: test-usa-patterns [filter]\n";
 }
 
-my $file = shift @ARGV || Usage();
-
-open(IN, $file) || die "Error: failed to open '$file' : $!\n";
-
-my %intok = ();
-my %outtok = ();
-my %pattern = ();
-
-while (!eof(IN)) {
-    my $in = <IN>;
-    chomp($in);
-    my @ipat = getpat(substr($in, 1, 34));
-    my $example = substr($in, 42);
-    my $out = <IN>;
-    my @opat = getpat(substr($out, 1, 34));
-    my $typ  = substr($out, 37, 2);
-    my $pri  = substr($out, 40, 2);
-    my $lang = substr($out, 56, 1);
-    my $usf  = substr($out, 57, 1);
-    my $excl = substr($out, 58, 1);
-    $out = <IN>; # skip over blank line
-    for my $x (@ipat) {
-        $intok{$x}++;
-    }
-    for my $x (@opat) {
-        $outtok{$x}++;
-    }
-    push @{$pattern{$typ}}, { ipat => \@ipat,
-                              opat => \@opat,
-                              type => $typ,
-                              pri  => $pri,
-                              lang => $lang,
-                              usf  => $usf,
-                              excl => $excl,
-                              exam => $example,
-                            };
-}
-close(IN);
-
-#print Data::Dumper->Dump([\%intok, \%outtok, \%pattern], [qw(intok outtok pattern)]);
-
+my $filter = shift @ARGV || 'PUNCT,SPACE,EMDASH';
 
 my $fail = 0;
 my $match = 0;
 
 for my $x (sort keys %expect) {
     my $addr = $x;
-    my $cmd = "./t2 lex-usa.txt ../../data/grammar/test2.grammar '$addr' 2>/dev/null | grep BEST";
+    my $cmd = "../src/tester/t2 sample/usa.lex sample/usa.gmr '$addr' '$filter' 2>/dev/null ";
     my $res = `$cmd`;
-    $res =~ s/^BEST: |\s*$//g;
+    $res = parseResults( $res );
     my $expect = $expect{$x};
 
     if ($res eq $expect) {
@@ -606,106 +488,18 @@ print "SUMMARY: MATCH: $match, FAILED: $fail\n";
 
 exit;
 
-#for my $x (@{$pattern{'H*'}}, @{$pattern{'H+'}}) {
-for my $x (@{$pattern{'H*'}}) {
-    #print $x->{exam}, "\t=>\t", join(' ', map { $itok{$_} } @{$x->{ipat}}), "\n";}
-    my $addr = $x->{exam};
-    $addr =~ s/^\s*|\s*$//g;
-    $addr .= " chelmsford ma usa";
-    my $cmd = "./t2 lex-usa.txt ../../data/grammar/test2.grammar '$addr' 2>/dev/null | grep BEST";
-    my $res = `$cmd`;
-    $res =~ s/^BEST: |\s*$//g;
-    my $expect = join(' ', map { $otok{$_} } @{$x->{opat}}) . " CITY PROV NATION";
+sub parseResults {
+    my $r = shift;
 
-    if ($res eq $expect) {
-        $match++;
+    return '' if $r =~ /#### Failed/;
+
+    $r =~ s/.*\nbestCost: [^\n]+\n//s;
+    my @lines = split(/\n/, $r);
+    my @best = ();
+    for my $x (@lines) {
+        my @ln = split(/\t/, $x);
+        push @best, $ln[4];
     }
-    else {
-        print "$addr\nEXPT: $expect\nBEST: $res\n\n";
-        $fail++;
-    }
+    return join(" ", @best);
 }
-
-print "SUMMARY: MATCH: $match, FAILED: $fail\n";
-
-exit;
-
-sub getpat {
-    my $s = shift;
-    $s =~ s/^\s*|\s*$//g;
-    return split(/\s/, $s);
-}
-
-
-=pod
-$intok = {
-           'A1' => 257, SINGLE
-           'A2' => 20,  DOUBLE
-           'A3' => 4,   WORD
-           'AM' => 21,  AMPERS
-           'AN' => 21,  MIXED
-           'AU' => 282, WORD
-           'B*' => 7,   [building]
-           'BU' => 193, BUILDT
-           'BX' => 19,  BOXH
-           'D1' => 46,  DIRECT (one)
-           'DA' => 3,   DASH
-           'DR' => 227, DIRECT
-           'EX' => 19,  QUALIF
-           'FC' => 23,  FRACT
-           'H*' => 37,  [house]
-           'HR' => 53,  ROAD
-           'MP' => 5,   MILE
-           'N*' => 4,   [number]
-           'NU' => 522, NUMBER
-           'OT' => 16,  ORD
-           'P*' => 5,   [pobox]
-           'PT' => 2,   TYPE
-           'R*' => 4,   [ruralroute]
-           'RR' => 7,   RR
-           'SA' => 14,  PROV
-           'T*' => 7,   [streetname]
-           'TY' => 279, TYPE
-           'W*' => 9,   [within]
-           'WD' => 30,  UNITH
-           'WI' => 17   UNITT
-         };
-$outtok = {
-            '1P' => 4,  number prefix
-            'B*' => 7,  @building
-            'BD' => 1,  prefix directional
-            'BI' => 3,  number
-            'BN' => 231,street name
-            'BS' => 12, number suffix
-            'BT' => 97, suffix type
-            'BX' => 9,  type
-            'BY' => 3,  type
-            'DB' => 13, suffix directional
-            'EI' => 36, extra info
-            'EX' => 17, extension
-            'H*' => 37, @house
-            'H1' => 18, house num 1
-            'H2' => 40, house num 2
-            'HN' => 247,house num
-            'HS' => 61, house number suffix
-            'NA' => 511,street name
-            'NB' => 53, number
-            'P*' => 5,  @pobox
-            'P1' => 50, house number prefix
-            'P2' => 32, house number prefix 2
-            'PD' => 118,prefix directional
-            'PT' => 96, prefix type
-            'R*' => 4,  @ruralroute
-            'RN' => 5,  rr number
-            'RR' => 7,  rr description
-            'SD' => 47, suffix directional
-            'ST' => 169,suffix type
-            'T*' => 7,  @streetname
-            'TB' => 15, prefix type
-            'W*' => 9,  @within
-            'WD' => 30, within description
-            'WI' => 142,within identifier
-            'XN' => 17  number
-          };
-=cut
 
