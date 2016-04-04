@@ -1,55 +1,55 @@
 OUTFILE=timed-log
 echo > $OUTFILE
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-denmark.txt grammar/denmark.grammar 'Kastanievej 15, 2, Agerskov 8660 SKANDERBORG DK' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-finland.txt grammar/finland.grammar 'Makelankatu 25 B 13 FI-00550 HELSINKI FINLAND' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-finland.txt grammar/finland.grammar 'Oy Finland Camex Ltd PL 900 FI-00101 HELSINKI ' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-finland.txt grammar/finland.grammar 'Vuollemutka 4 A 16 Ullakkohuoneisto FI' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-finland.txt grammar/finland.grammar 'Vuollemutka 4 A 16 Ullakkohuoneisto FI-01620 VANTAA' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-france.txt grammar/france.grammar '25 RUE DES FLEURS 33500 LIBOURNE CEDEX 1 FRANCE ' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-france.txt grammar/france.grammar '25 RUE DES FLEURS 33500 LIBOURNE FRANCE ' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-german-merge.txt grammar/german.grammar  'waldweg 33 54321  konstanz mecklenburg-vorpommern de' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-german-merge.txt grammar/german.grammar 'burgstrasse 1 14527 freiburg baden-wurttemberg de' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-german-merge.txt grammar/german.grammar 'diemSTRASSE 33 54321  berlin test test berlin de' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-german-merge.txt grammar/german.grammar 'main strasse 1 12345 city city city berlin de' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-german-merge.txt grammar/german.grammar 'main strasse 1 12345 city city city city berlin de' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-german-merge.txt grammar/german.grammar 'main strasse 1 12345 city city city city city berlin de' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-german-merge.txt grammar/german.grammar 'mainstrasse 1 12345 city city city city city berlin de' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-german-merge.txt grammar/german.grammar 'mainstrasse 1 12345 cityberg berlin de'  >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-german-merge.txt grammar/german.grammar 'waldweg 33 54321  konstanz baden-württemberg de' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-german-merge.txt grammar/german.grammar 'waldweg 33 54321  konstanz mecklenburg-vorpommern de' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-german-merge.txt grammar/german.grammar 'waldweg 33 54321  konstanz nordrhein-westphalen de' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-greatbritain.txt grammar/greatbritain.grammar '1A Seastone Cottages Station Road Weybourne HOLT NR25 7HG UK' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-greatbritain.txt grammar/greatbritain.grammar '1A Seastone Cottages Weybourne HOLT NR25 7HG UK' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-greatbritain.txt grammar/greatbritain.grammar '2B The Tower 27 John Street WINCHESTER SO23 9AP' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-greatbritain.txt grammar/greatbritain.grammar 'Leda Engineering Ltd 1 Upper Littleton APPLEFORD ABINGDON  OX14 4PG UNITED KINGDOM ' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-greatbritain.txt grammar/greatbritain.grammar 'Leda Engineering Ltd 1 Upper Littleton Rd APPLEFORD ABINGDON  OX14 4PG UNITED KINGDOM ' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-greatbritain.txt grammar/greatbritain.grammar 'Leda Engineering Ltd APPLEFORD ABINGDON  OX14 4PG UNITED KINGDOM ' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-ireland.txt grammar/ireland.grammar '12 Morehampton Road DUBLIN 4 IRELAND ' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-ireland.txt grammar/ireland.grammar '20 Rock Road Blackrock CO DUBLIN ' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-ireland.txt grammar/ireland.grammar 'ABC Company Limited 1 Dublin Road Portlaoise CO LAOIS IRELAND ' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-ireland.txt grammar/ireland.grammar 'Dublin Mail Center 1 Knockmitten Rd DUBLIN 12 ' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-ireland.txt grammar/ireland.grammar 'Dublin Mail Center 1 Knockmitten Rd DUBLIN 12 irl' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-ireland.txt grammar/ireland.grammar 'Dublin Mail Center 1 Knockmitten Rd DUBLIN 12 ireland' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-italy.txt grammar/italy.grammar ' VIALE EUROPA 22 00122 ROMA RM IT' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-italy.txt grammar/italy.grammar ' VIALETTO EUROPA 22 00122 ROMA RM IT' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-italy.txt grammar/italy.grammar ' VICO EUROPA 22 00122 ROMA RM IT' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-italy.txt grammar/italy.grammar 'ALLEE EUROPA 22 00122 ROMA RM IT' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-italy.txt grammar/italy.grammar 'INTERNO 12 PIANO 10 VIALE EUROPA 300 00144 ROMA RM IT' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-italy.txt grammar/italy.grammar 'INTERNO 12 PIANO 10 VIALE EUROPA 300 00144 ROMA RM' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-italy.txt grammar/italy.grammar 'LGO EUROPA 22 00122 ROMA RM IT' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-italy.txt grammar/italy.grammar 'PERCORSO EUROPA 22 00122 ROMA RM IT' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-italy.txt grammar/italy.grammar 'SESTIERE CANNAREGIO 1678 30121 VENEZIA VE ' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-italy.txt grammar/italy.grammar 'SESTIERE CANNAREGIO 1678 30121 VENEZIA VE IT ' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-italy.txt grammar/italy.grammar 'TANGENZIALE EUROPA 22 00122 ROMA RM IT' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-italy.txt grammar/italy.grammar 'VIA ARDEATINA KM 15,500 00134 ROMA RM '  >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-italy.txt grammar/italy.grammar 'VIA ARDEATINA KM 15.500 00134 ROMA RM '  >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-italy.txt grammar/italy.grammar 'VIALE EUROPA 22 00122 ROMA RM IT' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-luxembourg.txt  grammar/luxembourg.grammar '71, route de Berlin L-1234 DUDELANGE LUXEMBOURG' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-monaco.txt grammar/monaco.grammar '1 AVENUE DE L HERMITAGE 98000 MONACO MONACO ' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-monaco.txt grammar/monaco.grammar "1 AVENUE DE L'HERMITAGE 98000 MONACO MONACO " >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-monaco.txt grammar/monaco.grammar 'PALAIS DE LA SCALA 1 AVENUE HENRI DUNANT  98020 MONACO CEDEX  MONACO ' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-netherlands.txt  grammar/netherlands.grammar '2e Hugo de Groots 81-83 1052 MA AMSTERDAM JORDAAN NETHERLANDS' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-netherlands.txt  grammar/netherlands.grammar 'Drieslag 5-1 6832 AM ARNHEM NETHERLANDS' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/denmark.lex sample/denmark.gmr 'Kastanievej 15, 2, Agerskov 8660 SKANDERBORG DK' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/finland.lex sample/finland.gmr 'Makelankatu 25 B 13 FI-00550 HELSINKI FINLAND' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/finland.lex sample/finland.gmr 'Oy Finland Camex Ltd PL 900 FI-00101 HELSINKI ' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/finland.lex sample/finland.gmr 'Vuollemutka 4 A 16 Ullakkohuoneisto FI' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/finland.lex sample/finland.gmr 'Vuollemutka 4 A 16 Ullakkohuoneisto FI-01620 VANTAA' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/france.lex sample/france.gmr '25 RUE DES FLEURS 33500 LIBOURNE CEDEX 1 FRANCE ' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/france.lex sample/france.gmr '25 RUE DES FLEURS 33500 LIBOURNE FRANCE ' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/germany.lex sample/germany.gmr  'waldweg 33 54321  konstanz mecklenburg-vorpommern de' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/germany.lex sample/germany.gmr 'burgstrasse 1 14527 freiburg baden-wurttemberg de' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/germany.lex sample/germany.gmr 'diemSTRASSE 33 54321  berlin test test berlin de' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/germany.lex sample/germany.gmr 'main strasse 1 12345 city city city berlin de' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/germany.lex sample/germany.gmr 'main strasse 1 12345 city city city city berlin de' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/germany.lex sample/germany.gmr 'main strasse 1 12345 city city city city city berlin de' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/germany.lex sample/germany.gmr 'mainstrasse 1 12345 city city city city city berlin de' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/germany.lex sample/germany.gmr 'mainstrasse 1 12345 cityberg berlin de'  >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/germany.lex sample/germany.gmr 'waldweg 33 54321  konstanz baden-württemberg de' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/germany.lex sample/germany.gmr 'waldweg 33 54321  konstanz mecklenburg-vorpommern de' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/germany.lex sample/germany.gmr 'waldweg 33 54321  konstanz nordrhein-westphalen de' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/greatbritain.lex sample/greatbritain.gmr '1A Seastone Cottages Station Road Weybourne HOLT NR25 7HG UK' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/greatbritain.lex sample/greatbritain.gmr '1A Seastone Cottages Weybourne HOLT NR25 7HG UK' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/greatbritain.lex sample/greatbritain.gmr '2B The Tower 27 John Street WINCHESTER SO23 9AP' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/greatbritain.lex sample/greatbritain.gmr 'Leda Engineering Ltd 1 Upper Littleton APPLEFORD ABINGDON  OX14 4PG UNITED KINGDOM ' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/greatbritain.lex sample/greatbritain.gmr 'Leda Engineering Ltd 1 Upper Littleton Rd APPLEFORD ABINGDON  OX14 4PG UNITED KINGDOM ' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/greatbritain.lex sample/greatbritain.gmr 'Leda Engineering Ltd APPLEFORD ABINGDON  OX14 4PG UNITED KINGDOM ' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/ireland.lex sample/ireland.gmr '12 Morehampton Road DUBLIN 4 IRELAND ' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/ireland.lex sample/ireland.gmr '20 Rock Road Blackrock CO DUBLIN ' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/ireland.lex sample/ireland.gmr 'ABC Company Limited 1 Dublin Road Portlaoise CO LAOIS IRELAND ' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/ireland.lex sample/ireland.gmr 'Dublin Mail Center 1 Knockmitten Rd DUBLIN 12 ' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/ireland.lex sample/ireland.gmr 'Dublin Mail Center 1 Knockmitten Rd DUBLIN 12 irl' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/ireland.lex sample/ireland.gmr 'Dublin Mail Center 1 Knockmitten Rd DUBLIN 12 ireland' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/italy.lex sample/italy.gmr ' VIALE EUROPA 22 00122 ROMA RM IT' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/italy.lex sample/italy.gmr ' VIALETTO EUROPA 22 00122 ROMA RM IT' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/italy.lex sample/italy.gmr ' VICO EUROPA 22 00122 ROMA RM IT' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/italy.lex sample/italy.gmr 'ALLEE EUROPA 22 00122 ROMA RM IT' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/italy.lex sample/italy.gmr 'INTERNO 12 PIANO 10 VIALE EUROPA 300 00144 ROMA RM IT' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/italy.lex sample/italy.gmr 'INTERNO 12 PIANO 10 VIALE EUROPA 300 00144 ROMA RM' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/italy.lex sample/italy.gmr 'LGO EUROPA 22 00122 ROMA RM IT' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/italy.lex sample/italy.gmr 'PERCORSO EUROPA 22 00122 ROMA RM IT' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/italy.lex sample/italy.gmr 'SESTIERE CANNAREGIO 1678 30121 VENEZIA VE ' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/italy.lex sample/italy.gmr 'SESTIERE CANNAREGIO 1678 30121 VENEZIA VE IT ' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/italy.lex sample/italy.gmr 'TANGENZIALE EUROPA 22 00122 ROMA RM IT' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/italy.lex sample/italy.gmr 'VIA ARDEATINA KM 15,500 00134 ROMA RM '  >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/italy.lex sample/italy.gmr 'VIA ARDEATINA KM 15.500 00134 ROMA RM '  >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/italy.lex sample/italy.gmr 'VIALE EUROPA 22 00122 ROMA RM IT' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/luxembourg.lex  sample/luxembourg.gmr '71, route de Berlin L-1234 DUDELANGE LUXEMBOURG' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/monaco.lex sample/monaco.gmr '1 AVENUE DE L HERMITAGE 98000 MONACO MONACO ' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/monaco.lex sample/monaco.gmr "1 AVENUE DE L'HERMITAGE 98000 MONACO MONACO " >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/monaco.lex sample/monaco.gmr 'PALAIS DE LA SCALA 1 AVENUE HENRI DUNANT  98020 MONACO CEDEX  MONACO ' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/netherlands.lex  sample/netherlands.gmr '2e Hugo de Groots 81-83 1052 MA AMSTERDAM JORDAAN NETHERLANDS' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/netherlands.lex  sample/netherlands.gmr 'Drieslag 5-1 6832 AM ARNHEM NETHERLANDS' >> $OUTFILE 
 
 # Humanoid Enterprise b.v.        # organization name
 # Afdeling 4B                     # organization’s unit
@@ -58,11 +58,11 @@ echo > $OUTFILE
 # 1052 MA  AMSTERDAM JORDAAN      # postcode + locality name + district
 # NETHERLANDS                     # nation
 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-netherlands.txt  grammar/netherlands.grammar 'Humanoid Enterprise b.v. Afdeling 4B Gebouw Westpoint Kamer 8 II 2e Hugo de Groots 6832 AM ARNHEM NETHERLANDS' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-netherlands.txt  grammar/netherlands.grammar 'Humanoid Enterprise b.v. Afdeling 4B Gebouw Westpoint Kamer 8 II 2e Hugo de Groots 81-83 1052 MA AMSTERDAM JORDAAN NETHERLANDS' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-netherlands.txt  grammar/netherlands.grammar 'Postbus 278 6880 AC OOSTERBEEK \(Gld.\) Curaçao' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-netherlands.txt  grammar/netherlands.grammar 'Postbus 278 6880 AC OOSTERBEEK \(Gld.\) NETHERLANDS' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-greatbritain.txt grammar/greatbritain.grammar '15 The Street Hurn CHRISTCHURCH BH23 6AA GB' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-greatbritain.txt grammar/greatbritain.grammar '1A Seastone Cottages Station Road Weybourne HOLT NR25 7HG UK' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-greatbritain.txt grammar/greatbritain.grammar '1A Seastone Cottages Weybourne HOLT NR25 7HG UK' >> $OUTFILE 
-/usr/bin/time --append -o $OUTFILE ../src/tester/t2 lex-greatbritain.txt grammar/greatbritain.grammar '2B The Tower 27 John Street WINCHESTER SO23 9AP' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/netherlands.lex  sample/netherlands.gmr 'Humanoid Enterprise b.v. Afdeling 4B Gebouw Westpoint Kamer 8 II 2e Hugo de Groots 6832 AM ARNHEM NETHERLANDS' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/netherlands.lex  sample/netherlands.gmr 'Humanoid Enterprise b.v. Afdeling 4B Gebouw Westpoint Kamer 8 II 2e Hugo de Groots 81-83 1052 MA AMSTERDAM JORDAAN NETHERLANDS' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/netherlands.lex  sample/netherlands.gmr 'Postbus 278 6880 AC OOSTERBEEK \(Gld.\) Curaçao' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/netherlands.lex  sample/netherlands.gmr 'Postbus 278 6880 AC OOSTERBEEK \(Gld.\) NETHERLANDS' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/greatbritain.lex sample/greatbritain.gmr '15 The Street Hurn CHRISTCHURCH BH23 6AA GB' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/greatbritain.lex sample/greatbritain.gmr '1A Seastone Cottages Station Road Weybourne HOLT NR25 7HG UK' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/greatbritain.lex sample/greatbritain.gmr '1A Seastone Cottages Weybourne HOLT NR25 7HG UK' >> $OUTFILE 
+/usr/bin/time --append -o $OUTFILE ../src/tester/t2 sample/greatbritain.lex sample/greatbritain.gmr '2B The Tower 27 John Street WINCHESTER SO23 9AP' >> $OUTFILE 
