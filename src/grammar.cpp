@@ -20,6 +20,11 @@
 
 #include "grammar.h"
 
+//#define DEBUG
+//#define DEBUG_TRIE
+//#define DEBUG_WALK
+#define DEBUG_COUNTS
+
 Grammar::Grammar( const std::string &file )
     : issues_(""), status_(CHECK_OK)
 {
@@ -37,8 +42,34 @@ Grammar::Grammar( std::istream &is )
 }
 
 
+Rule* Grammar::searchAndReclassBest( const std::vector<std::vector<Token> > &phrases, float &score ) {
+
+    Rule* best;
+    float bestScore = -1.;
+
+    for ( auto &phrase : phrases ) {
+        auto patterns = Token::enumerate( phrase );
+        for ( const auto &pattern : patterns ) {
+            float thisScore;
+            auto result = match( pattern );
+            if ( result == NULL )
+                continue;
+            thisScore = result->score();
+            if ( thisScore > bestScore ) {
+                bestScore = thisScore;
+                best = result;
+            }
+        }
+    }
+
+    score = bestScore;
+    return best;
+}
+
+
 void Grammar::initialize( std::istream &is )
 {
+    recursion_limit_ = 100;
 
     auto re_comment = boost::make_u32regex( "^\\s*#.*|^\\s*$" );
     auto re_section = boost::make_u32regex( "^\\s*\\[(.+)\\]\\s*$" );
@@ -154,6 +185,24 @@ void Grammar::initialize( std::istream &is )
     if ( status_ == CHECK_FATAL )
         throw std::runtime_error( issues_ );
 
+    buildTrie( std::string("ADDRESS") );
+
+#ifdef DEBUG_COUNTS
+    std::cout << "addPathToTrie: counts: "
+              << Utils::getCount( "addPathToTrie" ) << "\n";
+#endif
+
+#ifdef DEBUG_TRIE
+     PatternSet dbg_patterns;
+     trie_.getPatterns( dbg_patterns );
+     for ( auto it=dbg_patterns.begin(); it != dbg_patterns.end(); ++it ) {
+        std::cout << "GTrie: ";
+        for ( const auto &p : *it )
+            std::cout << InClass::asString( p ) << " ";
+        std::cout << "\n";
+    }
+#endif
+
 }
 
 
@@ -180,9 +229,11 @@ void Grammar::updatePointers() {
                 else
                     references_[word] = references_[word] + 1;
 
-                if ( word == metaName )
+                if ( word == metaName ) {
                     // if this is self referential then point to self
-                    ref->mptr( &( *meta ) );
+                    issues_ += "Recursive rule: " + word + "\n";
+                    status_ = CHECK_FATAL;
+                }
                 else {
                     // otherwise find the SectionPtr this refers to
                     auto m = sectionIndex_.find( word );
@@ -228,7 +279,6 @@ void Grammar::updatePointers() {
                 status_ = CHECK_WARN;
         }
 
-#define DEBUG
 #ifdef DEBUG
 
         // check all the pointers are set correctly
@@ -271,6 +321,128 @@ void Grammar::updatePointers() {
     // done with reference_ and checked_ so clear them
     references_.clear();
     checked_.clear();
+}
+
+
+
+SectionPtr Grammar::getSectionPtr( const std::string &str ) {
+    auto idx = sectionIndex_.find( str );
+    if ( idx != sectionIndex_.end() ) {
+    
+        if ( idx->second < metas_.size()
+             and str == metas_[idx->second].name() ) {
+            SectionPtr ptr( str );
+            ptr.mptr( & metas_[idx->second] );
+            return ptr;
+        }
+
+        if ( idx->second < rules_.size()
+             and str == rules_[idx->second].name() ) {
+            SectionPtr ptr( str );
+            ptr.rptr( & rules_[idx->second] );
+            return ptr;
+        }
+
+    }
+    throw std::runtime_error( std::string("Grammar-Rule-Not-Found:")+str );
+}
+
+
+
+void Grammar::buildTrie( const std::string &name ) {
+    auto ptr = getSectionPtr( name );
+    walk( ptr, std::vector<SectionPtr>(), std::vector<Rule*>(), 0 );
+}
+
+
+void Grammar::walk( const SectionPtr &sptr, std::vector<SectionPtr> next, std::vector<Rule*> pathSoFar, unsigned long int level ) {
+
+#ifdef DEBUG_WALK
+    std::cout << "Grammar::walk(" << sptr << ", (";
+    for ( const auto &n : next )
+        std::cout << n << ", ";
+    std::cout << "), (";
+    for ( const auto &r : pathSoFar )
+        for ( auto it = r->begin(); it != r->end(); ++it )
+            std::cout << InClass::asString( *it ) << " ";
+    std::cout << "), " << level <<")\n";
+#endif
+
+    if ( level > recursion_limit_ ) {
+#ifdef DEBUG_TRIE
+        std::cerr << "Hit recursion_limit: " << recursion_limit_ << "\n";
+#else
+        throw std::runtime_error( "Grammar-walk-Recursion-Limit-Hit" );
+#endif
+        return;
+    }
+
+    auto metas = sptr.mptr();
+    if ( metas != NULL ) {
+        for ( auto meta = metas->begin(); meta != metas->end(); ++meta ) {
+            std::vector<SectionPtr> current( next );
+            for ( auto rule = meta->rbegin(); rule != meta->rend(); ++rule )
+                current.push_back( *rule );
+            if ( current.size() > 0 ) {
+                auto nextRule = current.back();
+                current.pop_back();
+                walk( nextRule, current, pathSoFar, level+1 );
+            }
+        }
+        return;
+    }
+
+    auto rules = sptr.rptr();
+    if ( rules != NULL ) {
+        for ( auto rule = rules->begin(); rule != rules->end(); ++rule ) {
+            pathSoFar.push_back( &( *rule ) );
+            if ( next.size() > 0 ) {
+                auto ptr = next.back();
+                next.pop_back();
+                walk( ptr, next, pathSoFar, level+1 );
+                next.push_back( ptr );
+            }
+            else {
+                addPathToTrie( pathSoFar );
+            }
+            pathSoFar.pop_back();
+        }
+        return;
+    }
+
+    throw std::runtime_error( "Grammar-walk-invalid-SectionPtr" );
+}
+
+
+
+void Grammar::addPathToTrie( std::vector<Rule*> path ) {
+#ifdef DEBUG_COUNTS
+    Utils::count( "addPathToTrie" );
+#endif
+    // create an empty rule
+    Rule *r = new Rule();
+
+    // concatentate the path rules into r
+    for ( auto it = path.begin(); it != path.end(); ++it )
+        *r += *(*it);
+#ifdef DEBUG_TRIE
+    std::cout << "addPathToTrie: " << *r << "\n";
+#endif
+
+    // see if this rule has already been added to the trie
+    auto data = trie_.match( r->in() );
+    if ( data == NULL )
+        // not in the trie so add it now
+        trie_.addPattern( r->in(), r );
+    else if ( data->score() < r->score() ) {
+        // its in the trie but this rule has a higher score
+        // delete the old path, and save this path
+        delete data;
+        trie_.addPattern( r->in(), r );
+    }
+    else
+        // we didn't save r above so delete it now
+        delete r;
 }
 
 

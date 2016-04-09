@@ -46,6 +46,8 @@ public:
 
     // operators
     inline Rule operator+( const Rule &rhs ) const { return concat( rhs ); };
+    Rule& operator+=( const Rule &rhs );
+
     friend std::ostream &operator<<(std::ostream &ss, const Rule &r);
 
     // setters

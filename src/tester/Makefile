@@ -1,7 +1,7 @@
 
 CPPFLAGS = -O0 -g -Wall -std=c++0x -fPIC -frounding-math -Wno-deprecated -pedantic  -fmax-errors=10 -Wextra -Werror=conversion -I ..
 
-OBJS = ../grammar.o ../inclass.o ../lexentry.o ../lexicon.o ../metarule.o ../metasection.o ../outclass.o ../rule.o ../rulesection.o ../search.o ../token.o ../tokenizer.o ../utils.o ../trieutf8.o ../utf8iterator.o
+OBJS = ../grammar.o ../inclass.o ../lexentry.o ../lexicon.o ../metarule.o ../metasection.o ../outclass.o ../rule.o ../rulesection.o ../token.o ../tokenizer.o ../utils.o ../trieutf8.o ../utf8iterator.o ../grammartrie.o
 
 EXE = t2 read-dump-grammar read-dump-lexicon t5 regex-tester
 

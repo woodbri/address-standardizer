@@ -38,12 +38,18 @@ public:
 
     typedef typename std::vector<SectionPtr>::iterator iterator;
     typedef typename std::vector<SectionPtr>::const_iterator const_iterator;
+    typedef typename std::vector<SectionPtr>::reverse_iterator reverse_iterator;
+    typedef typename std::vector<SectionPtr>::const_reverse_iterator const_reverse_iterator;
 
     iterator begin() { return refs_.begin(); };
     iterator end() { return refs_.end(); };
     const_iterator begin() const { return refs_.begin(); };
     const_iterator end() const { return refs_.end(); };
 
+    reverse_iterator rbegin() { return refs_.rbegin(); };
+    reverse_iterator rend() { return refs_.rend(); };
+    const_reverse_iterator rbegin() const { return refs_.rbegin(); };
+    const_reverse_iterator rend() const { return refs_.rend(); };
 
 private:
     std::vector<SectionPtr> refs_;

@@ -95,6 +95,21 @@ Rule Rule::concat( const Rule &r ) const {
     return conc;
 }
 
+
+Rule& Rule::operator+=( const Rule &rhs ) {
+
+    this->inClass_.insert( this->inClass_.end(), rhs.inClass_.begin(), rhs.inClass_.end() );
+    this->outClass_.insert( this->outClass_.end(), rhs.outClass_.begin(), rhs.outClass_.end() );
+
+    if ( this->score_ == 0.0 )
+        this->score_ = rhs.score_;
+    else
+        this->score_ = static_cast<float>( (this->score_ + rhs.score_) / 2.0 );
+
+    return *this;
+}
+
+
 // see if we can match the start of pattern to this rule
 // if we run out of tokens in pattern then it fails to match
 

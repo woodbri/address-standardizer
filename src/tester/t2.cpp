@@ -18,7 +18,6 @@
 #include "tokenizer.h"
 #include "utils.h"
 #include "grammar.h"
-#include "search.h"
 
 #include <iostream>
 #include <fstream>
@@ -116,7 +115,6 @@ int main(int ac, char* av[]) {
     std::cout << "-------------------------------\n";
 
     try {
-        //Grammar G( gfile );
 
         // simulate the postgres call, by reading the whole file into a string
         t0 = std::chrono::system_clock::now();
@@ -162,19 +160,13 @@ int main(int ac, char* av[]) {
 
         //std::cout << "--Gramar-------------------\n" << G << "---------------------------\n";
 
-        Search S( G );
-
         float bestCost = -1.0;
         t0 = std::chrono::system_clock::now();
-        auto best = S.searchAndReclassBest( phrases, bestCost );
+        auto best = G.searchAndReclassBest( phrases, bestCost );
         t1 = std::chrono::system_clock::now();
         diff = t1 - t0;
         dt = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
         std::cout << "Timer: Search::searchAndReclassBest: " << dt.count() << " ms\n";
-
-        std::cout << "Stats: findMetas: " << Utils::getCount("findMetas") << "\n";
-        std::cout << "Stats: findRules: " << Utils::getCount("findRules") << "\n";
-
 
         if ( bestCost < 0.0 ) {
             std::cout << "#### Failed to find a match (searchAndReclassBest)(" << bestCost << ")\n";
@@ -184,10 +176,7 @@ int main(int ac, char* av[]) {
         // get the appropriate standard terms and
         // print out the reclassified tokens
         std::cout << "bestCost: " << bestCost << "\n";
-        for (auto &token : best) {
-            lex.standardize( token );
-            std::cout << token << "\n";
-        }
+        std::cout << *best << "\n";
 
     }
     catch (std::runtime_error& e) {

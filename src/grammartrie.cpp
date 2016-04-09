@@ -2,20 +2,19 @@
 
 #include "grammartrie.h"
 
-vInClass GrammarTrie::getPatternFromData( Data *data ) {
+vInClass GrammarTrie::getPatternFromRule( Rule &data ) const {
     vInClass patt;
-    if ( data == NULL or data->size() == 0 )
+    if ( data.inSize() == 0 )
         return patt;
 
-    for ( auto it = data->begin(); it != data->end(); ++it )
-        for ( auto in = (*it)->begin(); in != (*it)->end(); ++in )
-            patt.push_back( *in );
+    for ( auto in = data.begin(); in != data.end(); ++in )
+        patt.push_back( *in );
 
     return patt;
 }
 
 
-void GrammarTrie::addPattern( const vInClass &pattern, Data *data ) {
+void GrammarTrie::addPattern( const vInClass &pattern, Rule *data ) {
     if ( pattern.size() > 0 ) {
         vInClass tail( pattern.begin()+1, pattern.end() );
         if ( _children[ pattern[0] ] ) {
@@ -33,7 +32,7 @@ void GrammarTrie::addPattern( const vInClass &pattern, Data *data ) {
 }
 
 
-Data *GrammarTrie::match( const vInClass &pattern ) const {
+Rule *GrammarTrie::match( const vInClass &pattern ) const {
     if ( pattern.size() == 0 )
         return _data;
 
@@ -43,7 +42,7 @@ Data *GrammarTrie::match( const vInClass &pattern ) const {
     while ( tail.size() > 0 ) {
         if ( tmp->_children.find( tail[0] ) != tmp->_children.end() ) {
             tmp = tmp->_children.find( tail[0] )->second;
-            tail = vInClass( pattern.begin()+1, pattern.end() );
+            tail = vInClass( tail.begin()+1, tail.end() );
         }
         else {
             return NULL;
@@ -60,8 +59,8 @@ void GrammarTrie::getPatterns( PatternSet &patterns, vInClass patternSoFar ) con
     for ( const auto &it : _children ) {
         vInClass tmp( patternSoFar );
         tmp.push_back( it.first );
-        if ( it.second and it.second->_data )
-            patterns.insert( patternSoFar );
+        if ( it.second and it.second->_data != NULL )
+            patterns.insert( tmp );
         it.second->getPatterns( patterns, tmp );
     }
 
