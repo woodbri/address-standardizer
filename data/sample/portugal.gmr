@@ -14,25 +14,20 @@
 
 
 [macro]
-@locality @postal @citywords @region @country
-@locality @postal @citywords @country
-@locality @postal @citywords @region
-@locality @postal @citywords
-@postal @citywords @region @country
-@postal @citywords @country
-@postal @citywords @region
-@postal @citywords
+@locality @postal @city @region @country
+@locality @postal @city @country
+@locality @postal @city @region
+@locality @postal @city
+@postal @city @region @country
+@postal @city @country
+@postal @city @region
+@postal @city
 
 [locality]
-@word @locality
-@word
-
-[word]
 WORD -> EXTRA -> 0.3
-
-[citywords]
-@city @citywords
-@city
+WORD WORD -> EXTRA EXTRA -> 0.3
+WORD WORD WORD -> EXTRA EXTRA EXTRA -> 0.3
+WORD WORD WORD WORD -> EXTRA EXTRA EXTRA EXTRA -> 0.3
 
 [placename]
 PLACEN -> BLDNG -> 0.7
@@ -84,6 +79,9 @@ BOXH NUMBER -> BOXH BOXT -> 0.7
 [city]
 CITY -> CITY -> 0.9
 WORD -> CITY -> 0.5
+WORD WORD -> CITY CITY -> 0.5
+WORD WORD WORD -> CITY CITY CITY -> 0.5
+WORD WORD WORD WORD -> CITY CITY CITY CITY -> 0.5
 
 [region]
 PROV -> PROV -> 0.9

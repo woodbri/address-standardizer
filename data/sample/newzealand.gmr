@@ -83,19 +83,22 @@ BOXH NUMBER -> BOXH BOXT -> 0.8
 BOXH NUMBER NUMBER -> BOXH BOXT BOXT -> 0.8
 
 [macro]
-@citywords @prov @postal @nation
-@citywords @prov @nation
-@citywords @prov @postal
-@citywords @prov
-
-[citywords]
-@city @citywords
-@city
+@city @prov @postal @nation
+@city @prov @nation
+@city @prov @postal
+@city @prov
 
 [city]
-DIRECT -> CITY -> 0.5
 CITY -> CITY -> 0.9
+DIRECT CITY -> CITY CITY -> 0.5
 WORD -> CITY -> 0.5
+WORD WORD -> CITY CITY -> 0.5
+WORD WORD WORD -> CITY CITY CITY -> 0.5
+WORD WORD WORD WORD -> CITY CITY CITY CITY -> 0.5
+DIRECT WORD -> CITY CITY -> 0.5
+DIRECT WORD WORD -> CITY CITY CITY -> 0.5
+DIRECT WORD WORD WORD -> CITY CITY CITY CITY -> 0.5
+DIRECT WORD WORD WORD WORD -> CITY CITY CITY CITY CITY -> 0.5
 
 [postal]
 QUAD -> POSTAL -> 0.7

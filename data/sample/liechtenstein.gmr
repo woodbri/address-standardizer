@@ -12,14 +12,8 @@
 @pobox
 
 [macro]
-@postal @citywords @country
-@postal @citywords
-#@postal @citywords @region @country
-#@postal @citywords @region
-
-[citywords]
-@city @citywords
-@city
+@postal @city @country
+@postal @city
 
 [placename]
 PLACEN -> BLDNG -> 0.7
@@ -65,9 +59,9 @@ BOXH NUMBER -> BOXH BOXT -> 0.7
 [city]
 CITY -> CITY -> 0.9
 WORD -> CITY -> 0.5
-
-#[region]
-#PROV -> PROV -> 0.9
+WORD WORD -> CITY CITY -> 0.5
+WORD WORD WORD -> CITY CITY CITY -> 0.5
+WORD WORD WORD WORD -> CITY CITY CITY CITY -> 0.5
 
 [country]
 NATION -> NATION -> 0.9

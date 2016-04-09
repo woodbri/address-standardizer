@@ -1,10 +1,10 @@
-# german.grammar
-# Initial grammar for Germany
+# greatbritain.grammar
+# Initial grammar for Great Britain
 # Author: Stephen Woodbridge <woodbri@imaptools.com>
 
 [ADDRESS]
 @micro @macro
-@building @micro @macro
+#@building @micro @macro
 
 [micro]
 @housenumber @street
@@ -19,10 +19,6 @@
 @city @postal @country
 @city @country
 @city @postal
-
-#[citywords]
-#@city @citywords
-#@city
 
 [building]
 @buildt @buildn

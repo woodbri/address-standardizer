@@ -12,13 +12,9 @@
 @pobox
 
 [macro]
-@postal @citywords @country
-@postal @citywords
-@citywords @country
-@citywords
-
-[citywords]
-@city @citywords
+@postal @city @country
+@postal @city
+@city @country
 @city
 
 [placename]
@@ -72,6 +68,9 @@ BOXH WORD -> BOXH BOXT -> 0.7
 [city]
 CITY -> CITY -> 0.9
 WORD -> CITY -> 0.5
+WORD WORD -> CITY CITY -> 0.5
+WORD WORD WORD -> CITY CITY CITY -> 0.5
+WORD WORD WORD WORD -> CITY CITY CITY CITY -> 0.5
 
 [country]
 NATION -> NATION -> 0.9

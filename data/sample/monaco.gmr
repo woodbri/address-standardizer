@@ -14,12 +14,10 @@
 @pobox
 
 [macro]
-@postal @citywords @country
-@postal @citywords
-
-[citywords]
-@city @citywords
-@city
+@postal @city @country
+@postal @city
+@postal @city @citybox @country
+@postal @city @citybox
 
 [placename]
 PLACEN -> BLDNG -> 0.7
@@ -60,13 +58,16 @@ UNITH WORD WORD -> UNITH UNITT UNITT -> 0.4
 [pobox]
 BOXH NUMBER -> BOXH BOXT -> 0.7
 
+[citybox]
+BOXH -> EXTRA -> 0.5
+BOXH NUMBER -> EXTRA EXTRA -> 0.5
+
 [city]
 CITY -> CITY -> 0.9
 WORD -> CITY -> 0.5
-CITY BOXH -> CITY EXTRA -> 0.9
-WORD BOXH -> CITY EXTRA -> 0.5
-CITY BOXH NUMBER -> CITY EXTRA EXTRA -> 0.9
-WORD BOXH NUMBER -> CITY EXTRA EXTRA -> 0.5
+WORD WORD -> CITY CITY -> 0.5
+WORD WORD WORD -> CITY CITY CITY -> 0.5
+WORD WORD WORD WORD -> CITY CITY CITY CITY -> 0.5
 
 [country]
 NATION -> NATION -> 0.9

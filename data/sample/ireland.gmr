@@ -12,19 +12,22 @@
 @pobox
 
 [macro]
-@citywords @prov @postal @country
-@citywords @prov @country
-@citywords @prov @postal
-@citywords @prov
-@citywords @postal @country
-@citywords @country
-@citywords @postal
-@citywords
-
-[citywords]
-@city @citywords
-@city @cityext
+@city @prov @postal @country
+@city @prov @country
+@city @prov @postal
+@city @prov
+@city @postal @country
+@city @country
+@city @postal
 @city
+@city @cityext @prov @postal @country
+@city @cityext @prov @country
+@city @cityext @prov @postal
+@city @cityext @prov
+@city @cityext @postal @country
+@city @cityext @country
+@city @cityext @postal
+@city @cityext
 
 [cityext]
 NUMBER -> POSTAL -> 0.5

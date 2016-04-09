@@ -17,31 +17,23 @@
 
 
 [macro]
-@postal @citywords @prov @nation
-@postal @citywords @nation
-@postal @citywords @prov
-@postal @citywords
 @postal @city @prov @nation
 @postal @city @nation
 @postal @city @prov
 @postal @city
 
 [locality]
-@locword @locality
-@locword
-
-[locword]
 WORD -> EXTRA -> 0.3
-
-[citywords]
-@c_word @citywords
-@c_word
+WORD WORD -> EXTRA EXTRA -> 0.3
+WORD WORD WORD -> EXTRA EXTRA EXTRA -> 0.3
+WORD WORD WORD WORD -> EXTRA EXTRA EXTRA EXTRA -> 0.3
 
 [city]
 CITY -> CITY -> 0.8
-
-[c_word]
 WORD -> CITY -> 0.5
+WORD WORD -> CITY CITY -> 0.5
+WORD WORD WORD -> CITY CITY CITY -> 0.5
+WORD WORD WORD WORD -> CITY CITY CITY CITY -> 0.5
 
 [placename]
 PLACEN -> BLDNG -> 0.7
