@@ -22,25 +22,51 @@ Rule::Rule( const std::string &line ) : score_(0.0) {
     std::stringstream buffer(line);
 
     // else read normal rule here
+    bool fromSerialize = false;
     int state = 0;
     while (not buffer.eof()) {
         buffer >> token;
 
-        if (token == "->" ) {
+        // skip marker used in GrammarTrie::serialize()
+        if ( token == "[" ) {
+            fromSerialize = true;
+            continue;
+        }
+
+        if ( token == "->" or token == "-1" ) {
             ++state;
             continue;
         }
 
-        switch (state) {
-            case 0:     // reading inClass tokens
-                pushIn( InClass::asOneType( token ) );
-                break;
-            case 1:     // reading outClass tokens
-                pushOut( OutClass::asType( token ) );
-                break;
-            case 2:     // reading score
-                score( static_cast<float>( atof( token.c_str() ) ) );
-                break;
+        // fromSerialize uses the integer representation of the rule
+        if ( fromSerialize ) {
+            int itoken = atoi( token.c_str() );
+
+            switch (state) {
+                case 0:     // reading inClass tokens
+                    pushIn( InClass::asType( itoken ) );
+                    break;
+                case 1:     // reading outClass tokens
+                    pushOut( OutClass::asType( itoken ) );
+                    break;
+                case 2:     // reading score
+                    score( static_cast<float>( atof( token.c_str() ) ) );
+                    break;
+            }
+        }
+        // otherwise, we are using the human readable string tokens
+        else {
+            switch (state) {
+                case 0:     // reading inClass tokens
+                    pushIn( InClass::asOneType( token ) );
+                    break;
+                case 1:     // reading outClass tokens
+                    pushOut( OutClass::asType( token ) );
+                    break;
+                case 2:     // reading score
+                    score( static_cast<float>( atof( token.c_str() ) ) );
+                    break;
+            }
         }
     }
 

@@ -8,7 +8,7 @@
 
 CREATE OR REPLACE FUNCTION as_standardize(
         address text,
-        grammar text,
+        gtrie text,
         lexicon text,
         locale text,
         filter text,
@@ -33,6 +33,14 @@ CREATE OR REPLACE FUNCTION as_standardize(
     AS '$libdir/address_standardizer-2.0', 'as_standardize'
     LANGUAGE 'c' IMMUTABLE STRICT;
 
+CREATE OR REPLACE FUNCTION as_compileGrammar(
+        grammar text,
+        node text default 'ADDRESS'
+        )
+    RETURNS TEXT
+    AS '$libdir/address_standardizer-2.0', 'as_compileGrammar'
+    LANGUAGE 'c' IMMUTABLE STRICT;
+
 CREATE OR REPLACE FUNCTION as_parse(
         address text,
         lexicon text,
@@ -52,8 +60,7 @@ CREATE OR REPLACE FUNCTION as_parse(
 
 CREATE OR REPLACE FUNCTION as_match(
         tokens text,
-        grammar text,
-        node text default 'ADDRESS',
+        gtrie text,
         OUT id bigint,
         OUT seq integer,
         OUT word text,

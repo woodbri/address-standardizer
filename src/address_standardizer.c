@@ -35,6 +35,7 @@ PG_MODULE_MAGIC;
 #endif
 
 Datum as_standardize(PG_FUNCTION_ARGS);
+Datum as_compileGrammar(PG_FUNCTION_ARGS);
 Datum as_parse(PG_FUNCTION_ARGS);
 Datum as_match(PG_FUNCTION_ARGS);
 
@@ -75,7 +76,7 @@ void stdaddr_free(STDADDR *stdaddr)
 /*
  *  CREATE OR REPLACE FUNCTION as_standardize(
  *          address text,
- *          grammar text,
+ *          gtrie text,
  *          lexicon text,
  *          locale text,
  *          filter text DEFAULT 'PUNCT,SPACE,DASH,EMDASH',
@@ -105,7 +106,7 @@ void stdaddr_free(STDADDR *stdaddr)
  *   insert into stdaddr (...)
  *       select id, (std).* from (
  *           select as_standardize(
- *               address, grammar, lexicon, config) as std
+ *               address, gtrie, lexicon, config) as std
  *             from table_to_standardize) as foo;
  *
  *
@@ -118,7 +119,7 @@ Datum as_standardize(PG_FUNCTION_ARGS)
     TupleDesc            tuple_desc;
     AttInMetadata       *attinmeta;
     char                *address;
-    char                *grammar;
+    char                *gtrie;
     char                *lexicon;
     char                *locale;
     char                *filter;
@@ -136,8 +137,8 @@ Datum as_standardize(PG_FUNCTION_ARGS)
 
     address = text2char(PG_GETARG_TEXT_P(0));
     DBG("address: '%s'", address);
-    grammar = text2char(PG_GETARG_TEXT_P(1));
-    DBG("grammar:\n '%s'", grammar);
+    gtrie = text2char(PG_GETARG_TEXT_P(1));
+    DBG("gtrie:\n '%s'", gtrie);
     lexicon = text2char(PG_GETARG_TEXT_P(2));
     DBG("lexicon:\n '%s'", lexicon);
     locale  = text2char(PG_GETARG_TEXT_P(3));
@@ -158,7 +159,7 @@ Datum as_standardize(PG_FUNCTION_ARGS)
    address. For now we will take the slower but similar approach.
 */
 /*
-    std = getStandardizer(grammar, lexicon, config);
+    std = getStandardizer(gtrie, lexicon, config);
     if (!std)
         elog(ERROR, "as_standardize() failed to create the address standardizer object!");
 
@@ -166,7 +167,7 @@ Datum as_standardize(PG_FUNCTION_ARGS)
     stdaddr = std_standardize(std, address);
 */
 
-    stdaddr = std_standardize(address, grammar, lexicon, locale, filter, &err_msg);
+    stdaddr = std_standardize(address, gtrie, lexicon, locale, filter, &err_msg);
     DBG("back from std_standardize");
 
     if ( err_msg != NULL )
@@ -209,6 +210,34 @@ Datum as_standardize(PG_FUNCTION_ARGS)
 
     DBG("returning standardized result");
     PG_RETURN_DATUM(result);
+}
+
+
+
+/*
+ *  CREATE OR REPLACE FUNCTION as_compileGrammar(
+ *          grammar text,
+ *          node text default 'ADDRESS'
+ *          )
+ *      RETURNS TEXT
+ *      AS '$libdir/address_standardizer-2.0', 'as_compileGrammar'
+ *      LANGUAGE 'c' IMMUTABLE STRICT;
+ *
+*/
+
+PG_FUNCTION_INFO_V1(as_compileGrammar);
+
+Datum as_compileGrammar(PG_FUNCTION_ARGS)
+{
+    char *grammar;
+    char *node;
+
+    DBG("Start as_compileGrammar");
+
+    grammar = text2char(PG_GETARG_TEXT_P(0));
+    node    = text2char(PG_GETARG_TEXT_P(1));
+
+    elog(ERROR, "as_compileGrammar() not implemented yet!.");
 }
 
 
@@ -257,7 +286,7 @@ Datum as_parse(PG_FUNCTION_ARGS)
 /*
  *  CREATE OR REPLACE FUNCTION as_match(
  *          tokens text,
- *          grammar text,
+ *          gtrie text,
  *          node text default 'ADDRESS',
  *          OUT id bigint,
  *          OUT seq integer,
@@ -277,14 +306,14 @@ PG_FUNCTION_INFO_V1(as_match);
 Datum as_match(PG_FUNCTION_ARGS)
 {
     char                *tokens;
-    char                *grammar;
+    char                *gtrie;
     char                *node;
 
 
     DBG("Start as_match");
 
     tokens  = text2char(PG_GETARG_TEXT_P(0));
-    grammar = text2char(PG_GETARG_TEXT_P(1));
+    gtrie = text2char(PG_GETARG_TEXT_P(1));
     node    = text2char(PG_GETARG_TEXT_P(2));
 
     elog(ERROR, "as_match() not implemented yet!.");

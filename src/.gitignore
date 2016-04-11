@@ -2,6 +2,8 @@
 *.o
 tester/t?
 tester/read-dump-grammar
+tester/compile-grammar
+tester/read-grammar-trie
 tester/read-dump-lexicon
 tester/regex-tester
 test/*-test

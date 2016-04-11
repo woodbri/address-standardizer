@@ -53,6 +53,8 @@ public:
     Status status() const { return status_; };
     std::string issues() const { return issues_; } ;
 
+    void serialize( std::ostream &ss ) { trie_.serialize( ss ); };
+
     friend std::ostream &operator<<(std::ostream &ss, const Grammar &g);
 
 private:

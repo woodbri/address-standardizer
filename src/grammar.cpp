@@ -23,7 +23,9 @@
 //#define DEBUG
 //#define DEBUG_TRIE
 //#define DEBUG_WALK
-#define DEBUG_COUNTS
+//#define DEBUG_COUNTS
+//#define WRITE_TRIE
+//#define READ_TRIE
 
 Grammar::Grammar( const std::string &file )
     : issues_(""), status_(CHECK_OK)
@@ -186,6 +188,37 @@ void Grammar::initialize( std::istream &is )
         throw std::runtime_error( issues_ );
 
     buildTrie( std::string("ADDRESS") );
+
+#ifdef WRITE_TRIE
+    std::ofstream ofs( "rules.txt", std::ofstream::out | std::ofstream::trunc 
+        | std::ofstream::binary );
+    if ( ofs.good() ) {
+        trie_.serialize( ofs );
+        ofs.close();
+    }
+    else
+        std::cerr << "ERROR: failed to create 'rules.txt' for write!\n";
+#endif
+
+#ifdef READ_TRIE
+    std::ifstream ifs( "rules.txt", std::ifstream::in | std::ifstream::binary );
+    if ( ifs.good() ) {
+        GrammarTrie *read_tmp = new GrammarTrie( NULL );
+        read_tmp->deSerialize( ifs );
+        ifs.close();
+        std::ofstream ofs( "rules2.txt", std::ofstream::out 
+            | std::ofstream::trunc | std::ofstream::binary );
+        if ( ofs.good() ) {
+            read_tmp->serialize( ofs );
+            ofs.close();
+        }
+        else
+            std::cerr << "ERROR: failed to create 'rules2.txt' for write!\n";
+        delete read_tmp;
+    }
+    else
+        std::cerr << "ERROR: failed to open 'rules.txt' for read!\n";
+#endif
 
 #ifdef DEBUG_COUNTS
     std::cout << "addPathToTrie: counts: "

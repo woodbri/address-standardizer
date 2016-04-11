@@ -1,6 +1,46 @@
 
-
+#include <boost/lexical_cast.hpp>
 #include "grammartrie.h"
+
+void GrammarTrie::serialize( std::ostream &os ) const {
+    if ( _data != NULL ) {
+        //os << "[ " << *_data << "\n";
+        os << "[ ";
+        for ( long unsigned int pos = 0; pos < _data->inSize(); ++pos )
+            os << _data->in( pos ) << " ";
+        os << "-1 ";
+        for ( long unsigned int pos = 0; pos < _data->outSize(); ++pos )
+            os << _data->out( pos ) << " ";
+        os << "-1 " << _data->score() << "\n";
+    }
+
+    for ( const auto &it : _children ) {
+        os << it.first << "\n";
+        it.second->serialize( os );
+    }
+    os << "]\n";
+}
+
+
+void GrammarTrie::deSerialize( std::istream &is ) {
+    std::string line;
+    while ( is ) {
+        std::getline( is, line );
+        if ( line.length() > 0 ) {
+            if ( line[0] == ']' )
+                return;
+            else if ( line[0] == '[' )
+                _data = new Rule( line );
+            else {
+                InClass::Type key( InClass::asType( boost::lexical_cast<int>( line ) ) );
+                GrammarTrie * tmp = new GrammarTrie( NULL );
+                tmp->deSerialize( is );
+                _children[ key ] = tmp;
+            }
+        }
+    }
+}
+
 
 vInClass GrammarTrie::getPatternFromRule( Rule &data ) const {
     vInClass patt;

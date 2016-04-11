@@ -24,9 +24,13 @@ public:
 
     explicit GrammarTrie( Rule *data=NULL ) : _data(data) {};
     ~GrammarTrie() {
+        delete _data;
         for ( auto &child : _children )
             delete child.second;
     };
+
+    void serialize( std::ostream &os ) const;
+    void deSerialize( std::istream &is );
 
     vInClass getPatternFromRule( Rule &data ) const;
     void addPattern( const vInClass &pattern, Rule *data );
