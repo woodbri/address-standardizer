@@ -1,6 +1,10 @@
+# usa.grammar
+# Initial grammar for United States of America
+# Author: Stephen Woodbridge <woodbri@imaptools.com>
+
 [ADDRESS]
 @micro @macro
-@building @micro @macro
+#@building @micro @macro
 
 [building]
 @buildt @buildn

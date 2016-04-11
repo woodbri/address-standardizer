@@ -4,7 +4,7 @@
 
 [ADDRESS]
 @micro @macro
-@building @micro @macro
+#@building @micro @macro
 
 [micro]
 @housenumber @street
