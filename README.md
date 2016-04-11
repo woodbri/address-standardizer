@@ -14,12 +14,16 @@ correctness or delivery point solutions.
 ```
 cd src
 make clean; make
+make -f Makefile.pg PGVER=9.4
+sudo make -f Makefile.pg PGVER=9.4 install
 
 cd tester
 make test
 ```
 
-Eventually this will get wrapped into postgresql stored procedures.
+Change the PGVER variable to match you PostgreSQL major version. The
+Makefile.pg will look for ``/usr/lib/posgresql/$(PGVER)/bin/pg_config``. If it
+is installed at another location on the system, then edit Makefile.pg. 
 
 ## Funding Needed
 

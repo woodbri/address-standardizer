@@ -39,6 +39,9 @@ Datum as_parse(PG_FUNCTION_ARGS);
 Datum as_match(PG_FUNCTION_ARGS);
 
 
+void stdaddr_free(STDADDR *stdaddr);
+static char *text2char(text *in);
+
 static char *text2char(text *in)
 {
     char *out = palloc(VARSIZE(in));
