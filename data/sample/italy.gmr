@@ -4,7 +4,7 @@
 
 [ADDRESS]
 @micro @macro
-@placename @micro @macro
+#@placename @micro @macro
 
 [micro]
 @streetname @housenumber

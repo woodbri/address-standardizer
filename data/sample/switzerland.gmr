@@ -5,7 +5,7 @@
 [ADDRESS]
 @micro @macro
 @micro @pobox @macro
-@placename @micro @macro
+#@placename @micro @macro
 
 [micro]
 @streetname @housenumber

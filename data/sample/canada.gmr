@@ -1,16 +1,16 @@
-# german.grammar
-# Initial grammar for Germany
+# canada.grammar
+# Initial grammar for Canada
 # Author: Stephen Woodbridge <woodbri@imaptools.com>
 
 [ADDRESS]
 @micro @macro
-@building @micro @macro
+#@building @micro @macro
 
 [micro]
-@housenumber @street @pobox
-@housenumber @street @unit @pobox
 @housenumber @street
+@housenumber @street @pobox
 @housenumber @street @unit
+#@housenumber @street @unit @pobox
 @pobox
 
 [macro]

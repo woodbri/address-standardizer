@@ -4,14 +4,12 @@
 
 [ADDRESS]
 @micro @macro
-@placename @micro @macro
+#@placename @micro @macro
 
 [micro]
 @streetname @housenumber
 @unit @streetname @housenumber
 @pobox
-
-
 
 [macro]
 @locality @postal @citywords @region @country
