@@ -1,8 +1,13 @@
-ifndef PGVER
-    $(error pgver error: make PGVER=9.2|9.3|9.4 clean|install)
+ifdef PGVER
+    PG_CONFIG = /usr/lib/postgresql/$(PGVER)/bin/pg_config
+else
+    ifndef PG_CONFIG
+        PG_CONFIG = pg_config
+    endif
 endif
-
-PG_CONFIG = /usr/lib/postgresql/$(PGVER)/bin/pg_config
+$(info 'PG_CONFIG=$(PG_CONFIG)' )
+PG_VERSION = $(shell $(PG_CONFIG) --version)
+$(info 'PG_VERSION=$(PG_VERSION)')
 
 PG_CFLAGS = -O0 -g -fPIC -frounding-math -Wno-deprecated -fmax-errors=10  -Werror=conversion -I$(shell $(PG_CONFIG) --cflags) -I$(shell $(PG_CONFIG) --includedir) -I$(shell $(PG_CONFIG) --includedir-server ) -I .
 
@@ -25,3 +30,9 @@ include $(PGXS)
 
 address_standardizer.o: address_standardizer.c address_standardizer.h
 	$(CC) $(PG_CFLAGS) -o address_standardizer.o -c address_standardizer.c
+
+help:
+	@echo 'make [PGVER=9.2|9.3|9.4|9.5]|[PG_CONFIG=/path/to/pg_config] clean|install'
+
+
+
