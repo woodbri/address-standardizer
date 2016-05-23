@@ -20,8 +20,17 @@
 
 #include "grammar.h"
 
+Grammar::Grammar( const char *grammar_in ) 
+    : md5_(""), issues_(""), status_(CHECK_OK)
+{
+    md5_ = md5( std::string( grammar_in ) );
+    std::istringstream iss( grammar_in );
+    initialize( iss );
+}
+
+
 Grammar::Grammar( const std::string &file )
-    : issues_(""), status_(CHECK_OK)
+    : md5_(""), issues_(""), status_(CHECK_OK)
 {
     std::ifstream ifs;
     ifs.open( file.c_str(), std::ifstream::in);
@@ -31,7 +40,7 @@ Grammar::Grammar( const std::string &file )
 
 
 Grammar::Grammar( std::istream &is )
-    : issues_(""), status_(CHECK_OK)
+    : md5_(""), issues_(""), status_(CHECK_OK)
 {
     initialize( is );
 }

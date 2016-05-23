@@ -17,6 +17,7 @@
 #include <string>
 #include <algorithm>
 
+#include "md5.h"
 #include "utils.h"
 #include "lexentry.h"
 #include "inclass.h"
@@ -28,19 +29,29 @@ Lexicon::Lexicon() {
     name_ = "";
     lang_ = InClass::UNKNOWN;
     locale_ = "";
+    md5_ = "";
     lex_.clear();
 }
 
 
 Lexicon::Lexicon(std::string name) :
-    name_(name), lang_(InClass::UNKNOWN), locale_("")
+    name_(name), lang_(InClass::UNKNOWN), locale_(""), md5_("")
 {}
 
 
 Lexicon::Lexicon(std::string name, std::istream &is ) :
-    name_(name), lang_(InClass::UNKNOWN), locale_("")
+    name_(name), lang_(InClass::UNKNOWN), locale_(""), md5_("")
 {
     initialize( is );
+}
+
+
+Lexicon::Lexicon( char *lexicon_in ) :
+    name_("unknown"), lang_(InClass::UNKNOWN), locale_("")
+{
+    md5_ = md5( std::string( lexicon_in ) );
+    std::istringstream iss( lexicon_in );
+    initialize( iss );
 }
 
 

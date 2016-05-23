@@ -34,9 +34,10 @@ protected:
 public:
     // constructors
     Lexicon();
-    explicit Lexicon(std::string name);
-    Lexicon(std::string name, std::string file);
-    Lexicon(std::string name, std::istream &is);
+    explicit Lexicon( std::string name );
+    explicit Lexicon( char *lexicon_in );
+    Lexicon( std::string name, std::string file );
+    Lexicon( std::string name, std::istream &is );
 
     void initialize(std::istream &is);
 
@@ -46,6 +47,7 @@ public:
     std::string langAsString() const { return InClass::asString(lang_); };
     std::string langAsName() const { return InClass::asName(lang_); };
     std::string locale() const { return locale_; };
+    const char *getMd5() { return md5_.c_str(); };
 
     std::vector<LexEntry> find( const std::string key );
 
@@ -88,7 +90,7 @@ private:
     std::string regex_;
     std::string regexPrefix_;
     std::string regexSuffix_;
-
+    std::string md5_;
 
 };
 

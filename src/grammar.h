@@ -20,6 +20,7 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "md5.h"
 #include "inclass.h"
 #include "outclass.h"
 #include "metasection.h"
@@ -37,6 +38,7 @@ public:
 
     Grammar( const Grammar& ) = default;
     explicit Grammar( const std::string &file );
+    explicit Grammar( const char *grammar_in );
     explicit Grammar( std::istream &is );
 
     void initialize( std::istream &is );
@@ -46,6 +48,7 @@ public:
 
     Status status() const { return status_; };
     std::string issues() const { return issues_; } ;
+    const char *getMd5() { return md5_.c_str(); };
 
     friend std::ostream &operator<<(std::ostream &ss, const Grammar &g);
 
@@ -64,6 +67,7 @@ protected:
     std::vector<MetaSection> metas_;
     std::vector<RuleSection> rules_;
     std::map<std::string,unsigned long int> sectionIndex_;
+    std::string md5_;
 
     // temp storage for analysis and checking of grammar
     std::string issues_;

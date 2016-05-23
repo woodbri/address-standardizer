@@ -25,6 +25,7 @@
 #include "tokenizer.h"
 #include "grammar.h"
 #include "search.h"
+#include "md5.h"
 
 #include "address_standardizer.h"
 
@@ -220,4 +221,76 @@ STDADDR *std_standardize( char *address_in, char *grammar_in, char *lexicon_in, 
 
 }
 
+void *getGrammarPtr( char *grammar_in )
+{
+    try {
+        Grammar* grammar = new Grammar( grammar_in );
+        return static_cast<void*>(grammar);
+    }
+    catch ( ... ) {
+        return NULL;
+    }
+}
+
+void freeGrammarPtr( void *ptr )
+{
+    try {
+        delete static_cast<Grammar*>( ptr );
+    }
+    catch ( ... ) {
+        // NOP
+    }
+}
+
+void *getLexiconPtr( char *lexicon_in )
+{
+    try {
+        Lexicon* lexicon = new Lexicon( lexicon_in );
+        return static_cast<void*>(lexicon);
+    }
+    catch (...) {
+        return NULL;
+    }
+}
+
+void freeLexiconPtr( void *ptr )
+{
+    try {
+        delete static_cast<Lexicon*>(ptr);
+    }
+    catch ( ... ) {
+        // NOP
+    }
+}
+
+char *getGrammarMd5( void *ptr )
+{
+    try {
+        return strdup( static_cast<Grammar*>(ptr)->getMd5() );
+    }
+    catch ( ... ) {
+        return NULL;
+    }
+}
+
+char *getLexiconMd5( void *ptr )
+{
+    try {
+        return strdup( static_cast<Lexicon*>(ptr)->getMd5() );
+    }
+    catch ( ... ) {
+        return NULL;
+    }
+}
+
+char *getMd5( char *text )
+{
+    try {
+        std::string md5str = md5( text );
+        return strdup( md5str.c_str() );
+    }
+    catch ( ... ) {
+        return NULL;
+    }
+}
 

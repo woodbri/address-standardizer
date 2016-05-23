@@ -52,6 +52,37 @@ STDADDR *std_standardize(
 #ifdef __cplusplus
 extern "C"
 #endif
+void *getGrammarPtr( char *grammar_in );
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void freeGrammarPtr( void *ptr );
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void *getLexiconPtr( char *lexicon_in );
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void freeLexiconPtr( void *ptr );
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char *getGrammarMd5( void *ptr );
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char *getLexiconMd5( void *ptr );
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char *getMd5( char *text );
 
 
 #endif
