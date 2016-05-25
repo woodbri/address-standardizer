@@ -7,11 +7,20 @@ else
 endif
 $(info 'PG_CONFIG=$(PG_CONFIG)' )
 PG_VERSION = $(shell $(PG_CONFIG) --version)
+PG_MAJOR = $(shell $(PG_CONFIG) --version | sed -e "s/^PostgreSQL \|[.][0-9]\+$$//gi")
 $(info 'PG_VERSION=$(PG_VERSION)')
+$(info 'PG_MAJOR=$(PG_MAJOR)')
 
-PG_CFLAGS = -O0 -g -fPIC -frounding-math -Wno-deprecated -fmax-errors=10  -Werror=conversion -I$(shell $(PG_CONFIG) --cflags) -I$(shell $(PG_CONFIG) --includedir) -I$(shell $(PG_CONFIG) --includedir-server ) -I .
+ifeq "$(PG_MAJOR)" '9.5'
+    CONVERSION =
+else
+    CONVERSION = -Werror=conversion
+endif
+$(info 'CONVERSION=$(CONVERSION)')
 
-PG_CPPFLAGS = -O0 -g -Wall -std=c++0x -fPIC -frounding-math -Wno-deprecated -pedantic  -fmax-errors=10 -Wextra -Werror=conversion -I .
+PG_CFLAGS = -O0 -g -fPIC -frounding-math -Wno-deprecated -fmax-errors=10  $(CONVERSION) -I$(shell $(PG_CONFIG) --cflags) -I$(shell $(PG_CONFIG) --includedir) -I$(shell $(PG_CONFIG) --includedir-server ) -I .
+
+PG_CPPFLAGS = -O0 -g -Wall -std=c++0x -fPIC -frounding-math -Wno-deprecated -pedantic  -fmax-errors=10 -Wextra $(CONVERSION) -I .
 
 CPP = g++
 CC = gcc
