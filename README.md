@@ -9,21 +9,19 @@ The purpose of this code is to be used as part of a geocoding or record
 matching system and is not useful for standardizing addresses for postal
 correctness or delivery point solutions.
 
+## Dependencies
+
+* boost/regex.hpp
+* boost/regex/icu.hpp
+* boost/lexical_cast.hpp
+* boost/algorithm/string.hpp
+* boost/algorithm/string/join.hpp
+* boost/algorithm/string/split.hpp
+* boost/algorithm/string/classification.hpp
+
 ## Build
 
-```
-cd src
-make clean; make
-make -f Makefile.pg PGVER=9.4
-sudo make -f Makefile.pg PGVER=9.4 install
-
-cd tester
-make test
-```
-
-Change the PGVER variable to match you PostgreSQL major version. The
-Makefile.pg will look for ``/usr/lib/posgresql/$(PGVER)/bin/pg_config``. If it
-is installed at another location on the system, then edit Makefile.pg. 
+See file src/README.address_standardizer
 
 ## Funding Needed
 
