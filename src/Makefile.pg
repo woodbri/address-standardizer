@@ -18,7 +18,13 @@ else
 endif
 $(info 'CONVERSION=$(CONVERSION)')
 
-PG_CFLAGS = -O0 -g -fPIC -frounding-math -Wno-deprecated -fmax-errors=10  $(CONVERSION) -I$(shell $(PG_CONFIG) --cflags) -I$(shell $(PG_CONFIG) --includedir) -I$(shell $(PG_CONFIG) --includedir-server ) -I$(shell $(PG_CONFIG) --includedir-server )/port/win32 -I .
+ifeq ($(OS),Windows_NT)
+    INC_PORT = -I$(shell $(PG_CONFIG) --includedir-server )/port/win32
+else
+    INC_PORT =
+endif
+
+PG_CFLAGS = -O0 -g -fPIC -frounding-math -Wno-deprecated -fmax-errors=10  $(CONVERSION) -I$(shell $(PG_CONFIG) --cflags) -I$(shell $(PG_CONFIG) --includedir) -I$(shell $(PG_CONFIG) --includedir-server ) $(INC_PORT) -I .
 
 PG_CPPFLAGS = -O0 -g -Wall -std=c++0x -fPIC -frounding-math -Wno-deprecated -pedantic  -fmax-errors=10 -Wextra $(CONVERSION) -I .
 

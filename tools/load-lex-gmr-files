@@ -14,9 +14,14 @@ use vars qw/*name *dir *prune/;
 sub wanted;
 
 sub Usage {
-    die "Usage: load-lex-gmr-files [-c] dataset dir dbname\n"
-      . "    -c  - drop and recreate config table\n";
+    die "Usage: load-lex-gmr-files [-c] dataset dir out-file.sql\n"
+      . "      -c - drop and recreate as_config table\n"
+      . " dataset - unique name assigned to this set of files, like 'sample'\n"
+      . "     dir - directory to search for lex and gmr files\n"
+      . " out-file.sql - file to create for loading the dataset\n";
 }
+
+my $dofile = 1;
 
 my $create = '';
 $create = shift @ARGV if @ARGV && $ARGV[0] eq '-c';
@@ -35,11 +40,18 @@ my @files = ();
 File::Find::find({wanted => \&wanted}, $dir);
 
 my $PSQL;
-open($PSQL, "|psql -U $DBUSER -h $DBHOST -p $DBPORT $DBNAME") ||
-    die "ERROR: Failed to connect to database : $!\n";
+if ($dofile) {
+    open($PSQL, ">$DBNAME") ||
+        die "ERROR: Failed to create file '$DBNAME' : $!\n";
+}
+else {
+    open($PSQL, "|psql -U $DBUSER -h $DBHOST -p $DBPORT $DBNAME") ||
+        die "ERROR: Failed to connect to database : $!\n";
+}
+print $PSQL "set client_encoding to 'utf8';\n";
 print $PSQL "begin;\n";
 
-createTable() if @files;
+createTable() if @files && $create;
 for my $f (@files) {
     loadFile( $f );
 }
