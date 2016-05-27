@@ -33,10 +33,10 @@ CC = gcc
 
 AS_VERSION = 2.0
 OBJS = address_standardizer.o as_wrapper.o grammar.o inclass.o lexentry.o lexicon.o metarule.o metasection.o outclass.o rule.o rulesection.o search.o token.o tokenizer.o utils.o trieutf8.o utf8iterator.o
-MODULE_big = address_standardizer-$(AS_VERSION)
-EXTENSION = address_standardizer
-DATA = address_standardizer--$(AS_VERSION).sql
-DOCS = README.address_standardizer
+MODULE_big = address_standardizer2-$(AS_VERSION)
+EXTENSION = address_standardizer2
+DATA = address_standardizer2--$(AS_VERSION).sql address_standardizer2-sample-data.sql
+DOCS = README.address_standardizer2
 
 SHLIB_LINK = -L /usr/lib/x86_64-linux-gnu/ `pkg-config --libs --cflags icu-uc icu-io` -L /usr/lib/x86_64-linux-gnu/ -lboost_regex
 
