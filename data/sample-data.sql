@@ -10,7 +10,7 @@ create table as_config (
     grammar text,
     filter text
 );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'dk', 'denmark', 'sample', 'LEXICON:	lex-denmark.txt	DAN	da_DK
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'dk', 'denmark', 'sample', 'LEXICON:	lex-denmark.txt	DAN	da_DK
 LEXENTRY:	AGER	AGER	TYPE	ATT_SUF
 LEXENTRY:	AGEREN	AGEREN	TYPE	ATT_SUF
 LEXENTRY:	ALL	ALLÉ	TYPE	DET_SUF
@@ -175,8 +175,8 @@ WORD WORD WORD WORD -> CITY CITY CITY CITY -> 0.3
 NATION -> NATION -> 0.9
 
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'us', 'usa', 'sample', 'LEXICON:	lex-usa-txt	USA	en_US	
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'us', 'usa', 'sample', 'LEXICON:	lex-usa-txt	USA	en_US	
 LEXENTRY:	#	#	UNITH,STOPWORD	
 LEXENTRY:	&	AND	AMPERS,WORD,STOPWORD	
 LEXENTRY:	-	-	DASH	
@@ -3342,8 +3342,8 @@ NATION -> NATION -> 0.8
 #[ampersand]
 #AMPERS -> STREET -> 0.7
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'nl', 'netherlands', 'sample', 'LEXICON:	lex-netherlands.txt	DUT	nl_NL
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'nl', 'netherlands', 'sample', 'LEXICON:	lex-netherlands.txt	DUT	nl_NL
 LEXENTRY:	ARUBA	ABW	NATION	DETACH
 LEXENTRY:	AMSTERDAM	AMSTERDAM	CITY	DETACH
 LEXENTRY:	THE HAGUE	THE HAGUE	CITY	DETACH
@@ -3710,8 +3710,8 @@ PROV -> PROV -> 0.9
 NATION -> NATION -> 0.9
 
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'uk', 'greatbritain', 'sample', 'LEXICON:	lex-greatbritain.txt	ENG	en_UK
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'uk', 'greatbritain', 'sample', 'LEXICON:	lex-greatbritain.txt	ENG	en_UK
 LEXENTRY:	1	1	NUMBER	DETACH
 LEXENTRY:	10	10	NUMBER	DETACH
 LEXENTRY:	10TH	10TH	WORD,ORD	DETACH
@@ -4510,8 +4510,8 @@ PROV -> PROV -> 0.8
 [country]
 NATION -> NATION -> 0.8
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'se', 'sweden', 'sample', 'LEXICON:	lex-sweden.txt	SWE	sv_SE
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'se', 'sweden', 'sample', 'LEXICON:	lex-sweden.txt	SWE	sv_SE
 LEXENTRY:	AB	AB	PLACEN	DETACH
 LEXENTRY:	AKTIEBOLAG	AKTIEBOLAG	PLACEN	DETACH
 LEXENTRY:	AKTIEBOLAGET	AKTIEBOLAGET	PLACEN	DETACH
@@ -4727,8 +4727,8 @@ WORD -> CITY -> 0.5
 NATION -> NATION -> 0.9
 
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'fr', 'france', 'sample', 'LEXICON:	lex-france.txt	FRE	fr_FR
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'fr', 'france', 'sample', 'LEXICON:	lex-france.txt	FRE	fr_FR
 LEXENTRY:			WORD	DETACH
 LEXENTRY:	1	1	NUMBER	DETACH
 LEXENTRY:	10	10	NUMBER	DETACH
@@ -5583,8 +5583,8 @@ WORD BOXH NUMBER -> CITY EXTRA EXTRA -> 0.5
 NATION -> NATION -> 0.9
 
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'fi', 'finland', 'sample', 'LEXICON:	lex-finland.txt	FIN	fi_FI
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'fi', 'finland', 'sample', 'LEXICON:	lex-finland.txt	FIN	fi_FI
 LEXENTRY:	AB	AB	PLACEN	DETACH
 LEXENTRY:	AY	AY	PLACEN	DETACH
 LEXENTRY:	KY	KY	PLACEN	DETACH
@@ -5767,8 +5767,8 @@ NATION -> NATION -> 0.9
 
 
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'no', 'norway', 'sample', 'LEXICON:	lex-norway.txt	NOR	no_NO
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'no', 'norway', 'sample', 'LEXICON:	lex-norway.txt	NOR	no_NO
 LEXENTRY:	AB	AB	PLACEN	DETACH
 LEXENTRY:	AKTIEBOLAG	AKTIEBOLAG	PLACEN	DETACH
 LEXENTRY:	AKTIEBOLAGET	AKTIEBOLAGET	PLACEN	DETACH
@@ -5957,8 +5957,8 @@ WORD -> CITY -> 0.5
 NATION -> NATION -> 0.9
 
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'be', 'belgium', 'sample', 'LEXICON:	lex-belgium.txt	FRE	fr_BE
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'be', 'belgium', 'sample', 'LEXICON:	lex-belgium.txt	FRE	fr_BE
 LEXENTRY:	#	APT	UNITH	DETACH
 LEXENTRY:	1	1	NUMBER	DETACH
 LEXENTRY:	10	10	NUMBER	DETACH
@@ -6832,8 +6832,8 @@ PROV -> PROV -> 0.9
 NATION -> NATION -> 0.9
 
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'pt', 'portugal', 'sample', 'LEXICON:	lex-portugal.txt	POR	pt_PT
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'pt', 'portugal', 'sample', 'LEXICON:	lex-portugal.txt	POR	pt_PT
 LEXENTRY:	º	º	UNITH	DETACH
 LEXENTRY:	ALAMEDA	ALAMEDA	TYPE	DET_PRE
 LEXENTRY:	ALAMEDA DA	ALAMEDA DA	TYPE	DET_PRE
@@ -7266,8 +7266,8 @@ PROV -> PROV -> 0.9
 NATION -> NATION -> 0.9
 
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'de', 'germany', 'sample', 'LEXICON:	lex-germany.txt	GER	de_DE	
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'de', 'germany', 'sample', 'LEXICON:	lex-germany.txt	GER	de_DE	
 LEXENTRY:	CITYBERG	CITYBERG	CITY	DETACH
 LEXENTRY:	A. d.	An der	STOPWORD	DETACH
 LEXENTRY:	A. d.	An dem	STOPWORD	DETACH
@@ -7821,8 +7821,8 @@ PROV -> PROV -> 0.9
 NATION -> NATION -> 0.9
 
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'es', 'spain', 'sample', 'LEXICON:	lex-spain.txt	SPA	es_ES
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'es', 'spain', 'sample', 'LEXICON:	lex-spain.txt	SPA	es_ES
 LEXENTRY:	APARTADO	APARTADO	BOXH	DETACH
 LEXENTRY:	APARTADO DE CORREOS	APARTADO DE CORREOS	BOXH	DETACH
 LEXENTRY:	APARTAT DE CORREUS	APARTADO DE CORREOS	BOXH	DETACH
@@ -8626,8 +8626,8 @@ PROV -> PROV -> 0.9
 NATION -> NATION -> 0.9
 
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'au', 'australia', 'sample', 'LEXICON:	lex-australia.txt	ENG	en_AU
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'au', 'australia', 'sample', 'LEXICON:	lex-australia.txt	ENG	en_AU
 LEXENTRY:	1	1	NUMBER	DETACH
 LEXENTRY:	10	10	NUMBER	DETACH
 LEXENTRY:	10TH	10TH	WORD,ORD	DETACH
@@ -9027,8 +9027,8 @@ PROV -> PROV -> 0.8
 [nation]
 NATION -> NATION -> 0.8
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'it', 'italy', 'sample', 'LEXICON:	lex-italy.txt	ITA	it_IT	
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'it', 'italy', 'sample', 'LEXICON:	lex-italy.txt	ITA	it_IT	
 LEXENTRY:	ACCESSO	ACCESSO	TYPE	DET_PRE
 LEXENTRY:	ACCESSO A	ACCESSO A	TYPE	DET_PRE
 LEXENTRY:	AG	AG	PROV	DETACH
@@ -10075,8 +10075,8 @@ PROV -> PROV -> 0.9
 NATION -> NATION -> 0.9
 
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'sm', 'san_marino', 'sample', 'LEXICON:	lex-san_marino.txt	ITA	it_SM
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'sm', 'san_marino', 'sample', 'LEXICON:	lex-san_marino.txt	ITA	it_SM
 LEXENTRY:	ACCESSO	ACCESSO	TYPE	DET_PRE
 LEXENTRY:	ACCESSO A	ACCESSO A	TYPE	DET_PRE
 LEXENTRY:	ACQUAVIVA	ACQUAVIVA	CITY	DETACH
@@ -10909,8 +10909,8 @@ WORD -> CITY -> 0.5
 NATION -> NATION -> 0.9
 
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'nz', 'newzealand', 'sample', 'LEXICON:	lex-newzealand.txt	ENG	en_NZ
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'nz', 'newzealand', 'sample', 'LEXICON:	lex-newzealand.txt	ENG	en_NZ
 LEXENTRY:	1	1	NUMBER	DETACH
 LEXENTRY:	10	10	NUMBER	DETACH
 LEXENTRY:	10TH	10TH	WORD,ORD	DETACH
@@ -11416,8 +11416,8 @@ WORD -> PROV -> 0.4
 [nation]
 NATION -> NATION -> 0.8
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'ie', 'ireland', 'sample', 'LEXICON:	lex-ireland.txt	ENG	en_IE
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'ie', 'ireland', 'sample', 'LEXICON:	lex-ireland.txt	ENG	en_IE
 LEXENTRY:	1	1	NUMBER	DETACH
 LEXENTRY:	10	10	NUMBER	DETACH
 LEXENTRY:	10TH	10TH	WORD,ORD	DETACH
@@ -11928,8 +11928,8 @@ PROV -> PROV -> 0.8
 [country]
 NATION -> NATION -> 0.8
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'ad', 'andorra', 'sample', 'LEXICON:	lex-andorra.txt	CAT	ca_AD
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'ad', 'andorra', 'sample', 'LEXICON:	lex-andorra.txt	CAT	ca_AD
 LEXENTRY:	AD	ANDORRA	NATION,DOUBLE	DETACH
 LEXENTRY:	AND	ANDORRA	NATION	DETACH
 LEXENTRY:	ANDORRA	ANDORRA	NATION	DETACH
@@ -12097,8 +12097,8 @@ NATION -> NATION -> 0.9
 
 
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'at', 'austria', 'sample', 'LEXICON:	lex-austria.txt	GER	de_AT
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'at', 'austria', 'sample', 'LEXICON:	lex-austria.txt	GER	de_AT
 LEXENTRY:	AG	AG	PLACEN	DETACH
 LEXENTRY:	AKTIEN	AKTIEN	PLACEN	DETACH
 LEXENTRY:	AKTIEN-GESELLSCHAFT	AKTIEN-GESELLSCHAFT	PLACEN	DETACH
@@ -12287,8 +12287,8 @@ PROV -> PROV -> 0.9
 NATION -> NATION -> 0.9
 
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'ch', 'switzerland', 'sample', 'LEXICON:	lex-switzerland.txt	GER	gsw_CH
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'ch', 'switzerland', 'sample', 'LEXICON:	lex-switzerland.txt	GER	gsw_CH
 LEXENTRY:	AARGAU	AG	PROV	DETACH
 LEXENTRY:	AG	AG	PLACEN	DETACH
 LEXENTRY:	AG	AG	PROV	DETACH
@@ -13085,8 +13085,8 @@ NUMBER -> IGNORE -> 0.3
 NATION -> NATION -> 0.9
 
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'ca', 'canada', 'sample', 'LEXICON:	lex-canada.txt	FRE	fr_CA
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'ca', 'canada', 'sample', 'LEXICON:	lex-canada.txt	FRE	fr_CA
 LEXENTRY:	PO BOX	PO BOX	BOXH	DETACH
 LEXENTRY:	P.O. BOX	PO BOX	BOXH	DETACH
 LEXENTRY:	PO	PO BOX	BOXH	DETACH
@@ -14736,8 +14736,8 @@ PROV -> PROV -> 0.8
 NATION -> NATION -> 0.8
 
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'mc', 'monaco', 'sample', 'LEXICON:	lex-monaco.txt	FRA	fr_MC
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'mc', 'monaco', 'sample', 'LEXICON:	lex-monaco.txt	FRA	fr_MC
 LEXENTRY:			WORD	DETACH
 LEXENTRY:	1	1	NUMBER	DETACH
 LEXENTRY:	10	10	NUMBER	DETACH
@@ -15553,8 +15553,8 @@ WORD BOXH NUMBER -> CITY EXTRA EXTRA -> 0.5
 NATION -> NATION -> 0.9
 
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'li', 'liechtenstein', 'sample', 'LEXICON:	lex-liechtenstein.txt	GER	de_LI
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'li', 'liechtenstein', 'sample', 'LEXICON:	lex-liechtenstein.txt	GER	de_LI
 LEXENTRY:	AG	AG	PLACEN	DETACH
 LEXENTRY:	AKTIEN	AKTIEN	PLACEN	DETACH
 LEXENTRY:	AKTIEN-GESELLSCHAFT	AKTIEN-GESELLSCHAFT	PLACEN	DETACH
@@ -15735,8 +15735,8 @@ WORD -> CITY -> 0.5
 NATION -> NATION -> 0.9
 
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'lu', 'luxembourg', 'sample', 'LEXICON:	lex-luxembourg.txt	GER	de_LU
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'lu', 'luxembourg', 'sample', 'LEXICON:	lex-luxembourg.txt	GER	de_LU
 LEXENTRY:	ALLEE	ALLÉE	TYPE	DET_PRE
 LEXENTRY:	ALLEE DE L''	ALLÉE DE L''	TYPE	ATT_PRE
 LEXENTRY:	ALLEE DE LA	ALLÉE DE LA	TYPE	DET_PRE
@@ -16010,8 +16010,8 @@ WORD -> CITY -> 0.5
 [country]
 NATION -> NATION -> 0.9
 
-' );
-insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( 'it', 'vatican', 'sample', 'LEXICON:	lex-vatican.txt	ITA	it_IT
+', 'PUNCT,SPACE,DASH' );
+insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( 'it', 'vatican', 'sample', 'LEXICON:	lex-vatican.txt	ITA	it_IT
 LEXENTRY:	ACCESSO	ACCESSO	TYPE	DET_PRE
 LEXENTRY:	ACCESSO A	ACCESSO A	TYPE	DET_PRE
 LEXENTRY:	AG	AGRIGENTO	PROV	DETACH
@@ -16788,5 +16788,5 @@ WORD -> CITY -> 0.5
 NATION -> NATION -> 0.9
 
 
-' );
+', 'PUNCT,SPACE,DASH' );
 commit;

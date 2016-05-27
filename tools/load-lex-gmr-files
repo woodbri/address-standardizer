@@ -100,7 +100,7 @@ sub loadFile {
         $head = (split(/\t/, $head))[3];
         $head =~ s/^[^_]+_//;
         $head = lc($head);
-        print $PSQL "insert into as_config (countrycode, countryname, dataset, lexicon, grammar) values ( '$head', '$country', '$dataset', '$lex', '$gmr' );\n";
+        print $PSQL "insert into as_config (countrycode, countryname, dataset, lexicon, grammar, filter) values ( '$head', '$country', '$dataset', '$lex', '$gmr', 'PUNCT,SPACE,DASH' );\n";
     }
     else {
         warn "ERROR: '$flex' or '$fgmr' files is missing!\n";
