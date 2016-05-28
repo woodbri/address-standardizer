@@ -1,9 +1,9 @@
 #
-valgrind --tool=callgrind --callgrind-out-file=callgrind.out ../src/tester/t2 lex-usa.txt grammar/usa.grammar "475 L'Enfant Plaza SW Rm 370 IBU WASHINGTON DC 20260–6500  USA"
+valgrind --tool=callgrind --callgrind-out-file=data/logs/callgrind.out src/tester/t2 data/sample/usa.lex data/sample/usa.gmr "475 L'Enfant Plaza SW Rm 370 IBU WASHINGTON DC 20260–6500  USA"
 
-callgrind_annotate callgrind.out &> callgrind.log
+callgrind_annotate data/logs/callgrind.out &> data/logs/callgrind.log
 
-grep ' /home' callgrind.log | sed "s@ /home/woodbri/work/address-standardizer/src/@@" | sed "s@ \\[/home/woodbri/work/address-standardizer/src/tester/t2\\]@@" > callgrind.txt
+grep ' src\/' data/logs/callgrind.log | sed "s@ /home/woodbri/work/address-standardizer/src/@@" | sed "s@ \\[/home/woodbri/work/address-standardizer/src/tester/t2\\]@@" > data/logs/callgrind.txt
 
 echo
-echo Results in callgrind.log
+echo Results in data/logs/callgrind.log and data/logs/callgrind.txt
