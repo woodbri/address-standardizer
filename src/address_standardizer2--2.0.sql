@@ -1,5 +1,5 @@
 -- complain if script is sourced in psql, rather than via CREATE EXTENSION
-\echo Use "CREATE EXTENSION address_standardizer" to load this file. \quit
+\echo Use "CREATE EXTENSION address_standardizer2" to load this file. \quit
 
 ---------------------------------------------------------------------
 -- Address Standardizer 2.0
@@ -30,7 +30,7 @@ CREATE OR REPLACE FUNCTION as_standardize(
         OUT unit text
         )
     RETURNS RECORD
-    AS '$libdir/address_standardizer-2.0', 'as_standardize'
+    AS '$libdir/address_standardizer2-2.0', 'as_standardize'
     LANGUAGE 'c' IMMUTABLE STRICT;
 
 CREATE OR REPLACE FUNCTION as_parse(
@@ -47,7 +47,7 @@ CREATE OR REPLACE FUNCTION as_parse(
         OUT attached text
         )
     RETURNS SETOF RECORD
-    AS '$libdir/address_standardizer-2.0', 'as_parse'
+    AS '$libdir/address_standardizer2-2.0', 'as_parse'
     LANGUAGE 'c' IMMUTABLE STRICT;
 
 CREATE OR REPLACE FUNCTION as_match(
@@ -63,7 +63,7 @@ CREATE OR REPLACE FUNCTION as_match(
         OUT attached text
         )
     RETURNS SETOF RECORD
-    AS '$libdir/address_standardizer-2.0', 'as_parse'
+    AS '$libdir/address_standardizer2-2.0', 'as_parse'
     LANGUAGE 'c' IMMUTABLE STRICT;
 
 

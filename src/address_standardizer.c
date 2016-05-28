@@ -17,7 +17,7 @@
 #include "fmgr.h"
 
 #undef DEBUG
-#define DEBUG 1
+//#define DEBUG 1
 
 #ifdef DEBUG
 #include <stdio.h>
