@@ -118,6 +118,8 @@ void Lexicon::initialize( std::istream &is ) {
                 line = Utils::upperCaseUTF8( line, locale_ );
             }
             LexEntry le( line );
+            if ( le.isInClass( InClass::BADTOKEN ) )
+                throw std::runtime_error("Lexicon-Invalid-LexEntry: "+ std::to_string(cnt) + ": " + line);
             insert( le );
         }
         else {
