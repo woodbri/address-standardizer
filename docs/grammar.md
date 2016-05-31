@@ -17,7 +17,7 @@ street house_number postal city country
 house_number street
 ```
 
-These three simple example are only for explanation, and a real grammar would
+These three simple examples are only for explanation, and a real grammar would
 need to account for things like optional fields, maybe apartment numbers, etc.
 
 The first example might match many addresses in the US and Canada. The USPS has
@@ -33,7 +33,7 @@ between localities.
 
 But this is only the top level of the grammar and and we need to describe each
 term in more detail eventually down to the level of mapping
-[InClass::Type](inclas.md) tokens to [OutClass::Type](outclass.md) token
+[InClass::Type](inclass.md) tokens to [OutClass::Type](outclass.md) token
 classification.  For example, lets look at **house_number** in more detail.
 
 ```
@@ -61,10 +61,19 @@ to consume input tokens, ie: the tokens before the first '->'.
 
 The ``[ADDRESS]`` style section is referred to a *MetaSection* and the
 ``[house_number]`` section is referred to as a *RuleSection*. You can not mix
-*MetaSection* lines with *RuleSection* lines.
+*MetaSection* lines with *RuleSection* lines. In the *MetaSection* in the
+grammar file all references are preceded by an '@' character, so the example
+``[ADDRESS]`` section above would be written as:
+```
+[ADDRESS]
+@house_number @street @city @state @postal @country
+@street @house_number @postal @city @country
+@house_number @street
+```
 
 ## See Also
 
+* [Overview](overview.md)
 * [Lexicon](lexicon.md)
 * [Token](token.md)
 * [InClass::Type](inclass.md)
