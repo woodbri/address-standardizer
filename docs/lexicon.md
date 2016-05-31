@@ -35,7 +35,7 @@ pressed to decide which of the ``WORD`` tokens belonged to ``STREET CITY
 STATE`` parts of the address. In this example we could classify *brier* as
 ``WORD`` but this adds no value over letting the tokenizer do that for us. On
 the other hand we might want to classify *green* as both a *WORD* and a *TYPE*
-so we can capture it as *WORD in the example above, as a street *TYPE* when
+so we can capture it as *WORD* in the example above, as a street *TYPE* when
 used as ``123 college green``.
 
 ## Lexicon File Format
