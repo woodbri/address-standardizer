@@ -27,10 +27,10 @@ address so it can match a grammar with some confidence. To get a better idea
 about this let look at the case of an empty lexicon. In this case the tokenizer
 will assign the default classification of *WORD* to most tokens. In reality
 there are a bunch of default tokens but they do not provide much useful
-classification by themselves. So and address like: *123 green brier st anytown
-mystate 12345* would get parsed into ``NUMBER WORD WORD WORD WORD WORD
+classification by themselves. So an address like: *123 green brier st anytown
+mystate 12345* could get parsed into ``NUMBER WORD WORD WORD WORD WORD
 NUMBER``. Given this we might be able to assume that the first ``NUMBER`` is
-the house number and the last ``NUMBER is a postal code, but we would be hard
+the house number and the last ``NUMBER`` is a postal code, but we would be hard
 pressed to decide which of the ``WORD`` tokens belonged to ``STREET CITY
 STATE`` parts of the address. In this example we could classify *brier* as
 ``WORD`` but this adds no value over letting the tokenizer do that for us. On
@@ -41,7 +41,7 @@ used as ``123 college green``.
 ## Lexicon File Format
 
 The Lexicon file format is lines where fields on the lines are separated by tab
-characters and the lines end with <CR><LF> or <LF>. The first line is a header
+characters and the lines end with &lt;CR>&lt;LF> or &lt;LF>. The first line is a header
 followed by lexicon entries.
 
 ### Format
