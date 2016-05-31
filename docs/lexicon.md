@@ -19,7 +19,7 @@ classifications to words that are not in the Lexicon.
 Attached words only appear in German and this allows us to split attached words
 from the base word. For example, *BRICKHAUSSTRASSE* can be recognized and split
 into *BRICKHAUS* and *STRASSE* if *STRASSE* is defined as *ATT_SUF*. See
-[Token](token.md) for a list of attachment types.
+[InClass::Type](inclass.md) for a list of attachment types.
 
 In general you want to keep the Lexicon as small as possible for performance in
 loading, but you need enough entries to classify various key tokens in the
@@ -68,7 +68,7 @@ The *LEXENTRY:* lines contain the Lexicon entries with the following fields:
 * WORD - a word or phrase that is being added to the lexicon
 * STDWORD - a standardized version of *WORD*
 * TYPELIST - a comma separated list of [InClass::Type](inclass.md) used as potential classifications for this *WORD* - *STDWORD* combination.
-* ATTACHLIST - For most entries this can be *DETACHED* or simply left empty. See [Token](token.md) for a list of attachment types.
+* ATTACHLIST - For most entries this can be *DETACHED* or simply left empty. See [InClass::Type](inclass.md) for a list of attachment types.
 
 The github repository contains a collection of lexicons and grammars in ``data/sample/`` directory.
 
