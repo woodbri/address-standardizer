@@ -147,6 +147,7 @@ public:
         DET_SUF  = 1,   ///< detached suffix
         ATT_PRE  = 2,   ///< attached prefix
         ATT_SUF  = 3    ///< attached suffix
+    //  DETACHED = can be used in the lexicon to indicate NO attachment
     } AttachType;
 
 
