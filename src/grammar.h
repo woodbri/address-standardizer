@@ -19,6 +19,8 @@
 #include <string>
 #include <iostream>
 #include <stdexcept>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/map.hpp>
 
 #include "inclass.h"
 #include "outclass.h"
@@ -27,6 +29,17 @@
 
 class Grammar
 {
+    friend std::ostream &operator<<(std::ostream &ss, const Grammar &g);
+
+private:
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version) {
+        ar & metas_;
+        ar & rules_;
+        ar & sectionIndex_;
+    }
+
 public:
 
     typedef enum {
@@ -46,8 +59,6 @@ public:
 
     Status status() const { return status_; };
     std::string issues() const { return issues_; } ;
-
-    friend std::ostream &operator<<(std::ostream &ss, const Grammar &g);
 
 
 private:

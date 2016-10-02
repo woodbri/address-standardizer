@@ -16,12 +16,21 @@
 
 #include <vector>
 #include <string>
+#include <boost/serialization/vector.hpp>
 
 #include "inclass.h"
 #include "outclass.h"
 
 class Rule
 {
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version) {
+        ar & inClass_;
+        ar & outClass_;
+        ar & score_;
+    }
+
 public:
 
     // constructors
