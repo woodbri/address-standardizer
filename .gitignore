@@ -1,4 +1,8 @@
 *.swp
 *.so
+diff.txt
 data/.gitignore
+lex-serial*
+address_standardizer2--2.0.sql
+address_standardizer2-sample-data.sql
 *.tri
