@@ -25,6 +25,14 @@ class RuleSection;
 
 class SectionPtr
 {
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version) {
+        ar & name_;
+        ar & mptr_;
+        ar & rptr_;
+    }
+
 public:
 
     SectionPtr( const SectionPtr& ) = default;

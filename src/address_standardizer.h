@@ -53,5 +53,10 @@ STDADDR *std_standardize(
 extern "C"
 #endif
 
+char * serialize_lexicon(
+    char *lexicon_in,
+    char **err_msg
+);
+
 
 #endif

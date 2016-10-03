@@ -19,6 +19,10 @@
 #include <vector>
 #include <cstdlib>
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/archive_exception.hpp>
+
 #include "utils.h"
 #include "token.h"
 #include "lexicon.h"
@@ -40,7 +44,17 @@ STDADDR *std_standardize( char *address_in, char *grammar_in, char *lexicon_in, 
         s = lexicon_in;
         iss.clear();
         iss.str( s );
-        Lexicon lexicon( "query-lex", iss );
+        Lexicon lexicon;
+        try {
+            boost::archive::text_iarchive ia(iss);
+            ia >> lexicon;
+        }
+        catch ( ... ) {
+            iss.clear();
+            iss.str( s );
+            lexicon.name( "query-lex" );
+            lexicon.initialize( iss );
+        }
 
         // Normalize and UPPERCASE the input string
         UErrorCode errorCode;
@@ -221,3 +235,44 @@ STDADDR *std_standardize( char *address_in, char *grammar_in, char *lexicon_in, 
 }
 
 
+char * serialize_lexicon( char *lexicon_in, char **err_msg )
+{
+    try {
+
+        // put the lexicon into a string stream
+        std::string s( lexicon_in );
+        std::istringstream iss( s );
+
+        // create the lexicon object
+        Lexicon lex( "query-lex", iss );
+
+        // serialize the lexicon object into a string stream
+        std::ostringstream ofs;
+        boost::archive::text_oarchive oa(ofs);
+        oa << lex;
+
+        // get the serialized lexicon text and return it
+        std::string clex = ofs.str();
+        if (clex.size() == 0) {
+            *err_msg = strdup( "Compiled lexicon should not be size=0!" );
+            return NULL;
+        }
+
+        *err_msg = (char *)0;
+        return strdup(clex.c_str());
+
+    }
+    catch ( std::runtime_error &e ) {
+        *err_msg = strdup( e.what() );
+        return NULL;
+    }
+    catch ( std::exception &e ) {
+        *err_msg = strdup( e.what() );
+        return NULL;
+    }
+    catch ( ... ) {
+        *err_msg = strdup( "Caught unknown expection!" );
+        return NULL;
+    }
+    
+}

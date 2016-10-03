@@ -18,11 +18,22 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/vector.hpp>
 
 #include "metarule.h"
 
 
 class MetaSection {
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version) {
+        ar & name_;
+        ar & rules_;
+    }
+
+
+public:
 
 public:
     MetaSection() {};
