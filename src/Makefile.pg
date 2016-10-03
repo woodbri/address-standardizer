@@ -35,16 +35,20 @@ AS_VERSION = 2.0
 OBJS = address_standardizer.o as_wrapper.o grammar.o inclass.o lexentry.o lexicon.o metarule.o metasection.o outclass.o rule.o rulesection.o search.o token.o tokenizer.o utils.o trieutf8.o utf8iterator.o
 MODULE_big = address_standardizer2-$(AS_VERSION)
 EXTENSION = address_standardizer2
-DATA_built = address_standardizer2-sample-data.sql address_standardizer2--$(AS_VERSION).sql
+OURSQL = address_standardizer2--$(AS_VERSION).sql
+DATA_built = address_standardizer2-sample-data.sql $(OURSQL)
 DOCS = README.address_standardizer2
 
-SHLIB_LINK = -L /usr/lib/x86_64-linux-gnu/ `pkg-config --libs --cflags icu-uc icu-io` -L /usr/lib/x86_64-linux-gnu/ -lboost_regex
+SHLIB_LINK = -L /usr/lib/x86_64-linux-gnu/ `pkg-config --libs --cflags icu-uc icu-io` -L /usr/lib/x86_64-linux-gnu/ -lboost_regex -lboost_serialization
 
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
 
 address_standardizer.o: address_standardizer.c address_standardizer.h
 	$(CC) $(PG_CFLAGS) -o address_standardizer.o -c address_standardizer.c
+
+$(OURSQL): $(OURSQL).in
+	cp $(OURSQL).in $(OURSQL)
 
 address_standardizer2-sample-data.sql: ../data/sample/*.lex ../data/sample/*.gmr
 	../tools/load-lex-gmr-files -c sample ../data/sample address_standardizer2-sample-data.sql

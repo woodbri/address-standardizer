@@ -33,6 +33,13 @@ CREATE OR REPLACE FUNCTION as_standardize(
     AS '$libdir/address_standardizer2-2.0', 'as_standardize'
     LANGUAGE 'c' IMMUTABLE STRICT;
 
+CREATE OR REPLACE FUNCTION as_compile_lexicon(
+        lexicon text
+        )
+    RETURNS TEXT
+    AS '$libdir/address_standardizer2-2.0', 'as_compile_lexicon'
+    LANGUAGE 'c' IMMUTABLE STRICT;
+
 CREATE OR REPLACE FUNCTION as_parse(
         address text,
         lexicon text,
