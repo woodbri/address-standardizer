@@ -84,5 +84,10 @@ extern "C"
 #endif
 char *getMd5( char *text );
 
+char * serialize_lexicon(
+    char *lexicon_in,
+    char **err_msg
+);
+
 
 #endif

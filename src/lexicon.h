@@ -21,6 +21,8 @@
 #include <iostream>
 #include <boost/regex.hpp>
 #include <boost/regex/icu.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/map.hpp>
 
 #include "trieutf8.h"
 #include "inclass.h"
@@ -29,6 +31,18 @@
 
 class Lexicon
 {
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version) {
+        ar & name_;
+        ar & lang_;
+        ar & locale_;
+        ar & lex_;
+        ar & regex_;
+        ar & regexPrefix_;
+        ar & regexSuffix_;
+    }
+
 protected:
 
 public:

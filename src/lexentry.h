@@ -16,11 +16,24 @@
 
 #include <string>
 #include <set>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/set.hpp>
 
 #include "inclass.h"
 
 class LexEntry
 {
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version) {
+        ar & word_;
+        ar & stdword_;
+        ar & type_;
+        ar & attached_;
+    }
+
+
 public:
     /** @name  accessors */
     ///@{

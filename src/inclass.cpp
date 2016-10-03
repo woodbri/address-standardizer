@@ -45,6 +45,7 @@ std::string InClass::asString(const InClass::Type &t) {
         case BOXH:      str = "BOXH";   break;
         case ORD:       str = "ORD";    break;
         case UNITH:     str = "UNITH";  break;
+        case UNITT:     str = "UNITT";  break;
         case SINGLE:    str = "SINGLE"; break;
         case BUILDH:    str = "BUILDH"; break;
         case MILE:      str = "MILE";   break;
@@ -89,6 +90,7 @@ InClass::Type InClass::asOneType(const std::string &s) {
     else if ( s == "BOXH" )     t = BOXH;
     else if ( s == "ORD" )      t = ORD;
     else if ( s == "UNITH" )    t = UNITH;
+    else if ( s == "UNITT" )    t = UNITT;
     else if ( s == "SINGLE" )   t = SINGLE;
     else if ( s == "BUILDH" )   t = BUILDH;
     else if ( s == "MILE" )     t = MILE;
@@ -163,6 +165,7 @@ InClass::Type InClass::asType(const int i) {
         case 14: t = BOXH;      break;
         case 15: t = ORD;       break;
         case 16: t = UNITH;     break;
+        case 17: t = UNITT;     break;
         case 18: t = SINGLE;    break;
         case 19: t = BUILDH;    break;
         case 20: t = MILE;      break;

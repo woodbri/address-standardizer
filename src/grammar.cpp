@@ -237,7 +237,7 @@ void Grammar::updatePointers() {
                 status_ = CHECK_WARN;
         }
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
 
         // check all the pointers are set correctly
