@@ -15,6 +15,7 @@
 #include "funcapi.h"
 #include "catalog/pg_type.h"
 #include "fmgr.h"
+#include "utils/builtins.h"
 
 #undef DEBUG
 //#define DEBUG 1
@@ -34,6 +35,7 @@
 PG_MODULE_MAGIC;
 #endif
 
+Datum as_compile_lexicon(PG_FUNCTION_ARGS);
 Datum as_standardize(PG_FUNCTION_ARGS);
 Datum as_parse(PG_FUNCTION_ARGS);
 Datum as_match(PG_FUNCTION_ARGS);
@@ -72,6 +74,43 @@ void stdaddr_free(STDADDR *stdaddr)
     if (stdaddr->unit)       free(stdaddr->unit);
     free(stdaddr);
     stdaddr = NULL;
+}
+
+
+/*
+ *  CREATE OR REPLACE FUNCTION as_compile_lexicon(
+ *          lexicon text
+ *          )
+ *      RETURNS TEXT
+ *      AS '$libdir/address_standardizer-2.0', 'compile_lexicon'
+ *      LANGUAGE 'c' IMMUTABLE STRICT;
+ *
+*/
+PG_FUNCTION_INFO_V1(as_compile_lexicon);
+
+Datum as_compile_lexicon(PG_FUNCTION_ARGS)
+{
+    char *lexicon;
+    char *cstr = NULL;
+    char *err_msg = NULL;
+    char *pstr;
+
+    lexicon = text2char(PG_GETARG_TEXT_P(0));
+    DBG("lexicon:\n '%s'", lexicon);
+
+    cstr = serialize_lexicon( lexicon, &err_msg );
+    if ( err_msg != NULL )
+        elog(ERROR, "std_standardize threw an error: %s", err_msg);
+
+    if (cstr) {
+        pstr = pstrdup(cstr);
+        free(cstr);
+    }
+    else
+        elog(ERROR, "lexicon failed to compile!");
+
+
+    PG_RETURN_TEXT_P(cstring_to_text(pstr));
 }
 
 

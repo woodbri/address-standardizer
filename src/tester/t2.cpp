@@ -27,6 +27,9 @@
 #include <vector>
 #include <chrono>
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/archive_exception.hpp>
 
 int main(int ac, char* av[]) {
 
@@ -81,7 +84,19 @@ int main(int ac, char* av[]) {
     std::cout << "Timer: read lexicon: " << dt.count() << " ms\n";
 
     t0 = std::chrono::system_clock::now();
-    Lexicon lex( "query-lex", iss );
+    // Lexicon lex( "query-lex", iss );
+    Lexicon lex;
+    try {
+        boost::archive::text_iarchive ia(iss);
+        ia >> lex;
+    }
+    catch ( ... ) {
+        std::cout << "Load from serialized failed! Trying to load lexicon.\n";
+        iss.clear();
+        iss.str( s );
+        lex.name( "query-lex" );
+        lex.initialize( iss );
+    }
     t1 = std::chrono::system_clock::now();
     diff = t1 - t0;
     dt = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
