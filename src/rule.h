@@ -25,7 +25,7 @@ class Rule
 {
     friend class boost::serialization::access;
     template<class Archive>
-    void serialize(Archive & ar, const unsigned int version) {
+    void serialize(Archive & ar, const unsigned int /* version */) {
         ar & inClass_;
         ar & outClass_;
         ar & score_;

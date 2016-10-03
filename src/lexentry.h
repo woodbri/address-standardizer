@@ -26,7 +26,7 @@ class LexEntry
 {
     friend class boost::serialization::access;
     template<class Archive>
-    void serialize(Archive & ar, const unsigned int version) {
+    void serialize(Archive & ar, const unsigned int /* version */) {
         ar & word_;
         ar & stdword_;
         ar & type_;
