@@ -50,6 +50,14 @@ STDADDR *std_standardize( char *address_in, char *grammar_in, char *lexicon_in, 
             boost::archive::text_iarchive ia(iss);
             ia >> lexicon;
         }
+        catch (std::runtime_error& e) {
+            if ( e.what() == std::string("Re-compile-lexicon"))
+                throw;
+            iss.clear();
+            iss.str( s );
+            lexicon.name( "query-lex" );
+            lexicon.initialize( iss );
+        }
         catch ( ... ) {
             iss.clear();
             iss.str( s );

@@ -19,6 +19,7 @@
 #include <string>
 #include <iostream>
 #include <stdexcept>
+#include <boost/serialization/version.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/map.hpp>
 
@@ -34,12 +35,26 @@ class Grammar
 
 private:
     friend class boost::serialization::access;
+
     template<class Archive>
-    void serialize(Archive & ar, const unsigned int /* version */) {
-        ar & metas_;
-        ar & rules_;
-        ar & sectionIndex_;
+    void load(Archive & ar, const unsigned int version) {
+        if ( version < 1 )
+            throw std::runtime_error("Re-compile-your-grammar");
+        ar >> metas_;
+        ar >> rules_;
+        ar >> sectionIndex_;
+        ar >> md5_;
     }
+
+    template<class Archive>
+    void save(Archive & ar, const unsigned int /* version */) const {
+        ar << metas_;
+        ar << rules_;
+        ar << sectionIndex_;
+        ar << md5_;
+    }
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 public:
 
@@ -87,5 +102,8 @@ protected:
     Status status_;
 
 };
+
+// Added md5_ in version 1
+BOOST_CLASS_VERSION(Grammar, 1)
 
 #endif
