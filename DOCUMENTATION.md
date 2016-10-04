@@ -146,6 +146,13 @@ Not included in the list above are:
 * ATT_PRE - An attached prefix
 * DETACH - No attachment (this is not listed inclass.h).
 
+Lexicon files can be compiled and these compiled files load 10 times faster
+than the original lexicon data files. In most cases, the code will accept
+either form of the lexicon data. If you load the sample data files from the
+sql it will create a compiled version of the lexicon in the ``clexicon``
+column. If the format of the compiled lexicon changes, you will get an error
+message indicating that you need to re-compile the lexicon.
+
 ### Grammar File Format
 
 In general, the grammar files should be built to work with specific lexicons
@@ -182,7 +189,7 @@ The meta rules look like the follow:
     @PLACENAME @STREET_ADDRESS @MACRO
 
 The "[ADDRESS]" is the rule name. The "@<name>" is a reference to another rule.
-This "[ADDRESS]" rule is saying and address is composed of matching the
+This "[ADDRESS]" rule is saying an address is composed of matching the
 "STREET_ADDRESS" rule followed by matching the "MACRO" rule. Or by matching the
 "PLACENAME" rule followed by the "STREET_ADDRESS" rule followed by the "MACRO"
 rule. So the grammar can be broken into convenient pieces and chained together
@@ -224,16 +231,19 @@ So reviewing the original example:
     Input Tokens:  NUMBER WORD TYPE DIRECT WORD PROV NUMBER NATION
     Output Tokens: HOUSE STREET SUFTYP CITY CITY PROV POSTAL NATION
 
-It you can see that the first WORD token gets mapped to the STREET token and
+In this example, the first WORD token gets mapped to the STREET token and
 the second WORD token get mapped to the CITY token. This allow us to match
 "Radcliffe" against street names and Chelmsford against city names. 
 
 ### Existing Lexicons and Grammars
 
-The project has an collection of lexicons for various countries in Europe, United States and Canada. (See the **data/** directory). These lexicons are only a starting place for users and will need to be adapted for your specific needs.
+The project has an collection of lexicons for various countries in Europe,
+United States and Canada. (See the **data/sample** directory). These lexicons
+are only a starting place for users and will need to be adapted for your
+specific needs.
 
 Likewise there are starter grammars in the **data/grammar/** directory.
 
-Files ending in **.txt** can be used with the file loader classes and files ending in **.sql** can be loaded as tables in the database and passed into the stored procedure interfaces in PostgreSQL.
+Files ending in **.txt|.lex|.gmr** can be used with the file loader classes and files ending in **.sql** can be loaded as tables in the database and passed into the stored procedure interfaces in PostgreSQL.
 
 
