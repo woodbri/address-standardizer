@@ -111,6 +111,7 @@ int main(int ac, char* av[]) {
     dt = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
     std::cout << "Timer: load lexicon: " << dt.count() << " ms\n";
 
+    std::cout << "Lexicon md5: " << lex.getMd5() << "\n";
 
 //    std::cout << lex << "\n";
 //    std::cout << "Lexicon regex: '" << lex.regex() <<"'\n\n";
@@ -183,6 +184,8 @@ int main(int ac, char* av[]) {
                 std::cout << "OK loading grammar: " << G.issues() << "\n";
                 break;
         }
+
+        std::cout << "Grammar md5: " << G.getMd5() << "\n";
 
         //std::cout << "--Gramar-------------------\n" << G << "---------------------------\n";
 

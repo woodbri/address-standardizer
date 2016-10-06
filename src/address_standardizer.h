@@ -35,9 +35,28 @@ typedef struct {
 } STDADDR;
 
 
+typedef struct
+{
+    void *lex_obj;
+    void *gmr_obj;
+}
+STANDARDIZER;
+
+
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
+
+
+STDADDR *std_standardize_ptrs(
+    char *address_in,
+    void *grammar_ptr,
+    void *lexicon_ptr,
+    char *locale_in,
+    char *filter_in,
+    char **err_msg
+);
+
 
 STDADDR *std_standardize(
     char *address_in,
@@ -49,39 +68,18 @@ STDADDR *std_standardize(
 );
 
 
-#ifdef __cplusplus
-extern "C"
-#endif
-void *getGrammarPtr( char *grammar_in );
+void *getGrammarPtr( char *grammar_in, char **err_msg );
 
-#ifdef __cplusplus
-extern "C"
-#endif
 void freeGrammarPtr( void *ptr );
 
-#ifdef __cplusplus
-extern "C"
-#endif
-void *getLexiconPtr( char *lexicon_in );
+void *getLexiconPtr( char *lexicon_in, char **err_msg );
 
-#ifdef __cplusplus
-extern "C"
-#endif
 void freeLexiconPtr( void *ptr );
 
-#ifdef __cplusplus
-extern "C"
-#endif
 char *getGrammarMd5( void *ptr );
 
-#ifdef __cplusplus
-extern "C"
-#endif
 char *getLexiconMd5( void *ptr );
 
-#ifdef __cplusplus
-extern "C"
-#endif
 char *getMd5( char *text );
 
 char * serialize_lexicon(
@@ -89,5 +87,8 @@ char * serialize_lexicon(
     char **err_msg
 );
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif
