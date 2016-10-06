@@ -20,8 +20,16 @@
 
 #include "grammar.h"
 
+Grammar::Grammar( const char *grammar_in ) 
+    : md5_(""), issues_(""), status_(CHECK_OK)
+{
+    std::istringstream iss( grammar_in );
+    initialize( iss );
+}
+
+
 Grammar::Grammar( const std::string &file )
-    : issues_(""), status_(CHECK_OK)
+    : md5_(""), issues_(""), status_(CHECK_OK)
 {
     std::ifstream ifs;
     ifs.open( file.c_str(), std::ifstream::in);
@@ -31,7 +39,7 @@ Grammar::Grammar( const std::string &file )
 
 
 Grammar::Grammar( std::istream &is )
-    : issues_(""), status_(CHECK_OK)
+    : md5_(""), issues_(""), status_(CHECK_OK)
 {
     initialize( is );
 }
@@ -39,6 +47,7 @@ Grammar::Grammar( std::istream &is )
 
 void Grammar::initialize( std::istream &is )
 {
+    std::string grammar_in;
 
     auto re_comment = boost::make_u32regex( "^\\s*#.*|^\\s*$" );
     auto re_section = boost::make_u32regex( "^\\s*\\[(.+)\\]\\s*$" );
@@ -55,6 +64,7 @@ void Grammar::initialize( std::istream &is )
     while ( is ) {
         ++line_cnt;
         std::getline( is, line );
+        grammar_in += line;
         //std::cout << "\t" << line_cnt << ": " << line << "\n";
 
         // remove UTF8 BOM if one exists
@@ -154,6 +164,7 @@ void Grammar::initialize( std::istream &is )
     if ( status_ == CHECK_FATAL )
         throw std::runtime_error( issues_ );
 
+    md5_ = md5( grammar_in );
 }
 
 

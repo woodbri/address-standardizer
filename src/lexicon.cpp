@@ -17,6 +17,7 @@
 #include <string>
 #include <algorithm>
 
+#include "md5.h"
 #include "utils.h"
 #include "lexentry.h"
 #include "inclass.h"
@@ -28,19 +29,28 @@ Lexicon::Lexicon() {
     name_ = "";
     lang_ = InClass::UNKNOWN;
     locale_ = "";
+    md5_ = "";
     lex_.clear();
 }
 
 
 Lexicon::Lexicon(std::string name) :
-    name_(name), lang_(InClass::UNKNOWN), locale_("")
+    name_(name), lang_(InClass::UNKNOWN), locale_(""), md5_("")
 {}
 
 
 Lexicon::Lexicon(std::string name, std::istream &is ) :
-    name_(name), lang_(InClass::UNKNOWN), locale_("")
+    name_(name), lang_(InClass::UNKNOWN), locale_(""), md5_("")
 {
     initialize( is );
+}
+
+
+Lexicon::Lexicon( char *lexicon_in ) :
+    name_("unknown"), lang_(InClass::UNKNOWN), locale_("")
+{
+    std::istringstream iss( lexicon_in );
+    initialize( iss );
 }
 
 
@@ -56,9 +66,12 @@ Lexicon::Lexicon(std::string name, std::string file) :
 
 void Lexicon::initialize( std::istream &is ) {
     std::string line;
+    std::string lexicon_in;
     unsigned long int cnt = 0;
 
     std::getline( is, line );
+    lexicon_in += line;
+
     // remove UTF8 BOM if one exists
     if (line[0] == '\xEF' && line[1] == '\xBB' && line[2] == '\xBF')
         line = line.substr(4);
@@ -70,6 +83,7 @@ void Lexicon::initialize( std::istream &is ) {
             throw std::runtime_error("Lexicon-LexEntry-Before-Lexicon");
         }
         std::getline( is, line );
+        lexicon_in += line;
         ++cnt;
     }
 
@@ -99,6 +113,7 @@ void Lexicon::initialize( std::istream &is ) {
     // read in the lexicon entries
     while ( is ) {
         std::getline( is, line );
+        lexicon_in += line;
         ++cnt;
         //std::cout << "\t" << line << "\n";
 
@@ -126,6 +141,8 @@ void Lexicon::initialize( std::istream &is ) {
             throw std::runtime_error("Lexicon-Invalid-LexEntry: "+ std::to_string(cnt) + ": " + line);
         }
     }
+
+    md5_ = md5( lexicon_in );
 }
 
 // getters

@@ -29,8 +29,23 @@
 #include "tokenizer.h"
 #include "grammar.h"
 #include "search.h"
+#include "md5.h"
 
 #include "address_standardizer.h"
+
+
+STDADDR *standardize_addr( char *address_in, Grammar & grammar, Lexicon & lexicon, char *locale_in, char *filter_in, char **err_msg);
+
+
+
+STDADDR *std_standardize_ptrs( char *address_in, void *grammar_ptr, void *lexicon_ptr, char *locale_in, char *filter_in, char **err_msg)
+{
+    return standardize_addr( address_in,
+                             *(static_cast<Grammar*>( grammar_ptr )),
+                             *(static_cast<Lexicon*>( lexicon_ptr )),
+                             locale_in, filter_in, err_msg );
+}
+
 
 
 STDADDR *std_standardize( char *address_in, char *grammar_in, char *lexicon_in, char *locale_in, char *filter_in, char **err_msg)
@@ -49,6 +64,14 @@ STDADDR *std_standardize( char *address_in, char *grammar_in, char *lexicon_in, 
             boost::archive::text_iarchive ia(iss);
             ia >> lexicon;
         }
+        catch (std::runtime_error& e) {
+            if ( e.what() == std::string("Re-compile-lexicon"))
+                throw;
+            iss.clear();
+            iss.str( s );
+            lexicon.name( "query-lex" );
+            lexicon.initialize( iss );
+        }
         catch ( ... ) {
             iss.clear();
             iss.str( s );
@@ -56,6 +79,27 @@ STDADDR *std_standardize( char *address_in, char *grammar_in, char *lexicon_in, 
             lexicon.initialize( iss );
         }
 
+        return standardize_addr( address_in, grammar, lexicon, locale_in, filter_in, err_msg );
+
+    }
+    catch ( std::runtime_error &e ) {
+        *err_msg = strdup( e.what() );
+        return NULL;
+    }
+    catch ( std::exception &e ) {
+        *err_msg = strdup( e.what() );
+        return NULL;
+    }
+    catch ( ... ) {
+        *err_msg = strdup( "Caught unknown expection!" );
+        return NULL;
+    }
+}
+
+
+STDADDR *standardize_addr( char *address_in, Grammar & grammar, Lexicon & lexicon, char *locale_in, char *filter_in, char **err_msg)
+{
+    try {
         // Normalize and UPPERCASE the input string
         UErrorCode errorCode;
         std::string nstr = Utils::normalizeUTF8( std::string(address_in), errorCode );
@@ -234,6 +278,118 @@ STDADDR *std_standardize( char *address_in, char *grammar_in, char *lexicon_in, 
 
 }
 
+void *getGrammarPtr( char *grammar_in, char **err_msg )
+{
+    try {
+        std::string s( grammar_in );
+        std::istringstream iss( s );
+        Grammar* grammar = new Grammar( iss );
+        return static_cast<void*>(grammar);
+    }
+    catch ( std::runtime_error &e ) {
+        *err_msg = strdup( e.what() );
+        return NULL;
+    }
+    catch ( std::exception &e ) {
+        *err_msg = strdup( e.what() );
+        return NULL;
+    }
+    catch ( ... ) {
+        *err_msg = strdup( "Caught unknown expection trying to load the Grammar!" );
+        return NULL;
+    }
+}
+
+void freeGrammarPtr( void *ptr )
+{
+    try {
+        delete static_cast<Grammar*>( ptr );
+    }
+    catch ( ... ) {
+        // NOP
+    }
+}
+
+void *getLexiconPtr( char *lexicon_in, char **err_msg )
+{
+    try {
+        std::string s( lexicon_in );
+        std::istringstream iss( s );
+        Lexicon* lexicon = new Lexicon;
+        try {
+            boost::archive::text_iarchive ia(iss);
+            ia >> *lexicon;
+        }
+        catch (std::runtime_error& e) {
+            if ( e.what() == std::string("Re-compile-lexicon"))
+                throw;
+            iss.clear();
+            iss.str( s );
+            lexicon->name( "query-lex" );
+            lexicon->initialize( iss );
+        }
+        catch ( ... ) {
+            iss.clear();
+            iss.str( s );
+            lexicon->name( "query-lex" );
+            lexicon->initialize( iss );
+        }
+        return static_cast<void*>(lexicon);
+    }
+    catch ( std::runtime_error &e ) {
+        *err_msg = strdup( e.what() );
+        return NULL;
+    }
+    catch ( std::exception &e ) {
+        *err_msg = strdup( e.what() );
+        return NULL;
+    }
+    catch ( ... ) {
+        *err_msg = strdup( "Caught unknown expection trying to load the Lexicon!" );
+        return NULL;
+    }
+}
+
+void freeLexiconPtr( void *ptr )
+{
+    try {
+        delete static_cast<Lexicon*>(ptr);
+    }
+    catch ( ... ) {
+        // NOP
+    }
+}
+
+char *getGrammarMd5( void *ptr )
+{
+    try {
+        return strdup( static_cast<Grammar*>(ptr)->getMd5() );
+    }
+    catch ( ... ) {
+        return NULL;
+    }
+}
+
+char *getLexiconMd5( void *ptr )
+{
+    try {
+        return strdup( static_cast<Lexicon*>(ptr)->getMd5() );
+    }
+    catch ( ... ) {
+        return NULL;
+    }
+}
+
+char *getMd5( char *text )
+{
+    try {
+        std::string md5str = md5( text );
+        return strdup( md5str.c_str() );
+    }
+    catch ( ... ) {
+        return NULL;
+    }
+}
 
 char * serialize_lexicon( char *lexicon_in, char **err_msg )
 {

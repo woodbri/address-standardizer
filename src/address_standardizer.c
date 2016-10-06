@@ -17,6 +17,8 @@
 #include "fmgr.h"
 #include "utils/builtins.h"
 
+#define USE_QUERY_CACHE
+
 #undef DEBUG
 //#define DEBUG 1
 
@@ -29,16 +31,17 @@
 #endif
 
 
+#include "std_pg_hash.h"
 #include "address_standardizer.h"
 
 #ifdef PG_MODULE_MAGIC
 PG_MODULE_MAGIC;
 #endif
 
-Datum as_compile_lexicon(PG_FUNCTION_ARGS);
-Datum as_standardize(PG_FUNCTION_ARGS);
-Datum as_parse(PG_FUNCTION_ARGS);
-Datum as_match(PG_FUNCTION_ARGS);
+PGDLLEXPORT Datum as_compile_lexicon(PG_FUNCTION_ARGS);
+PGDLLEXPORT Datum as_standardize(PG_FUNCTION_ARGS);
+PGDLLEXPORT Datum as_parse(PG_FUNCTION_ARGS);
+PGDLLEXPORT Datum as_match(PG_FUNCTION_ARGS);
 
 
 void stdaddr_free(STDADDR *stdaddr);
@@ -169,9 +172,7 @@ Datum as_standardize(PG_FUNCTION_ARGS)
     char               **values;
     HeapTuple            tuple;
     int                  k;
-/*
     STANDARDIZER        *std;
-*/
     char                *err_msg; 
 
     DBG("Start as_standardize");
@@ -195,20 +196,21 @@ Datum as_standardize(PG_FUNCTION_ARGS)
     attinmeta = TupleDescGetAttInMetadata(tuple_desc);
 
 /* 
-   TODO The following code is code be used to implement a query level cache
+   The following code is code be used to implement a query level cache
    of the standardizer, so it does not have to be initialized  for every
-   address. For now we will take the slower but similar approach.
+   address. Else we will take the slower approach.
 */
-/*
-    std = getStandardizer(grammar, lexicon, config);
+#ifdef USE_QUERY_CACHE
+    std = GetStdUsingFCInfo( fcinfo, lexicon, grammar );
     if (!std)
         elog(ERROR, "as_standardize() failed to create the address standardizer object!");
 
     DBG("calling std_standardize('%s')", address);
-    stdaddr = std_standardize(std, address);
-*/
-
+    stdaddr = std_standardize_ptrs( address, std->gmr_obj, std->lex_obj, locale, filter, &err_msg );
+#else
+    DBG("calling std_standardize('%s')", address);
     stdaddr = std_standardize(address, grammar, lexicon, locale, filter, &err_msg);
+#endif
     DBG("back from std_standardize");
 
     if ( err_msg != NULL )

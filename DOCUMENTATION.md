@@ -146,6 +146,13 @@ Not included in the list above are:
 * ATT_PRE - An attached prefix
 * DETACH - No attachment (this is not listed inclass.h).
 
+Lexicon files can be compiled and these compiled files load 10 times faster
+than the original lexicon data files. In most cases, the code will accept
+either form of the lexicon data. If you load the sample data files from the
+sql it will create a compiled version of the lexicon in the ``clexicon``
+column. If the format of the compiled lexicon changes, you will get an error
+message indicating that you need to re-compile the lexicon.
+
 ### Grammar File Format
 
 In general, the grammar files should be built to work with specific lexicons
@@ -182,7 +189,7 @@ The meta rules look like the follow:
     @PLACENAME @STREET_ADDRESS @MACRO
 
 The "[ADDRESS]" is the rule name. The "@<name>" is a reference to another rule.
-This "[ADDRESS]" rule is saying and address is composed of matching the
+This "[ADDRESS]" rule is saying an address is composed of matching the
 "STREET_ADDRESS" rule followed by matching the "MACRO" rule. Or by matching the
 "PLACENAME" rule followed by the "STREET_ADDRESS" rule followed by the "MACRO"
 rule. So the grammar can be broken into convenient pieces and chained together
@@ -224,16 +231,101 @@ So reviewing the original example:
     Input Tokens:  NUMBER WORD TYPE DIRECT WORD PROV NUMBER NATION
     Output Tokens: HOUSE STREET SUFTYP CITY CITY PROV POSTAL NATION
 
-It you can see that the first WORD token gets mapped to the STREET token and
+In this example, the first WORD token gets mapped to the STREET token and
 the second WORD token get mapped to the CITY token. This allow us to match
 "Radcliffe" against street names and Chelmsford against city names. 
 
 ### Existing Lexicons and Grammars
 
-The project has an collection of lexicons for various countries in Europe, United States and Canada. (See the **data/** directory). These lexicons are only a starting place for users and will need to be adapted for your specific needs.
+The project has an collection of lexicons for various countries in Europe,
+United States and Canada. (See the **data/sample** directory). These lexicons
+are only a starting place for users and will need to be adapted for your
+specific needs.
 
 Likewise there are starter grammars in the **data/grammar/** directory.
 
-Files ending in **.txt** can be used with the file loader classes and files ending in **.sql** can be loaded as tables in the database and passed into the stored procedure interfaces in PostgreSQL.
+Files ending in **.txt|.lex|.gmr** can be used with the file loader classes and files ending in **.sql** can be loaded as tables in the database and passed into the stored procedure interfaces in PostgreSQL.
+
+## Performance Considerations
+
+For each address that we need to standardize, we need both the lexicon and the
+grammar objects. These are expensive to read and construct each time we need
+them. We have implemented two features the can significantly improve
+performance around this issue.
+
+### Compile the Lexicon
+
+It takes time to load a lexicon, especially if it is large, but if you compile
+the lexicon using ``as_compile_lexicon`` and save it, then supplying the
+compiled lexicon instead of the source lexicon saves about 66% of the time to
+load the lexicon. If you load the sample lexicons and grammars, we create a
+``clexicon`` column and compile the lexicon into that. Or you could do
+something like:
+
+```
+update as_config set clexicon = as_compile_lexicon( lexicon );
+```
+
+which would compile or recompile all the lexicons in the ``as_config`` table.
+
+### Query-Level Caching of Lexicon and Grammar objects
+
+We implemented Query-Level Caching of Lexicon and Grammar objects to speed up
+standardizing a whole table. You will not see any benefit on one-off queries
+but if you construct your queries like the follow, there is a significant
+performance boost.
+
+For this example, assume that we have a table ``test_addresses`` with a column ``address`` and we want to standardize the text in ``address`` into a new table ``standardized_addresses`` that contains ``id`` from ``test_addresses``, the standardized fields followed by the ``test_addresses.address`` field.
+
+```
+create table standardized_addresses as
+with cfg as (
+  select * from as_config where countrycode='us'
+)
+select a.id, (as_standardize( address, cfg.grammar, cfg.clexicon, 'en_US', cfg.filter )).*, address
+  from test_addresses a, cfg order by id;
+
+```
+
+You can get a little more creative if you ``test_addresses`` table looks like this and you are working with addresses from multiple countries. Given that the ``as_config`` looks like the following.
+
+```
+CREATE TABLE as_config
+(
+  id serial NOT NULL PRIMARY KEY,
+  countrycode character(2),
+  countryname text,
+  dataset text,
+  lexicon text,
+  clexicon text,
+  grammar text,
+  filter text
+);
+
+CREATE TABLE test_addresses
+(
+    id serial NOT NULL PRIMARY KEY,
+    address text,
+    locale text,
+    countrycode character(2)
+);
+```
+
+Here we expect ``test_addresses.countrycode`` to join on ``as_config.countrycode`` and in this case we can now use multiple lexicons and grammars where each is appropriate to address record getting standardized.
+
+```
+create table standardized_addresses as
+select a.id, (as_standardize( address, b.grammar, b.clexicon, a.locale, b.filter )).*, address, a.countrycode
+  from test_addresses a join as_config b a.countrycode=b.countrycode
+ order by a.countrycode, a.id;
+
+```
+
+In this example, we ``order by a.countrycode`` so we only build the Lexicon and
+Grammar once for the country. There are multiple slots in the cache, but it is
+possible to delete a slot to make room for a new incoming slot in the cache if
+it fills up and this prevents that from potentially becoming a problem.
+
+You might also notice that the ``locale`` is save with the address and not the `Lexicon``. The reason is that many countries are multilingual so the specific interpertation of an address needs to be based on its locale. The Lexicon may contain words and phrases for multiple languages as does the US lexicon that has some Spanish and French words used in addresses in the US.
 
 

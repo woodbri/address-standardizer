@@ -13,15 +13,18 @@ correctness or delivery point solutions.
 
 * boost/regex.hpp
 * boost/regex/icu.hpp
-* boost/lexical_cast.hpp
+* boost/lexical\_cast.hpp
 * boost/algorithm/string.hpp
 * boost/algorithm/string/join.hpp
 * boost/algorithm/string/split.hpp
 * boost/algorithm/string/classification.hpp
+* boost/serialization/\*
+* unicode/\*  (from icu packages)
+* PostgreSQL server development for 9.2, 9.3, 9.4, 9.5, and/or 9.6
 
 ## Build
 
-See file src/README.address_standardizer
+See file src/README.address\_standardizer
 
 ## Funding Needed
 

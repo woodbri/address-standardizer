@@ -32,7 +32,7 @@ CPP = g++
 CC = gcc
 
 AS_VERSION = 2.0
-OBJS = address_standardizer.o as_wrapper.o grammar.o inclass.o lexentry.o lexicon.o metarule.o metasection.o outclass.o rule.o rulesection.o search.o token.o tokenizer.o utils.o trieutf8.o utf8iterator.o
+OBJS = address_standardizer.o std_pg_hash.o as_wrapper.o grammar.o inclass.o lexentry.o lexicon.o metarule.o metasection.o outclass.o rule.o rulesection.o search.o token.o tokenizer.o utils.o trieutf8.o utf8iterator.o md5.o
 MODULE_big = address_standardizer2-$(AS_VERSION)
 EXTENSION = address_standardizer2
 OURSQL = address_standardizer2--$(AS_VERSION).sql

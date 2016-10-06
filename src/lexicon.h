@@ -21,6 +21,7 @@
 #include <iostream>
 #include <boost/regex.hpp>
 #include <boost/regex/icu.hpp>
+#include <boost/serialization/version.hpp>
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/map.hpp>
 
@@ -32,25 +33,44 @@
 class Lexicon
 {
     friend class boost::serialization::access;
+
     template<class Archive>
-    void serialize(Archive & ar, const unsigned int /* version */) {
-        ar & name_;
-        ar & lang_;
-        ar & locale_;
-        ar & lex_;
-        ar & regex_;
-        ar & regexPrefix_;
-        ar & regexSuffix_;
+    void load(Archive & ar, const unsigned int version) {
+        if ( version < 1 )
+            throw std::runtime_error("Re-compile-lexicon");
+        ar >> name_;
+        ar >> lang_;
+        ar >> locale_;
+        ar >> lex_;
+        ar >> regex_;
+        ar >> regexPrefix_;
+        ar >> regexSuffix_;
+        ar >> md5_;
     }
+
+    template<class Archive>
+    void save(Archive & ar, const unsigned int /* version */) const {
+        ar << name_;
+        ar << lang_;
+        ar << locale_;
+        ar << lex_;
+        ar << regex_;
+        ar << regexPrefix_;
+        ar << regexSuffix_;
+        ar << md5_;
+    }
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 protected:
 
 public:
     // constructors
     Lexicon();
-    explicit Lexicon(std::string name);
-    Lexicon(std::string name, std::string file);
-    Lexicon(std::string name, std::istream &is);
+    explicit Lexicon( std::string name );
+    explicit Lexicon( char *lexicon_in );
+    Lexicon( std::string name, std::string file );
+    Lexicon( std::string name, std::istream &is );
 
     void initialize(std::istream &is);
 
@@ -60,6 +80,7 @@ public:
     std::string langAsString() const { return InClass::asString(lang_); };
     std::string langAsName() const { return InClass::asName(lang_); };
     std::string locale() const { return locale_; };
+    const char *getMd5() { return md5_.c_str(); };
 
     std::vector<LexEntry> find( const std::string key );
 
@@ -102,8 +123,10 @@ private:
     std::string regex_;
     std::string regexPrefix_;
     std::string regexSuffix_;
-
+    std::string md5_;
 
 };
+
+BOOST_CLASS_VERSION(Lexicon, 1)
 
 #endif
