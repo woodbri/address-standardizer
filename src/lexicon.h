@@ -30,13 +30,15 @@
 #include "token.h"
 #include "lexentry.h"
 
+#define LEXICON_ARCHIVE_VERSION 2
+
 class Lexicon
 {
     friend class boost::serialization::access;
 
     template<class Archive>
     void load(Archive & ar, const unsigned int version) {
-        if ( version < 1 )
+        if ( version < LEXICON_ARCHIVE_VERSION )
             throw std::runtime_error("Re-compile-lexicon");
         ar >> name_;
         ar >> lang_;
@@ -50,6 +52,7 @@ class Lexicon
 
     template<class Archive>
     void save(Archive & ar, const unsigned int /* version */) const {
+        // now save to archive
         ar << name_;
         ar << lang_;
         ar << locale_;
@@ -127,6 +130,6 @@ private:
 
 };
 
-BOOST_CLASS_VERSION(Lexicon, 1)
+BOOST_CLASS_VERSION(Lexicon, LEXICON_ARCHIVE_VERSION)
 
 #endif

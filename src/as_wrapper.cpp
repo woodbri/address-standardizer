@@ -402,6 +402,11 @@ char * serialize_lexicon( char *lexicon_in, char **err_msg )
         // create the lexicon object
         Lexicon lex( "query-lex", iss );
 
+        // populate the regex strings in the Lexicon
+        lex.regex();
+        lex.regexPrefixAtt();
+        lex.regexSuffixAtt();
+
         // serialize the lexicon object into a string stream
         std::ostringstream ofs;
         boost::archive::text_oarchive oa(ofs);

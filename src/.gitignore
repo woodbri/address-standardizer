@@ -6,5 +6,7 @@ tester/compile-grammar
 tester/read-grammar-trie
 tester/read-dump-lexicon
 tester/regex-tester
+tester/compile-lexicon
+tester/callgrind.*
 test/*-test
 .*.swp
