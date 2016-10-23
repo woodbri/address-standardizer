@@ -278,16 +278,39 @@ performance boost.
 For this example, assume that we have a table ``test_addresses`` with a column ``address`` and we want to standardize the text in ``address`` into a new table ``standardized_addresses`` that contains ``id`` from ``test_addresses``, the standardized fields followed by the ``test_addresses.address`` field.
 
 ```
+-- before PostgreSQL 9.3 use a query like this
 create table standardized_addresses as
-with cfg as (
-  select * from as_config where countrycode='us'
-)
-select a.id, (as_standardize( address, cfg.grammar, cfg.clexicon, 'en_US', cfg.filter )).*, address
-  from test_addresses a, cfg order by id;
+with tmp as (select a.id, address, as_standardize(
+                 address,
+                 grammar,
+                 clexicon,
+                 'en_US',
+                 filter) as std
+             from as_config cfg, test_addresses a
+            where cfg.countrycode='us')
+select id, (std).*, address
+  from tmp
+ order by id;
+
+-- PostgreSQL 9.3+ use a query like this
+select a.id, std.*, address
+  from test_addresses as a,
+       as_config cfg,
+       LATERAL as_standardize(
+            address,
+            grammar,
+            clexicon,
+            'en_US',
+            filter
+        ) as std
+ where cfg.countrycode='us'
+ order by a.id;
 
 ```
 
-You can get a little more creative if you ``test_addresses`` table looks like this and you are working with addresses from multiple countries. Given that the ``as_config`` looks like the following.
+You can get a little more creative if your ``test_addresses`` table looks like
+this and you are working with addresses from multiple countries. Given that the
+``as_config`` looks like the following.
 
 ```
 CREATE TABLE as_config
@@ -301,7 +324,11 @@ CREATE TABLE as_config
   grammar text,
   filter text
 );
+```
 
+You might create your ``test_addresses`` table like:
+
+```
 CREATE TABLE test_addresses
 (
     id serial NOT NULL PRIMARY KEY,
@@ -311,20 +338,44 @@ CREATE TABLE test_addresses
 );
 ```
 
-Here we expect ``test_addresses.countrycode`` to join on ``as_config.countrycode`` and in this case we can now use multiple lexicons and grammars where each is appropriate to address record getting standardized.
+Now ``test_addresses.countrycode`` can join on ``as_config.countrycode`` and in
+this case we can now use multiple lexicons and grammars where each is
+appropriate to address record getting standardized, using queries like:
 
 ```
+-- before PostgreSQL 9.3 use a query like this
 create table standardized_addresses as
-select a.id, (as_standardize( address, b.grammar, b.clexicon, a.locale, b.filter )).*, address, a.countrycode
-  from test_addresses a join as_config b a.countrycode=b.countrycode
- order by a.countrycode, a.id;
+with tmp as (select a.id, address, as_standardize(
+                 address,
+                 grammar,
+                 clexicon,
+                 a.locale,
+                 filter) as std
+             from as_config cfg, test_addresses a
+            where a.countrycode=cfg.countrycode
+            order by a.countrycode)
+select id, address, (std).* from tmp;
+
+-- PostgreSQL 9.3+ use a query like this
+select a.id, address, std.*
+  from test_addresses as a,
+       as_config cfg,
+       LATERAL as_standardize(
+            address,
+            grammar,
+            clexicon,
+            a.locale,
+            filter
+        ) as std
+ where a.countrycode=cfg.countrycode
+ order by a.countrycode;
 
 ```
 
 In this example, we ``order by a.countrycode`` so we only build the Lexicon and
 Grammar once for the country. There are multiple slots in the cache, but it is
-possible to delete a slot to make room for a new incoming slot in the cache if
-it fills up and this prevents that from potentially becoming a problem.
+possible to overwrite a slot to make room for a new incoming slot in the cache
+if it fills up and this prevents that from potentially becoming a problem.
 
 You might also notice that the ``locale`` is save with the address and not the `Lexicon``. The reason is that many countries are multilingual so the specific interpertation of an address needs to be based on its locale. The Lexicon may contain words and phrases for multiple languages as does the US lexicon that has some Spanish and French words used in addresses in the US.
 
