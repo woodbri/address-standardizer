@@ -8,5 +8,6 @@ tester/read-dump-lexicon
 tester/regex-tester
 tester/compile-lexicon
 tester/callgrind.*
+tester/usa.gmr
 test/*-test
 .*.swp

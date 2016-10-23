@@ -57,7 +57,9 @@ for my $f (@files) {
 }
 
 print $PSQL "update as_config set clexicon=as_compile_lexicon(lexicon);\n";
+print $PSQL "create index as_config_countrycode_idx on as_config using btree (countrycode);\n";
 print $PSQL "commit;\n";
+print $PSQL "analyze as_config;\n";
 close($PSQL);
 
 exit;
