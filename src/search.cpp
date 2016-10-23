@@ -345,30 +345,16 @@ SearchPath Search::matchRule( const Rule &r, const SearchPath &path ) const {
 #endif
     auto &pattern = path.remaining;
 
-#if 0
-    // for whatever reason the follow is code is slower
-    // then the else clause
-
-    if (  r.inSize() > pattern.size() or not r.match( pattern ) ) {
-        // failed to match
-#ifdef TRACING_SEARCH
-        std::cout << "\tReturning: Search::matchRule: Failed 2\n";
-#endif
-        return SearchPath();
-    }
-
-    // we have a match so update result and return it
-    auto it = pattern.begin() + r.inSize();
-#else
-
     if ( r.inSize() > pattern.size() ) {
-        // failed to match, rules has more items than pattern
+        // failed to match, rule has more items than pattern
         // return an empty result
 #ifdef TRACING_SEARCH
         std::cout << "\tReturning: Search::matchRule: Failed 1\n";
 #endif
         return SearchPath();
     }
+
+    // try to match the rule to the pattern
     auto it = pattern.begin();
     for ( long unsigned int pos = 0; pos < r.inSize(); ++pos ) {
         if ( *it == r.in( pos ) )
@@ -381,8 +367,10 @@ SearchPath Search::matchRule( const Rule &r, const SearchPath &path ) const {
             return SearchPath();
         }
     }
-#endif
 
+    // rule was matched, so return it
+    // and take what remains unmatched of pattern
+    // and copy it to remaining
     SearchPath result( path );
     result.rules.push_back(r);
     result.remaining.clear();
