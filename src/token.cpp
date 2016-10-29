@@ -119,3 +119,29 @@ std::vector< std::vector<InClass::Type> > Token::enumerate( std::vector<Token> t
 
     return list;
 }
+
+// Token::trim(int which)
+// which = 1 -- trim left
+//         2 -- trim right
+//         * -- trim both
+
+void Token::trim(int which) {
+    const std::string delimiters = " \f\n\r\t\v";
+
+    // do nothing if the Token is empty
+    if ( text_.size() > 0 ) {
+        // trim left or both
+        if (which != 2) {   // trim left
+            text_.erase( 0, text_.find_first_not_of( delimiters ) );
+        }
+        // trim right or both
+        if (which != 1) {   // trim right
+            text_.erase( text_.find_last_not_of( delimiters ) + 1 );
+        }
+        // if we trimmed the the Token empty, set it to a space
+        if (text_.size() == 0) {
+            text_ = " ";
+        }
+    }
+}
+

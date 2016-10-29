@@ -55,6 +55,7 @@ public:
     void attached(std::set<InClass::AttachType> attached) { attached_ = attached; };
     void outclass(OutClass::Type outclass) { outclass_ = outclass; };
     void inLex(bool inlex) { inlex_ = inlex; };
+    void trim(int which);
 
     // operators
 

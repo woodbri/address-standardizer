@@ -163,14 +163,44 @@ std::vector<Token> Tokenizer::splitToken( const Token &tok ) {
 
 std::vector<Token> Tokenizer::getTokens( std::string str ) {
 
-    // make sure the text is normalized and UUPERCASE
+    // make sure the text is normalized and UPPERCASE
     std::string locale = lex_.locale();
     UErrorCode errorCode;
     std::string nstr = Utils::normalizeUTF8( str, errorCode );
     str = Utils::upperCaseUTF8( nstr, locale );
 
+    // As a reminder POSIX regex classes are:
+    //                ASCII           UNICODE
+    // [:alnum:]      [a-zA-Z0-9]     [\p{L}\p{Nl}\p{Nd}]
+    // [:alpha:]      [a-zA-Z]        [\p{L}\p{Nl}]
+    // [:ascii:]      [\x00-\x7F]     \p{InBasicLatin}
+    // [:blank:]      [ \t]           [\p{Zs}\t]
+    // [:cntrl:]      [\x00-\x1F\x7F] \p{Cc}
+    // [:digit:]  \d  [0-9]           \p{Nd}
+    // [:lower:]      [a-z]           \p{Ll}
+    // [:punct:]      [!"\#$%&'()*+,\-./:;<=>?@\[\\\]^_`{|}~]     \p{P}
+    // [:space:]  \s  [ \t\r\n\v\f]   [\p{Z}\t\r\n\v\f]
+    // [:upper:]      [A-Z]           \p{Lu}
+    // [:word:]   \w  [A-Za-z0-9_]    [\p{L}\p{Nl}\p{Nd}\p{Pc}]
+
     // build the regex for identifying tokens
-    std::string regex = "^\\s*(?!(?:\xe2\x80\x94)+)(" + lex_.regex() + "\\d+/\\d+|\\d+[,\\.]\\d+|\\d+|\\<[[:alpha:]]+\\>|[\\p{L}\\p{Nd}]+|[[:alpha:]\\d]+)([-&\\s\\|[:punct:]]+|\xe2\x80\x94|$)";
+    //
+    // ^\\s*                    -- ignore leading white space
+    // (?!(?:\xe2\x80\x94)+)    -- ignore optional leading uft8 emdash
+    // (                        -- capture token
+    //  lex_.regex()            -- include regex for lexicon entries
+    //  \\d+[/,\\.]\\d+ |       -- numbers and fractions  99/99, 99.99, 99,99
+    //  \\d+ |                  -- integers 99
+    //  \\<[[:alpha:]]+\\> |    -- words
+    //  [\\p{L}\\p{Nd}]+ |      -- utf8 letter followed by digits
+    //  [[:alpha:]\\d]+         -- letter followed by digits  A1, B99
+    // )
+    // (                        -- capture separator following token
+    //  [-&\\s\\|[:punct:]]+ |  -- 1+ of '-', space, [:punct:]
+    //  \xe2\x80\x94 |          -- utf8 emdash
+    //  $                       -- or end of string
+    // )
+    std::string regex = "^\\s*(?!(?:\xe2\x80\x94)+)(" + lex_.regex() + "\\d+[/,\\.]\\d+|\\d+|\\<[[:alpha:]]+\\>|[\\p{L}\\p{Nd}]+|[[:alpha:]\\d]+)([-&\\s\\|[:punct:]]+|\xe2\x80\x94|$)";
 
     boost::u32regex re = boost::make_u32regex( regex, boost::regex::icase );
 
@@ -207,6 +237,7 @@ std::vector<Token> Tokenizer::getTokens( std::string str ) {
         // create a token for the punctuation
         if (what[2].first < what[2].second) {
             Token punct( std::string(what[2].first, what[2].second) );
+            punct.trim( 3 );    // trim white space from both ends of token
             lex_.classify(punct, InClass::PUNCT);
             outtokens.push_back(punct);
         }
