@@ -86,6 +86,118 @@ lexicon to recognize words and phrases, to split attached words and work with
 the lexicon to classify the input tokens. The input is a string and the output
 is a vector of tokens.
 
+There is a SQL function ``as_parse(address, lexicon, locale, filter)`` that can
+help you understand how the tokenizer is parsing an address and breaking it
+into tokens. This is important because it is this string of tokens that you
+want your grammar to match against. If you find an address that fails to
+standardize, then run it through ``as_parse`` and look at the tokens and make
+sure you have rules in the grammar that can match this string of tokens.
+Another option is that if you do not like the string of tokens, maybe you can
+add some entries in the lexicon to recognize some of the words and classify
+them explicitly to generate a better string of tokens.
+
+Here are some examples:
+
+```
+as_test=# select * from as_parse(
+    '1/1 radcliff rd, north chelmsford, ma 01863 usa',
+    (select clexicon from as_config where countrycode='us'),
+    'en_US',
+    (select filter from as_config where countrycode='us')
+);
+ seq |    word    |       inclass       | attached
+-----+------------+---------------------+----------
+   1 | 1/1        | FRACT               |
+   2 | RADCLIFF   | WORD                |
+   3 | RD         | TYPE                |
+   4 | NORTH      | DIRECT              |
+   5 | CHELMSFORD | WORD                |
+   6 | MA         | WORD,TYPE,ROAD,PROV |
+   7 | 01863      | NUMBER,QUINT        |
+   8 | USA        | NATION              |
+(8 rows)
+
+as_test=# select * from as_parse(
+    '1/a radcliff rd, north chelmsford, ma 01863 usa',
+    (select clexicon from as_config where countrycode='us'),
+    'en_US',
+    (select filter from as_config where countrycode='us')
+);
+ seq |    word    |        inclass         | attached
+-----+------------+------------------------+----------
+   1 | 1          | NUMBER                 |
+   2 | /          | SLASH                  |
+   3 | A          | QUALIF,STOPWORD,SINGLE |
+   4 | RADCLIFF   | WORD                   |
+   5 | RD         | TYPE                   |
+   6 | NORTH      | DIRECT                 |
+   7 | CHELMSFORD | WORD                   |
+   8 | MA         | WORD,TYPE,ROAD,PROV    |
+   9 | 01863      | NUMBER,QUINT           |
+  10 | USA        | NATION                 |
+(10 rows)
+
+```
+
+In this example, "1/1" is being recognized as a ``FRACT`` token. And "1/a" is parsed as ``NUMBER SLASH QUALIF,STOPWORD,SINGLE``. But if we put
+a space to the right or left of the slash we get:
+
+```
+as_test=# select * from as_parse(
+    '1 /1 radcliff rd, north chelmsford, ma 01863 usa',
+    (select clexicon from as_config where countrycode='us'),
+    'en_US',
+    (select filter from as_config where countrycode='us')
+);
+ seq |    word    |       inclass       | attached
+-----+------------+---------------------+----------
+   1 | 1          | NUMBER              |
+   2 | /          | SLASH               |
+   3 | 1          | NUMBER              |
+   4 | RADCLIFF   | WORD                |
+   5 | RD         | TYPE                |
+   6 | NORTH      | DIRECT              |
+   7 | CHELMSFORD | WORD                |
+   8 | MA         | WORD,TYPE,ROAD,PROV |
+   9 | 01863      | NUMBER,QUINT        |
+  10 | USA        | NATION              |
+(10 rows)
+```
+
+If we remove the filter by setting it to '', you will also see all the
+separator tokens between the regular tokens:
+
+```
+as_test=# select * from as_parse(
+    '1 /1 radcliff rd, north chelmsford, ma 01863 usa',
+    (select clexicon from as_config where countrycode='us'),
+    'en_US',
+    ''
+);
+ seq |    word    |       inclass       | attached
+-----+------------+---------------------+----------
+   1 | 1          | NUMBER              |
+   2 | /          | SLASH               |
+   3 | 1          | NUMBER              |
+   4 |            | SPACE               |
+   5 | RADCLIFF   | WORD                |
+   6 |            | SPACE               |
+   7 | RD         | TYPE                |
+   8 | ,          | PUNCT               |
+   9 | NORTH      | DIRECT              |
+  10 |            | SPACE               |
+  11 | CHELMSFORD | WORD                |
+  12 | ,          | PUNCT               |
+  13 | MA         | WORD,TYPE,ROAD,PROV |
+  14 |            | SPACE               |
+  15 | 01863      | NUMBER,QUINT        |
+  16 |            | SPACE               |
+  17 | USA        | NATION              |
+(17 rows)
+```
+
+In this last case, you might notice that the space in "1 /1" does not show in the output. This is because a string of multiple separators is recognized as a single separator and extra spaces are trimmed off leaving just the "/".
+
 ### Grammar Class
 
 The Grammar class is responsible for loading a grammar and building the
