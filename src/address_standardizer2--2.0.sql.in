@@ -45,12 +45,9 @@ CREATE OR REPLACE FUNCTION as_parse(
         lexicon text,
         locale text,
         filter text,
-        OUT id bigint,
         OUT seq integer,
         OUT word text,
-        OUT stdword text,
         OUT inclass text,
-        OUT outclass text,
         OUT attached text
         )
     RETURNS SETOF RECORD
@@ -70,7 +67,7 @@ CREATE OR REPLACE FUNCTION as_match(
         OUT attached text
         )
     RETURNS SETOF RECORD
-    AS '$libdir/address_standardizer2-2.0', 'as_parse'
+    AS '$libdir/address_standardizer2-2.0', 'as_match'
     LANGUAGE 'c' STABLE STRICT;
 
 

@@ -286,21 +286,36 @@ IsInStdPortalCache(StdPortalCache *STDCache,  char *lexicon, char *grammar)
     int i;
     bool ret = FALSE;
 
-    char *lex_md5 = getMd5( lexicon );
-    char *gmr_md5 = getMd5( grammar );
-
     DBG("Enter: IsInStdPortalCache");
+
+    char *lex_md5 = getMd5( lexicon );
+    DBG("lex_md5: %p", lex_md5);
+
+    char *gmr_md5 = getMd5( grammar );
+    DBG("gmr_md5: %p", gmr_md5);
+    if ( gmr_md5 == NULL )
+        gmr_md5 = strdup("");
+    DBG("gmr_md5: %p", gmr_md5);
+
+    DBG("Looping through %d STD_CACHE_ITEMS", STD_CACHE_ITEMS);
     for (i=0; i<STD_CACHE_ITEMS; i++) {
         StdCacheItem *ci = &STDCache->StdCache[i];
+        DBG("StdCacheItem[%d] = %p", i, ci);
+        DBG("   ci->lex_md5: %p, ci->gmr_md5: %p", ci->lex_md5, ci->gmr_md5);
         if ( ci->lex_md5 && !strcmp(ci->lex_md5, lex_md5 ) &&
              ci->gmr_md5 && !strcmp(ci->gmr_md5, gmr_md5 ) ) {
                 ret = TRUE;
                 break;
         }
     }
+    DBG("End of loop, ret: %d", ret);
 
+    DBG("free( lex_md5 )");
     free( lex_md5 );
+    DBG("free( lex_md5 )");
     free( gmr_md5 );
+
+    DBG("Leaving IsInStdPortalCache, ret: %d", ret);
     return ret;
 }
 
@@ -322,6 +337,8 @@ GetStdFromPortalCache(StdPortalCache *STDCache,  char *lexicon, char *grammar)
 
     char *lex_md5 = getMd5( lexicon );
     char *gmr_md5 = getMd5( grammar );
+    if ( gmr_md5 == NULL )
+        gmr_md5 = strdup("");
 
     for (i=0; i<STD_CACHE_ITEMS; i++) {
         StdCacheItem *ci = &STDCache->StdCache[i];
@@ -395,6 +412,8 @@ AddToStdPortalCache(StdPortalCache *STDCache, char *lexicon, char * grammar)
     lex_md5 = getMd5( lexicon );
     DBG("Calling getMd5( grammar )");
     gmr_md5 = getMd5( grammar );
+    if ( gmr_md5 == NULL )
+        gmr_md5 = strdup("");
 
     /* if the NextSlot in the cache is used, then delete it */
     if (STDCache->StdCache[STDCache->NextSlot].std != NULL) {

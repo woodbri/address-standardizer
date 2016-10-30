@@ -43,6 +43,15 @@ typedef struct
 STANDARDIZER;
 
 
+typedef struct
+{
+    int seq;
+    char *word;
+    char *inclass;
+    char *attached;
+} TOKENS;
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -67,6 +76,27 @@ STDADDR *std_standardize(
     char **err_msg
 );
 
+
+TOKENS *std_parse_address_ptrs(
+    char *address_in,
+    void *lexicon_ptr,
+    char *locale_in,
+    char *filter_in,
+    int  *nrec,
+    char **err_msg
+);
+
+
+TOKENS *std_parse_address(
+    char *address_in,
+    char *lexicon_in,
+    char *locale_in,
+    char *filter_in,
+    int  *nrec,
+    char **err_msg
+);
+
+void tokens_free( TOKENS *tokens, int nrec );
 
 void *getGrammarPtr( char *grammar_in, char **err_msg );
 

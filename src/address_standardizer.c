@@ -14,8 +14,11 @@
 #include "postgres.h"
 #include "funcapi.h"
 #include "catalog/pg_type.h"
-#include "fmgr.h"
 #include "utils/builtins.h"
+#if PGSQL_VERSION > 92
+#include "access/htup_details.h"
+#endif
+#include "fmgr.h"
 
 #define USE_QUERY_CACHE
 
@@ -77,6 +80,21 @@ void stdaddr_free(STDADDR *stdaddr)
     if (stdaddr->unit)       free(stdaddr->unit);
     free(stdaddr);
     stdaddr = NULL;
+}
+
+
+void tokens_free(TOKENS *tokens, int nrec)
+{
+    int i;
+
+    if ( nrec < 1 || ! tokens ) return;
+    for ( i=0; i<nrec; ++i ) {
+        if ( tokens[i].word ) free( tokens[i].word );
+        if ( tokens[i].inclass ) free( tokens[i].inclass );
+        if ( tokens[i].attached ) free( tokens[i].attached );
+    }
+    free( tokens );
+    tokens = NULL;
 }
 
 
@@ -196,10 +214,11 @@ Datum as_standardize(PG_FUNCTION_ARGS)
     attinmeta = TupleDescGetAttInMetadata(tuple_desc);
 
 /* 
-   The following code is code be used to implement a query level cache
-   of the standardizer, so it does not have to be initialized  for every
-   address. Else we will take the slower approach.
+   Code to implement a query level cache of the standardizer, so it does not
+   have to be initialized for every address. Else we will take the slower
+   approach.
 */
+
 #ifdef USE_QUERY_CACHE
     std = GetStdUsingFCInfo( fcinfo, lexicon, grammar );
     if (!std)
@@ -265,9 +284,7 @@ Datum as_standardize(PG_FUNCTION_ARGS)
  *          filter text,
  *          OUT seq integer,
  *          OUT word text,
- *          OUT stdword text,
  *          OUT inclass text,
- *          OUT outclass text,
  *          OUT attached text
  *          )
  *      RETURNS SETOF RECORD
@@ -281,20 +298,118 @@ PG_FUNCTION_INFO_V1(as_parse);
 
 Datum as_parse(PG_FUNCTION_ARGS)
 {
+    FuncCallContext     *funcctx;
+    uint32_t             call_cntr;
+    uint32_t             max_calls;
+
+    TupleDesc            tuple_desc;
     char                *address;
     char                *lexicon;
     char                *locale;
     char                *filter;
-
+    TOKENS              *tokens;
+    STANDARDIZER        *std;
 
     DBG("Start as_parse");
 
-    address = text2char(PG_GETARG_TEXT_P(0));
-    lexicon = text2char(PG_GETARG_TEXT_P(1));
-    locale  = text2char(PG_GETARG_TEXT_P(2));
-    filter  = text2char(PG_GETARG_TEXT_P(3));
+    if (SRF_IS_FIRSTCALL()) {
+        MemoryContext   oldcontext;
+        int nrec = 0;
+        char *err_msg; 
 
-    elog(ERROR, "as_parse() not implemented yet!.");
+        int ret = -1;
+        if (ret == -1) {}; // to avoid warning set but not used
+
+        // create a function context for cross-call persistence
+        funcctx = SRF_FIRSTCALL_INIT();
+
+        // switch to memory context appropriate for multiple function calls
+        oldcontext = MemoryContextSwitchTo(funcctx->multi_call_memory_ctx);
+
+        address = text2char(PG_GETARG_TEXT_P(0));
+        DBG("address: '%s'", address);
+        lexicon = text2char(PG_GETARG_TEXT_P(1));
+        DBG("lexicon:\n '%s'", lexicon);
+        locale  = text2char(PG_GETARG_TEXT_P(2));
+        DBG("locale: '%s'", locale);
+        filter  = text2char(PG_GETARG_TEXT_P(3));
+        DBG("filter: '%s'", filter);
+
+#if 0
+        std = GetStdUsingFCInfo( fcinfo, lexicon, "" );
+        if (!std)
+            elog(ERROR, "as_parse() failed to create the address standardizer object!");
+
+        DBG("calling std_parse_address('%s')", address);
+        tokens = std_parse_address_ptrs( address, std->lex_obj, locale, filter, &nrec, &err_msg );
+#else
+        DBG("calling std_parse_address('%s')", address);
+        tokens = std_parse_address(address, lexicon, locale, filter, &nrec, &err_msg);
+#endif
+        DBG("back from std_parse_address");
+
+        if ( err_msg != NULL )
+            DBG("std_standardize threw an error: %s", err_msg);
+
+        DBG("calling get_call_result_type");
+        if (get_call_result_type( fcinfo, NULL, &tuple_desc ) != TYPEFUNC_COMPOSITE ) {
+            elog(ERROR, "as_standardize() was called in a way that cannot accept record as a result");
+        }
+        BlessTupleDesc(tuple_desc);
+
+        funcctx->max_calls = (uint32_t) nrec;
+        funcctx->user_fctx = tokens;
+        funcctx->tuple_desc = tuple_desc;
+
+        MemoryContextSwitchTo(oldcontext);
+    }
+
+    // stuff done on every call of the function
+    funcctx = SRF_PERCALL_SETUP();
+
+    call_cntr = funcctx->call_cntr;
+    max_calls = funcctx->max_calls;
+    tuple_desc = funcctx->tuple_desc;
+    tokens = (TOKENS*) funcctx->user_fctx;
+
+    if (call_cntr < max_calls)    // do when there is more left to send
+    {
+        HeapTuple    tuple;
+        Datum        result;
+        Datum *values;
+        bool* nulls;
+
+        values = (Datum *) palloc(4 * sizeof(Datum));
+        nulls =  (bool *)  palloc(4 * sizeof(bool));
+
+        values[0] = Int32GetDatum(call_cntr + 1);
+        nulls[0] = false;
+        values[1] = CStringGetTextDatum(tokens[call_cntr].word);
+        nulls[1] = false;
+        values[2] = CStringGetTextDatum(tokens[call_cntr].inclass);
+        nulls[2] = false;
+        values[3] = CStringGetTextDatum(tokens[call_cntr].attached);
+        nulls[3] = false;
+
+        DBG("Calling heap_form_tuple");
+        tuple = (HeapTuple) heap_form_tuple(tuple_desc, values, nulls);
+
+        // make the tuple into a datum
+        DBG("Calling HeapTupleGetDatum");
+        result = (Datum) HeapTupleGetDatum(tuple);
+
+        // clean up (this is not really necessary)
+        pfree(values);
+        pfree(nulls);
+
+        SRF_RETURN_NEXT(funcctx, result);
+    }
+    else    // do when there is no more left
+    {
+        DBG("Going to free tokens");
+        tokens_free(tokens, (int) max_calls);
+        SRF_RETURN_DONE(funcctx);
+    }
 }
 
 

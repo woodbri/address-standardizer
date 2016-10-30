@@ -278,6 +278,112 @@ STDADDR *standardize_addr( char *address_in, Grammar & grammar, Lexicon & lexico
 
 }
 
+
+TOKENS *parse_addr( char *address_in, Lexicon & lexicon, char *locale_in, char *filter_in, int *nrec, char **err_msg);
+
+
+TOKENS *std_parse_address_ptrs( char *address_in, void *lexicon_ptr, char *locale_in, char *filter_in, int *nrec, char **err_msg)
+{
+    return parse_addr( address_in,
+                       *(static_cast<Lexicon*>( lexicon_ptr )),
+                       locale_in, filter_in, nrec, err_msg );
+}
+
+
+TOKENS *std_parse_address( char *address_in, char *lexicon_in, char *locale_in, char *filter_in, int *nrec, char **err_msg)
+{
+    try {
+
+        std::string s(lexicon_in );
+        std::istringstream iss( s );
+        iss.clear();
+        iss.str( s );
+        Lexicon lexicon;
+        try {
+            boost::archive::text_iarchive ia(iss);
+            ia >> lexicon;
+        }
+        catch (std::runtime_error& e) {
+            if ( e.what() == std::string("Re-compile-lexicon"))
+                throw;
+            iss.clear();
+            iss.str( s );
+            lexicon.name( "query-lex" );
+            lexicon.initialize( iss );
+        }
+        catch ( ... ) {
+            iss.clear();
+            iss.str( s );
+            lexicon.name( "query-lex" );
+            lexicon.initialize( iss );
+        }
+
+        return parse_addr( address_in, lexicon, locale_in, filter_in, nrec, err_msg );
+
+    }
+    catch ( std::runtime_error &e ) {
+        *err_msg = strdup( e.what() );
+        return NULL;
+    }
+    catch ( std::exception &e ) {
+        *err_msg = strdup( e.what() );
+        return NULL;
+    }
+    catch ( ... ) {
+        *err_msg = strdup( "Caught unknown expection!" );
+        return NULL;
+    }
+}
+
+
+TOKENS *parse_addr( char *address_in, Lexicon & lexicon, char *locale_in, char *filter_in, int *nrec, char **err_msg)
+{
+    try {
+        // Normalize and UPPERCASE the input string
+        UErrorCode errorCode;
+        std::string nstr = Utils::normalizeUTF8( std::string(address_in), errorCode );
+        std::string Ustr = Utils::upperCaseUTF8( nstr, locale_in );
+
+        Tokenizer tokenizer( lexicon );
+        tokenizer.filter( InClass::asType( filter_in ) );
+
+        std::vector<Token> toks = tokenizer.getTokens( Ustr );
+
+        TOKENS * tokens = (TOKENS *) calloc( sizeof(TOKENS), toks.size() );
+        if ( ! tokens ) {
+            *err_msg = strdup( "Out of memory!" );
+            return NULL;
+        }
+
+        int i = 0;
+        for ( const auto &t : toks ) {
+            tokens[i].seq = i;
+            tokens[i].word = strdup( t.text().c_str() );
+            tokens[i].inclass = strdup( InClass::asString( t.inclass() ).c_str() );
+            tokens[i].attached = strdup( InClass::asString( t.attached() ).c_str() );
+            ++i;
+        }
+
+        *nrec = static_cast<int>( toks.size() );
+        *err_msg = (char *)0;
+        return tokens;
+    }
+    catch ( std::runtime_error &e ) {
+        *err_msg = strdup( e.what() );
+        return NULL;
+    }
+    catch ( std::exception &e ) {
+        *err_msg = strdup( e.what() );
+        return NULL;
+    }
+    catch ( ... ) {
+        *err_msg = strdup( "Caught unknown expection!" );
+        return NULL;
+    }
+
+}
+
+
 void *getGrammarPtr( char *grammar_in, char **err_msg )
 {
     try {
