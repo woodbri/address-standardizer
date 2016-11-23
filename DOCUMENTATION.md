@@ -491,4 +491,118 @@ if it fills up and this prevents that from potentially becoming a problem.
 
 You might also notice that the ``locale`` is save with the address and not the `Lexicon``. The reason is that many countries are multilingual so the specific interpertation of an address needs to be based on its locale. The Lexicon may contain words and phrases for multiple languages as does the US lexicon that has some Spanish and French words used in addresses in the US.
 
+## Debugging Standardization Problems
+
+It can be hard to understand the interplay between Lexicon and the Grammar.
+There are two functions that can used to help understand this interplay. The
+function ``as_standardize()`` takes your address, grammar, lexicon, etc. and
+breaks the address into tokens and classifies the tokens. Next it takes the
+tokens and searches the Grammar to find potentially multiple matches against
+the Grammar. These matches are scored and the best score is the result.
+
+So lets look at each of these. First we can look at the results of ``as_standardize()``. In the following query we have addresses in a table and select the address via ``a.id=93090``.
+
+```
+select a.id, std.*, dmetaphone(std.name)
+  from rawdata.addresses as a,
+       as_config as cfg,
+       LATERAL as_standardize( address, grammar, clexicon, 'en_AU', filter) as std
+ where countrycode='au' and dataset='gnaf'
+   and a.id=93090;
+
+  id   | building | house_num | predir | qual | pretype | name | suftype  | sufdir | ruralroute | extra |   city    | prov | country | postcode | box | unit | dmetaphone
+-------+----------+-----------+--------+------+---------+------+----------+--------+------------+-------+-----------+------+---------+----------+-----+------+------------
+ 93090 |          | 1         |        |      | POINT   | PARK | CRESCENT |        |            |       | DOCKLANDS | VIC  |         | 3008     |     |      | PRK
+(1 row)
+
+```
+
+Next we might want to look at how the address was tokenized and the tokens were
+classified. If you are not happy with the way tokens are classified you can
+make changes to the Lexicon and check the results here.
+
+```
+select a.id, std.*
+  from rawdata.addresses as a,
+       as_config as cfg,
+       LATERAL as_parse( address, clexicon, 'en_AU', filter) as std
+ where countrycode='au' and dataset='gnaf' and a.id=93090;
+
+  id   | seq |   word    |     inclass      | attached
+-------+-----+-----------+------------------+----------
+ 93090 |   1 | 1         | NUMBER           |
+ 93090 |   2 | POINT     | WORD,TYPE        |
+ 93090 |   3 | PARK      | WORD,TYPE,PLACEN |
+ 93090 |   4 | CRESCENT  | WORD,TYPE        |
+ 93090 |   5 | DOCKLANDS | WORD             |
+ 93090 |   6 | VIC       | WORD,PROV        |
+ 93090 |   7 | 3008      | NUMBER,QUAD      |
+(7 rows)
+
+```
+
+Given a set of tokens, these get enumerated into a collection of patterns, and
+then each pattern is matched against the grammar. In fact a given pattern might
+have multiple ways that it can match against the grammar and all of these are
+extracted and scored. The follow query show the results of this matching and
+the related score for each pattern. The score is the sum of the rule scores
+divided by the number of rules matched for that pattern.
+
+If you remove the distinct you will see many duplicate rows. These are caused
+by the fact that there are multiple ways to match the grammar that have the
+same score. Regardless, this should give you a hint to how the grammar is
+working for a set of tokens. You can adjust the rule scores move a pattern to
+the top of the list, but be aware that it might change other addresses in a
+negative way lowering them.
+
+```
+select distinct a.id, std.*
+  from rawdata.addresses as a,
+       as_config as cfg,
+       LATERAL as_match( address, grammar, clexicon, 'en_AU', filter) as std
+ where countrycode='au' and dataset='gnaf'
+       and a.id=93090
+ order by score desc;
+
+  id   |                                        tokens                                         |       score
+-------+---------------------------------------------------------------------------------------+-------------------
+ 93090 | NUMBER TYPE TYPE TYPE WORD PROV QUAD -> HOUSE PRETYP STREET SUFTYP CITY PROV POSTAL   | 0.675714288439069
+ 93090 | NUMBER TYPE TYPE TYPE WORD PROV QUAD -> HOUSE STREET STREET SUFTYP CITY PROV POSTAL   | 0.668333331743876
+ 93090 | NUMBER TYPE TYPE TYPE WORD PROV NUMBER -> HOUSE PRETYP STREET SUFTYP CITY PROV POSTAL | 0.661428579262325
+ 93090 | NUMBER TYPE TYPE TYPE WORD PROV NUMBER -> HOUSE STREET STREET SUFTYP CITY PROV POSTAL | 0.651666671037674
+ 93090 | NUMBER TYPE TYPE WORD WORD PROV QUAD -> HOUSE STREET SUFTYP CITY CITY PROV POSTAL     |  0.65166666607062
+ 93090 | NUMBER TYPE WORD TYPE WORD PROV QUAD -> HOUSE PRETYP STREET SUFTYP CITY PROV POSTAL   | 0.645714291504451
+ 93090 | NUMBER TYPE TYPE TYPE WORD PROV QUAD -> HOUSE PRETYP STREET STREET CITY PROV POSTAL   | 0.638333340485891
+ 93090 | NUMBER TYPE TYPE WORD WORD PROV NUMBER -> HOUSE STREET SUFTYP CITY CITY PROV POSTAL   | 0.635000005364418
+ 93090 | NUMBER TYPE WORD TYPE WORD PROV NUMBER -> HOUSE PRETYP STREET SUFTYP CITY PROV POSTAL | 0.631428582327706
+ 93090 | NUMBER TYPE TYPE TYPE WORD PROV NUMBER -> HOUSE PRETYP STREET STREET CITY PROV POSTAL | 0.621666679779688
+ 93090 | NUMBER TYPE TYPE WORD WORD PROV QUAD -> HOUSE PRETYP STREET CITY CITY PROV POSTAL     | 0.621666674812635
+ 93090 | NUMBER WORD TYPE WORD WORD PROV QUAD -> HOUSE STREET SUFTYP CITY CITY PROV POSTAL     | 0.616666669646899
+ 93090 | NUMBER WORD WORD TYPE WORD PROV QUAD -> HOUSE STREET STREET SUFTYP CITY PROV POSTAL   | 0.616666664679845
+ 93090 | NUMBER TYPE TYPE WORD WORD PROV NUMBER -> HOUSE PRETYP STREET CITY CITY PROV POSTAL   | 0.605000014106433
+ 93090 | NUMBER TYPE TYPE WORD WORD PROV QUAD -> HOUSE STREET STREET CITY CITY PROV POSTAL     | 0.602000004053116
+ 93090 | NUMBER WORD TYPE WORD WORD PROV NUMBER -> HOUSE STREET SUFTYP CITY CITY PROV POSTAL   | 0.600000008940697
+ 93090 | NUMBER WORD WORD TYPE WORD PROV NUMBER -> HOUSE STREET STREET SUFTYP CITY PROV POSTAL | 0.600000003973643
+ 93090 | NUMBER TYPE WORD WORD WORD PROV QUAD -> HOUSE PRETYP STREET CITY CITY PROV POSTAL     | 0.586666678388914
+ 93090 | NUMBER TYPE WORD WORD WORD PROV QUAD -> HOUSE PRETYP STREET STREET CITY PROV POSTAL   |  0.58666667342186
+ 93090 | NUMBER TYPE TYPE WORD WORD PROV NUMBER -> HOUSE STREET STREET CITY CITY PROV POSTAL   | 0.582000011205673
+ 93090 | NUMBER TYPE WORD WORD WORD PROV NUMBER -> HOUSE PRETYP STREET CITY CITY PROV POSTAL   | 0.570000017682711
+ 93090 | NUMBER TYPE WORD WORD WORD PROV NUMBER -> HOUSE PRETYP STREET STREET CITY PROV POSTAL | 0.570000012715658
+ 93090 | NUMBER TYPE WORD WORD WORD PROV QUAD -> HOUSE STREET CITY CITY CITY PROV POSTAL       | 0.562000003457069
+ 93090 | NUMBER WORD WORD WORD WORD PROV QUAD -> HOUSE STREET STREET STREET CITY PROV POSTAL   |              0.55
+ 93090 | NUMBER TYPE WORD WORD WORD PROV NUMBER -> HOUSE STREET CITY CITY CITY PROV POSTAL     | 0.542000010609627
+ 93090 | NUMBER WORD WORD WORD WORD PROV QUAD -> HOUSE STREET STREET CITY CITY PROV POSTAL     | 0.540000003576279
+ 93090 | NUMBER WORD WORD WORD WORD PROV NUMBER -> HOUSE STREET STREET STREET CITY PROV POSTAL | 0.530000007152557
+ 93090 | NUMBER WORD WORD WORD WORD PROV NUMBER -> HOUSE STREET STREET CITY CITY PROV POSTAL   | 0.520000010728836
+ 93090 | NUMBER WORD WORD WORD WORD PROV QUAD -> HOUSE STREET CITY CITY CITY PROV POSTAL       | 0.520000007748604
+ 93090 | NUMBER WORD WORD WORD WORD PROV NUMBER -> HOUSE STREET CITY CITY CITY PROV POSTAL     | 0.500000014901161
+(30 rows)
+```
+
+In general, localized changes (ie: related to a word or phrase) should be done
+by adding to the Lexicon or changing how Lexicon entries are classified. For
+global changes (ie: ones related to may addresses or a class of addresses)
+making adjustments to the grammar is better. I typically look at 1,000s if not
+1,000,000s of records when building a new Lexicon and Grammar.
+
 

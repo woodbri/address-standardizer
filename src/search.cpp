@@ -150,8 +150,55 @@ std::vector<Token> Search::searchAndReclassBest( const std::vector<std::vector<T
 }
 
 
+std::vector<std::string> Search::searchAndReclassAll(const std::vector<Token> &phrase, std::vector<double> &scores) {
+    std::vector<std::string> tokens;
+    scores.clear();
+    
+    SearchPaths results = search( phrase );
+    // if we failed to match against the grammar
+    // set score to -1.0 and return an empty result
+    if ( results.size() == 0 ) {
+        scores.push_back( -1. );
+        tokens.push_back( std::string("Failed to match to grammar!") );
+        return tokens;
+    }
+
+    // for each result compute the average score of the rules in the result
+    int i = 0;
+    for ( const auto &result : results ) {
+        double sum = 0.0;
+        for ( const auto &rule : result.rules )
+            sum += rule.score();
+        sum /= static_cast<double>( result.rules.size() );
+
+        std::vector<Token> reclassed( phrase );
+
+        if ( not reclassTokens( reclassed, result ) )
+            sum = -2.0;
+
+        tokens.push_back( toString( reclassed ) );
+        scores.push_back( sum );
+
+        ++i;
+    }
+
+    return tokens;
+}
+
+
 // ---------------------- PRIVATE ----------------------------
 
+
+std::string Search::toString(const std::vector<Token> &result) const {
+    std::string out;
+    for ( auto &t : result )
+        out = out + t.inclassAsString() + " ";
+    out = out + "-> ";
+    for ( auto &t : result )
+        out = out + t.outclassAsString() + " ";
+    out.pop_back();
+    return out;
+}
 
 SectionPtr Search::stringToSectionPtr( std::string str ) {
     auto idx = sectionIndex_.find( str );

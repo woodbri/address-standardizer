@@ -52,8 +52,11 @@ public:
 
     std::vector<Token> searchAndReclassBest( const std::vector<std::vector<Token> > &phrases, float &cost );
 
+    std::vector<std::string> searchAndReclassAll( const std::vector<Token> &phrase, std::vector<double> &scores );
+
 private:
 
+    std::string toString( const std::vector<Token> &results ) const;
     SectionPtr stringToSectionPtr( std::string str );
     SearchPaths match( const SectionPtr &ptr, const SearchPaths &paths, const unsigned long int level ) const;
     SearchPaths match( const SectionPtr &ptr, const SearchPath &path, const unsigned long int level ) const;

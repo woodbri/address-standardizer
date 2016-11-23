@@ -349,11 +349,11 @@ Datum as_parse(PG_FUNCTION_ARGS)
         DBG("back from std_parse_address");
 
         if ( err_msg != NULL )
-            DBG("std_standardize threw an error: %s", err_msg);
+            DBG("std_parse_address threw an error: %s", err_msg);
 
         DBG("calling get_call_result_type");
         if (get_call_result_type( fcinfo, NULL, &tuple_desc ) != TYPEFUNC_COMPOSITE ) {
-            elog(ERROR, "as_standardize() was called in a way that cannot accept record as a result");
+            elog(ERROR, "as_parse() was called in a way that cannot accept record as a result");
         }
         BlessTupleDesc(tuple_desc);
 
@@ -415,38 +415,130 @@ Datum as_parse(PG_FUNCTION_ARGS)
 
 /*
  *  CREATE OR REPLACE FUNCTION as_match(
- *          tokens text,
+ *          address text,
  *          grammar text,
- *          node text default 'ADDRESS',
- *          OUT id bigint,
- *          OUT seq integer,
- *          OUT word text,
- *          OUT stdword text,
- *          OUT inclass text,
- *          OUT outclass text,
- *          OUT attached text
+ *          lexicon text,
+ *          locale text,
+ *          filter text,
+ *          OUT tokens text,
+ *          OUT score float
  *          )
  *      RETURNS SETOF RECORD
- *      AS '$libdir/address_standardizer-2.0', 'parse'
+ *      AS '$libdir/address_standardizer-2.0', 'match'
  *      LANGUAGE 'c' IMMUTABLE STRICT;
+ *
+ *
 */
 
 PG_FUNCTION_INFO_V1(as_match);
 
 Datum as_match(PG_FUNCTION_ARGS)
 {
-    char                *tokens;
-    char                *grammar;
-    char                *node;
+    FuncCallContext     *funcctx;
+    uint32_t             call_cntr;
+    uint32_t             max_calls;
 
+    TupleDesc            tuple_desc;
+    char                *address;
+    char                *grammar;
+    char                *lexicon;
+    char                *locale;
+    char                *filter;
+    MTOKEN              *tokens;
+    STANDARDIZER        *std;
+    int                  i;
 
     DBG("Start as_match");
 
-    tokens  = text2char(PG_GETARG_TEXT_P(0));
-    grammar = text2char(PG_GETARG_TEXT_P(1));
-    node    = text2char(PG_GETARG_TEXT_P(2));
+    if (SRF_IS_FIRSTCALL()) {
+        MemoryContext   oldcontext;
+        int nrec = 0;
+        char *err_msg; 
 
-    elog(ERROR, "as_match() not implemented yet!.");
+        int ret = -1;
+        if (ret == -1) {}; // to avoid warning set but not used
+
+        // create a function context for cross-call persistence
+        funcctx = SRF_FIRSTCALL_INIT();
+
+        // switch to memory context appropriate for multiple function calls
+        oldcontext = MemoryContextSwitchTo(funcctx->multi_call_memory_ctx);
+
+        address = text2char(PG_GETARG_TEXT_P(0));
+        DBG("address: '%s'", address);
+        grammar = text2char(PG_GETARG_TEXT_P(1));
+        //DBG("grammar:\n '%s'", grammar);
+        lexicon = text2char(PG_GETARG_TEXT_P(2));
+        //DBG("lexicon:\n '%s'", lexicon);
+        locale  = text2char(PG_GETARG_TEXT_P(3));
+        DBG("locale: '%s'", locale);
+        filter  = text2char(PG_GETARG_TEXT_P(4));
+        DBG("filter: '%s'", filter);
+
+        DBG("calling std_match_address('%s')", address);
+        tokens = std_match_address(address, grammar, lexicon, locale, filter, &nrec, &err_msg);
+        DBG("back from std_match_address");
+
+        if ( err_msg != NULL )
+            DBG("std_match_address threw an error: %s", err_msg);
+
+        DBG("calling get_call_result_type");
+        if (get_call_result_type( fcinfo, NULL, &tuple_desc ) != TYPEFUNC_COMPOSITE ) {
+            elog(ERROR, "as_match_address() was called in a way that cannot accept record as a result");
+        }
+        BlessTupleDesc(tuple_desc);
+
+        funcctx->max_calls = (uint32_t) nrec;
+        funcctx->user_fctx = tokens;
+        funcctx->tuple_desc = tuple_desc;
+
+        MemoryContextSwitchTo(oldcontext);
+    }
+
+    // stuff done on every call of the function
+    funcctx = SRF_PERCALL_SETUP();
+
+    call_cntr = funcctx->call_cntr;
+    max_calls = funcctx->max_calls;
+    tuple_desc = funcctx->tuple_desc;
+    tokens = (MTOKEN*) funcctx->user_fctx;
+
+    if (call_cntr < max_calls)    // do when there is more left to send
+    {
+        HeapTuple    tuple;
+        Datum        result;
+        Datum *values;
+        bool* nulls;
+
+        values = (Datum *) palloc(2 * sizeof(Datum));
+        nulls =  (bool *)  palloc(2 * sizeof(bool));
+
+        values[0] = CStringGetTextDatum(tokens[call_cntr].tokens);
+        nulls[0] = false;
+        values[1] = Float8GetDatum(tokens[call_cntr].score);
+        nulls[1] = false;
+
+        DBG("Calling heap_form_tuple");
+        tuple = (HeapTuple) heap_form_tuple(tuple_desc, values, nulls);
+
+        // make the tuple into a datum
+        DBG("Calling HeapTupleGetDatum");
+        result = (Datum) HeapTupleGetDatum(tuple);
+
+        // clean up (this is not really necessary)
+        pfree(values);
+        pfree(nulls);
+
+        SRF_RETURN_NEXT(funcctx, result);
+    }
+    else    // do when there is no more left
+    {
+        DBG("Going to free tokens");
+        for (i=0; i<(int) max_calls; i++)
+            free(tokens[i].tokens);
+        free(tokens);
+
+        SRF_RETURN_DONE(funcctx);
+    }
 }
-
 

@@ -51,6 +51,12 @@ typedef struct
     char *attached;
 } TOKENS;
 
+typedef struct
+{
+    char * tokens;
+    double score;
+} MTOKEN;
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -89,6 +95,17 @@ TOKENS *std_parse_address_ptrs(
 
 TOKENS *std_parse_address(
     char *address_in,
+    char *lexicon_in,
+    char *locale_in,
+    char *filter_in,
+    int  *nrec,
+    char **err_msg
+);
+
+
+MTOKEN *std_match_address(
+    char *address_in,
+    char *grammar_in,
     char *lexicon_in,
     char *locale_in,
     char *filter_in,

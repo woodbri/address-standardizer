@@ -384,6 +384,109 @@ TOKENS *parse_addr( char *address_in, Lexicon & lexicon, char *locale_in, char *
 }
 
 
+MTOKEN *match_addr( char *address_in, Grammar & grammar, Lexicon & lexicon, char *locale_in, char *filter_in, int *nrec, char **err_msg);
+
+
+MTOKEN *std_match_address( char *address_in, char *grammar_in, char *lexicon_in, char *locale_in, char * filter_in, int *nrec, char **err_msg)
+{
+    try {
+
+        std::string s( grammar_in );
+        std::istringstream iss( s );
+        Grammar grammar( iss );
+
+        s = lexicon_in;
+        iss.clear();
+        iss.str( s );
+        Lexicon lexicon;
+        try {
+            boost::archive::text_iarchive ia(iss);
+            ia >> lexicon;
+        }
+        catch (std::runtime_error& e) {
+            if ( e.what() == std::string("Re-compile-lexicon"))
+                throw;
+            iss.clear();
+            iss.str( s );
+            lexicon.name( "query-lex" );
+            lexicon.initialize( iss );
+        }
+        catch ( ... ) {
+            iss.clear();
+            iss.str( s );
+            lexicon.name( "query-lex" );
+            lexicon.initialize( iss );
+        }
+
+        return match_addr( address_in, grammar, lexicon, locale_in, filter_in, nrec, err_msg );
+
+    }
+    catch ( std::runtime_error &e ) {
+        *err_msg = strdup( e.what() );
+        return NULL;
+    }
+    catch ( std::exception &e ) {
+        *err_msg = strdup( e.what() );
+        return NULL;
+    }
+    catch ( ... ) {
+        *err_msg = strdup( "Caught unknown expection!" );
+        return NULL;
+    }
+}
+
+
+MTOKEN *match_addr( char *address_in, Grammar & grammar, Lexicon & lexicon, char *locale_in, char *filter_in, int *nrec, char **err_msg)
+{
+    try {
+        // Normalize and UPPERCASE the input string
+        UErrorCode errorCode;
+        std::string nstr = Utils::normalizeUTF8( std::string(address_in), errorCode );
+        std::string Ustr = Utils::upperCaseUTF8( nstr, locale_in );
+
+        Tokenizer tokenizer( lexicon );
+        tokenizer.filter( InClass::asType( filter_in ) );
+
+        std::vector<Token> phrase = tokenizer.getTokens( Ustr );
+
+        Search search( grammar );
+
+        std::vector<double> scores;
+        auto toks = search.searchAndReclassAll( phrase, scores );
+
+        MTOKEN * tokens = (MTOKEN *) calloc( sizeof(MTOKEN), toks.size() );
+        if ( ! tokens ) {
+            *err_msg = strdup( "Out of memory!" );
+            return NULL;
+        }
+
+        int i = 0;
+        for ( const auto &t : toks ) {
+            tokens[i].tokens = strdup( t.c_str() );
+            tokens[i].score = scores[i];
+            ++i;
+        }
+
+        *nrec = static_cast<int>( toks.size() );
+        *err_msg = (char *)0;
+        return tokens;
+    }
+    catch ( std::runtime_error &e ) {
+        *err_msg = strdup( e.what() );
+        return NULL;
+    }
+    catch ( std::exception &e ) {
+        *err_msg = strdup( e.what() );
+        return NULL;
+    }
+    catch ( ... ) {
+        *err_msg = strdup( "Caught unknown expection!" );
+        return NULL;
+    }
+}
+
+
+
 void *getGrammarPtr( char *grammar_in, char **err_msg )
 {
     try {
