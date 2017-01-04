@@ -32,6 +32,7 @@ typedef struct {
    char *postcode;
    char *box;
    char *unit;
+   char *pattern;
 } STDADDR;
 
 
@@ -45,6 +46,7 @@ STANDARDIZER;
 
 typedef struct
 {
+    int pat;
     int seq;
     char *word;
     char *inclass;
@@ -55,6 +57,7 @@ typedef struct
 {
     char * tokens;
     double score;
+    double nrules;
 } MTOKEN;
 
 

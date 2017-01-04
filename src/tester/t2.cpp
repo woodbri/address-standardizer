@@ -20,6 +20,7 @@
 #include "grammar.h"
 #include "search.h"
 
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <streambuf>
@@ -30,6 +31,11 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/archive_exception.hpp>
+
+bool sortByScoresDesc( const MatchResult &lhs, const MatchResult &rhs) {
+    return lhs.score > rhs.score;
+}
+
 
 int main(int ac, char* av[]) {
 
@@ -133,12 +139,24 @@ int main(int ac, char* av[]) {
     dt = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
     std::cout << "Timer: tokenizer::getTokens: " << dt.count() << " ms\n";
 
+    t0 = std::chrono::system_clock::now();
+    auto alts = tokenizer.getAltTokens( phrases.back() );
+    for (const auto &a : alts)
+        phrases.push_back( a );
+    t1 = std::chrono::system_clock::now();
+    diff = t1 - t0;
+    dt = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
+    std::cout << "Timer: tokenizer::getAltTokens: " << dt.count() << " ms\n";
+
     for ( const auto phrase : phrases ) {
         std::cout << "-------------------------------\n";
         for ( const auto tok : phrase )
             std::cout << tok << "\n";
     }
     std::cout << "-------------------------------\n";
+
+    // copy the phrases
+    std::vector<std::vector<Token> > phrases2( phrases );
 
     try {
         //Grammar G( gfile );
@@ -192,8 +210,10 @@ int main(int ac, char* av[]) {
         Search S( G );
 
         float bestCost = -1.0;
+        float bestNrules = -1.0;
+        std::string matched;
         t0 = std::chrono::system_clock::now();
-        auto best = S.searchAndReclassBest( phrases, bestCost );
+        auto best = S.searchAndReclassBest( phrases, bestCost, matched, bestNrules );
         t1 = std::chrono::system_clock::now();
         diff = t1 - t0;
         dt = std::chrono::duration_cast<std::chrono::milliseconds>(diff);
@@ -215,6 +235,19 @@ int main(int ac, char* av[]) {
             lex.standardize( token );
             std::cout << token << "\n";
         }
+        std::cout << "matched: " << matched << ", " << bestNrules << "\n";
+
+        std::cout << "-----------------------------------------------------\n";
+
+        std::vector<double> scores;
+        std::vector<double> nrules;
+
+        auto toks = S.searchAndReclassAll( phrases2 );
+
+        std::sort( toks.begin(), toks.end(), sortByScoresDesc );
+
+        for ( const auto &t : toks )
+            std::cout << t.matched << ", " << t.score << ", " << t.nrules << "\n";
 
     }
     catch (std::runtime_error& e) {

@@ -35,6 +35,15 @@ public:
 typedef std::vector<SearchPath> SearchPaths;
 
 
+class MatchResult {
+public:
+    std::string matched;
+    double score;
+    double nrules;
+};
+
+typedef std::vector<MatchResult> MatchResults;
+
 
 class Search : Grammar
 {
@@ -48,11 +57,11 @@ public:
 
     bool reclassTokens( std::vector<Token> &tokens, const SearchPath &path ) const;
 
-    std::vector<Token> searchAndReclassBest( const std::vector<Token> &phrase, float &cost );
+    std::vector<Token> searchAndReclassBest( const std::vector<Token> &phrase, float &cost, std::string &matched, float &nrules );
 
-    std::vector<Token> searchAndReclassBest( const std::vector<std::vector<Token> > &phrases, float &cost );
+    std::vector<Token> searchAndReclassBest( const std::vector<std::vector<Token> > &phrases, float &cost, std::string &matched, float &nrules );
 
-    std::vector<std::string> searchAndReclassAll( const std::vector<Token> &phrase, std::vector<double> &scores );
+    MatchResults searchAndReclassAll( const std::vector<std::vector<Token> > &phrases );
 
 private:
 

@@ -266,3 +266,60 @@ std::vector<Token> Tokenizer::applyFilter( const std::vector<Token> &in ) {
 
     return out;
 }
+
+
+std::vector<std::vector<Token> > Tokenizer::getAltTokens( const std::vector<Token> &in ) {
+    std::vector<std::vector<std::string> > alt;
+
+    // split each token into words
+    for (const auto &t : in ) {
+        // split each token into words
+        std::vector<std::string> words;
+        std::string str( t.text() );
+        boost::split(words, str, boost::is_any_of(" "), boost::token_compress_on);
+        alt.push_back( words );
+    }
+
+    // enumerate the words into a list of alternate tokens
+
+    long unsigned int cnt = 1;
+    for ( const auto &a : alt )
+        if (a.size() > 1) cnt *= 2;
+
+    std::vector<std::vector<Token> > list;
+    list.clear();
+
+    // if cnt==1 then no tokens could be split
+    // so return an empty list
+    if ( cnt == 1 )
+        return list;
+
+    //reserve space for all the combinations
+    list.reserve( cnt-1 );
+
+    // enumerate the combination
+    for ( long unsigned int i=1; i<cnt; ++i ) {
+        long unsigned int n = 0;
+        std::vector<Token> one;
+        for ( long unsigned int j=0; j<alt.size(); ++j ) {
+            if ( alt[j].size() == 1 ) 
+                one.push_back( in[j] );
+            else {
+                if ( i / (1<<n) % 2 == 0 ) 
+                    one.push_back( in[j] );
+                else
+                    for ( const auto &w : alt[j] ) {
+                        Token tok( w );
+                        lex_.classify( tok, InClass::WORD );
+                        one.push_back( tok );
+                    }
+                ++n;
+            }
+        }
+        list.push_back( one );
+    }
+
+    return list;
+}
+
+

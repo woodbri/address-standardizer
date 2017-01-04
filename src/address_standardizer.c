@@ -78,6 +78,7 @@ void stdaddr_free(STDADDR *stdaddr)
     if (stdaddr->postcode)   free(stdaddr->postcode);
     if (stdaddr->box)        free(stdaddr->box);
     if (stdaddr->unit)       free(stdaddr->unit);
+    if (stdaddr->pattern)    free(stdaddr->pattern);
     free(stdaddr);
     stdaddr = NULL;
 }
@@ -157,7 +158,8 @@ Datum as_compile_lexicon(PG_FUNCTION_ARGS)
  *          OUT country text,
  *          OUT postcode text,
  *          OUT box text,
- *          OUT unit text
+ *          OUT unit text,
+ *          OUT pattern text
  *          )
  *      RETURNS RECORD
  *      AS '$libdir/address_standardizer-2.0', 'standardize_address'
@@ -166,10 +168,12 @@ Datum as_compile_lexicon(PG_FUNCTION_ARGS)
  * If you want to standardize a whole table then call it like:
  *
  *   insert into stdaddr (...)
- *       select id, (std).* from (
- *           select as_standardize(
- *               address, grammar, lexicon, config) as std
- *             from table_to_standardize) as foo;
+ *       select a.id, std.*, dmetaphone(std.name)
+ *         from rawdata.addresses as a,
+ *              as_config as cfg,
+ *              LATERAL as_standardize( address, grammar, clexicon,
+ *                     'en_AU', filter) as std
+ *        where countrycode='au' and dataset='gnaf'
  *
  *
 */
@@ -235,8 +239,8 @@ Datum as_standardize(PG_FUNCTION_ARGS)
     if ( err_msg != NULL )
         DBG("std_standardize threw an error: %s", err_msg);
 
-    values = (char **) palloc(16 * sizeof(char *));
-    for (k=0; k<16; k++) {
+    values = (char **) palloc(17 * sizeof(char *));
+    for (k=0; k<17; k++) {
         values[k] = NULL;
     }
     DBG("setup values array for natts=%d", tuple_desc->natts);
@@ -257,6 +261,7 @@ Datum as_standardize(PG_FUNCTION_ARGS)
         values[13] = stdaddr->postcode  ? pstrdup(stdaddr->postcode) : NULL;
         values[14] = stdaddr->box       ? pstrdup(stdaddr->box) : NULL;
         values[15] = stdaddr->unit      ? pstrdup(stdaddr->unit) : NULL;
+        values[16] = stdaddr->pattern   ? pstrdup(stdaddr->pattern) : NULL;
     }
 
     DBG("calling heap_form_tuple");
@@ -282,6 +287,7 @@ Datum as_standardize(PG_FUNCTION_ARGS)
  *          lexicon text,
  *          locale text,
  *          filter text,
+ *          OUT pat integer,
  *          OUT seq integer,
  *          OUT word text,
  *          OUT inclass text,
@@ -346,7 +352,7 @@ Datum as_parse(PG_FUNCTION_ARGS)
         DBG("calling std_parse_address('%s')", address);
         tokens = std_parse_address(address, lexicon, locale, filter, &nrec, &err_msg);
 #endif
-        DBG("back from std_parse_address");
+        DBG("back from std_parse_address, nrec=%d", nrec);
 
         if ( err_msg != NULL )
             DBG("std_parse_address threw an error: %s", err_msg);
@@ -379,24 +385,33 @@ Datum as_parse(PG_FUNCTION_ARGS)
         Datum *values;
         bool* nulls;
 
-        values = (Datum *) palloc(4 * sizeof(Datum));
-        nulls =  (bool *)  palloc(4 * sizeof(bool));
+        values = (Datum *) palloc(5 * sizeof(Datum));
+        nulls =  (bool *)  palloc(5 * sizeof(bool));
 
-        values[0] = Int32GetDatum(call_cntr + 1);
+        DBG("token[%d].pat = %d", call_cntr, tokens[call_cntr].pat);
+        DBG("token[%d].seq = %d", call_cntr, tokens[call_cntr].seq);
+        DBG("token[%d].word = '%s'", call_cntr, tokens[call_cntr].word);
+        DBG("token[%d].inclass = '%s'", call_cntr, tokens[call_cntr].inclass);
+        DBG("token[%d].attached = '%s'",call_cntr, tokens[call_cntr].attached);
+
+        values[0] = Int32GetDatum(tokens[call_cntr].pat+1);
         nulls[0] = false;
-        values[1] = CStringGetTextDatum(tokens[call_cntr].word);
+        values[1] = Int32GetDatum(tokens[call_cntr].seq+1);
         nulls[1] = false;
-        values[2] = CStringGetTextDatum(tokens[call_cntr].inclass);
+        values[2] = CStringGetTextDatum(tokens[call_cntr].word);
         nulls[2] = false;
-        values[3] = CStringGetTextDatum(tokens[call_cntr].attached);
+        values[3] = CStringGetTextDatum(tokens[call_cntr].inclass);
         nulls[3] = false;
+        values[4] = CStringGetTextDatum(tokens[call_cntr].attached);
+        nulls[4] = false;
 
-        DBG("Calling heap_form_tuple");
+        DBG("Calling heap_form_tuple for record: %d", call_cntr+1);
         tuple = (HeapTuple) heap_form_tuple(tuple_desc, values, nulls);
 
         // make the tuple into a datum
         DBG("Calling HeapTupleGetDatum");
         result = (Datum) HeapTupleGetDatum(tuple);
+        DBG("After HeapTupleGetDatum");
 
         // clean up (this is not really necessary)
         pfree(values);
@@ -421,7 +436,8 @@ Datum as_parse(PG_FUNCTION_ARGS)
  *          locale text,
  *          filter text,
  *          OUT tokens text,
- *          OUT score float
+ *          OUT score float,
+ *          OUT score nrules
  *          )
  *      RETURNS SETOF RECORD
  *      AS '$libdir/address_standardizer-2.0', 'match'
@@ -510,13 +526,15 @@ Datum as_match(PG_FUNCTION_ARGS)
         Datum *values;
         bool* nulls;
 
-        values = (Datum *) palloc(2 * sizeof(Datum));
-        nulls =  (bool *)  palloc(2 * sizeof(bool));
+        values = (Datum *) palloc(3 * sizeof(Datum));
+        nulls =  (bool *)  palloc(3 * sizeof(bool));
 
         values[0] = CStringGetTextDatum(tokens[call_cntr].tokens);
         nulls[0] = false;
         values[1] = Float8GetDatum(tokens[call_cntr].score);
         nulls[1] = false;
+        values[2] = Float8GetDatum(tokens[call_cntr].nrules);
+        nulls[2] = false;
 
         DBG("Calling heap_form_tuple");
         tuple = (HeapTuple) heap_form_tuple(tuple_desc, values, nulls);

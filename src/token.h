@@ -43,6 +43,7 @@ public:
     bool isInClass( InClass::Type test ) const;
     bool isInClassEmpty() const { return inclass_.empty(); };
     bool inLex() const { return inlex_; };
+    long unsigned int inSize() const { return inclass_.size(); };
 
     static std::vector< std::vector<InClass::Type> > enumerate( std::vector<Token> tokens );
 
@@ -64,7 +65,6 @@ public:
 private:
 
     // this methods are used on enumerate()
-    long unsigned int inSize() const { return inclass_.size(); };
     InClass::Type in(long unsigned int i) const;
 
 

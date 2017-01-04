@@ -40,6 +40,8 @@ public:
     void removeFilter(InClass::Type filter);
     void clearFilter() { filter_.clear(); };
 
+    std::vector<std::vector<Token> > getAltTokens( const std::vector<Token> &in );
+
 private:
     Lexicon& lex_;
     std::set<InClass::Type> filter_;

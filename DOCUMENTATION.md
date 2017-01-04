@@ -510,16 +510,26 @@ select a.id, std.*, dmetaphone(std.name)
  where countrycode='au' and dataset='gnaf'
    and a.id=93090;
 
-  id   | building | house_num | predir | qual | pretype | name | suftype  | sufdir | ruralroute | extra |   city    | prov | country | postcode | box | unit | dmetaphone
--------+----------+-----------+--------+------+---------+------+----------+--------+------------+-------+-----------+------+---------+----------+-----+------+------------
- 93090 |          | 1         |        |      | POINT   | PARK | CRESCENT |        |            |       | DOCKLANDS | VIC  |         | 3008     |     |      | PRK
+  id   | building | house_num | predir | qual | pretype |    name    | suftype  | sufdir | ruralroute | extra |   city    | prov | country | postcode | box | unit |                                       pattern                                       | dmetaphone
+-------+----------+-----------+--------+------+---------+------------+----------+--------+------------+-------+-----------+------+---------+----------+-----+------+-------------------------------------------------------------------------------------+------------
+ 93090 |          | 1         |        |      |         | POINT PARK | CRESCENT |        |            |       | DOCKLANDS | VIC  |         | 3008     |     |      | NUMBER WORD TYPE TYPE CITY PROV QUAD -> HOUSE STREET STREET SUFTYP CITY PROV POSTAL | PNTP
 (1 row)
 
 ```
 
-Next we might want to look at how the address was tokenized and the tokens were
-classified. If you are not happy with the way tokens are classified you can
-make changes to the Lexicon and check the results here.
+We recently added an output fields to as_standardize() called pattern the returns a string like:
+```
+NUMBER WORD TYPE CITY PROV QUAD -> HOUSE STREET SUFTYP CITY PROV POSTAL
+```
+
+This contains the list of tokens types on input and how they were standardized
+on output. This is more of a diagnosic tool than anything else. It might be
+interesting to use it to do some statistical analysis on what rules were used
+in the grammar.
+
+Next we might want to look at how the address was tokenized and how the tokens
+were classified. If you are not happy with the way tokens are classified you
+can make changes to the Lexicon and check the results here.
 
 ```
 select a.id, std.*
@@ -540,6 +550,18 @@ select a.id, std.*
 (7 rows)
 
 ```
+
+You can put phrases in the lexicon the consist of multiple words, like a city
+name, like ``NORTH CHELMSFORD``, this has the advantage the ``NORTH`` is
+recognized as part of the city rather than as street name suffix. But tokens
+are collected in a greedy way such the the longest tokens are collected first.
+So if you have lexicon entries like: ``` AAA BBB BBB CCC ``` and you have a
+text string like ``AAA DDD AAA BBB CCC`` this will get broken into tokens of
+``AAA``, ``DDD``, ``AAA BBB``, and ``CCC``, so you never see the ``BBB CCC``
+token. The code also splits multiple word tokens into individual tokens so you
+will get a second set of tokens of ``AAA``, ``DDD``, ``AAA``, ``BBB``, ``CCC``
+and both sets of tokens will get searched for in the grammar with the best
+scoring one returned as the final result.
 
 Given a set of tokens, these get enumerated into a collection of patterns, and
 then each pattern is matched against the grammar. In fact a given pattern might

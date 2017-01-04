@@ -27,7 +27,8 @@ CREATE OR REPLACE FUNCTION as_standardize(
         OUT country text,
         OUT postcode text,
         OUT box text,
-        OUT unit text
+        OUT unit text,
+        OUT pattern text
         )
     RETURNS RECORD
     AS '$libdir/address_standardizer2-2.0', 'as_standardize'
@@ -45,6 +46,7 @@ CREATE OR REPLACE FUNCTION as_parse(
         lexicon text,
         locale text,
         filter text,
+        OUT pat integer,
         OUT seq integer,
         OUT word text,
         OUT inclass text,

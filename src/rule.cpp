@@ -13,6 +13,7 @@
 
 #include <sstream>
 #include <boost/regex.hpp>
+#include <stdexcept>
 
 #include "rule.h"
 
@@ -45,8 +46,7 @@ Rule::Rule( const std::string &line ) : score_(0.0) {
     }
 
     if (not isValid()) {
-        //std::cerr << "ERROR: Invalid Rule defined for: '" << line << "'\n";
-        clear();
+        throw std::runtime_error("Rule-Not-Valid("+line+")");
     }
 }
 

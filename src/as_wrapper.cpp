@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <algorithm>
 
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
@@ -111,10 +112,16 @@ STDADDR *standardize_addr( char *address_in, Grammar & grammar, Lexicon & lexico
         std::vector<std::vector<Token> > phrases;
         phrases.push_back( tokenizer.getTokens( Ustr ) );
 
+        auto alts = tokenizer.getAltTokens( phrases.back() );
+        for (const auto &a : alts)
+            phrases.push_back( a );
+
         Search search( grammar );
 
         float bestCost = -1.0;
-        auto best = search.searchAndReclassBest( phrases, bestCost );
+        float bestNrules = -1.0;
+        std::string matched;
+        auto best = search.searchAndReclassBest( phrases, bestCost, matched, bestNrules );
 
         if ( bestCost >= 0.0 ) {
 
@@ -256,6 +263,7 @@ STDADDR *standardize_addr( char *address_in, Grammar & grammar, Lexicon & lexico
                 v_stdaddr[15].resize(v_stdaddr[15].size()-1);
                 stdaddr->unit       = strdup( v_stdaddr[15].c_str() );
             }
+            stdaddr->pattern        = strdup( matched.c_str() );
             *err_msg = (char *)0;
             return stdaddr;
         }
@@ -347,24 +355,40 @@ TOKENS *parse_addr( char *address_in, Lexicon & lexicon, char *locale_in, char *
         Tokenizer tokenizer( lexicon );
         tokenizer.filter( InClass::asType( filter_in ) );
 
-        std::vector<Token> toks = tokenizer.getTokens( Ustr );
+        std::vector<std::vector<Token> > phrases;
+        phrases.push_back( tokenizer.getTokens( Ustr ) );
 
-        TOKENS * tokens = (TOKENS *) calloc( sizeof(TOKENS), toks.size() );
+        auto alts = tokenizer.getAltTokens( phrases.back() );
+        for (const auto &a : alts)
+            phrases.push_back( a );
+
+        long unsigned int cnt = 0;
+        for ( const auto &phrase : phrases )
+            cnt += phrase.size();
+
+        TOKENS * tokens = (TOKENS *) calloc( sizeof(TOKENS), cnt );
         if ( ! tokens ) {
             *err_msg = strdup( "Out of memory!" );
             return NULL;
         }
 
         int i = 0;
-        for ( const auto &t : toks ) {
-            tokens[i].seq = i;
-            tokens[i].word = strdup( t.text().c_str() );
-            tokens[i].inclass = strdup( InClass::asString( t.inclass() ).c_str() );
-            tokens[i].attached = strdup( InClass::asString( t.attached() ).c_str() );
+        int j = 0;
+        int k = 0;
+        for ( const auto &phrase : phrases ) {
+            for ( const auto &t : phrase ) {
+                tokens[k].pat = i;
+                tokens[k].seq = j;
+                tokens[k].word = strdup( t.text().c_str() );
+                tokens[k].inclass = strdup( InClass::asString( t.inclass() ).c_str() );
+                tokens[k].attached = strdup( InClass::asString( t.attached() ).c_str() );
+                ++j;
+                ++k;
+            }
             ++i;
         }
 
-        *nrec = static_cast<int>( toks.size() );
+        *nrec = static_cast<int>( cnt );
         *err_msg = (char *)0;
         return tokens;
     }
@@ -436,6 +460,11 @@ MTOKEN *std_match_address( char *address_in, char *grammar_in, char *lexicon_in,
 }
 
 
+bool sortByScoresDesc( const MatchResult &lhs, const MatchResult &rhs) {
+    return lhs.score > rhs.score;
+}
+
+
 MTOKEN *match_addr( char *address_in, Grammar & grammar, Lexicon & lexicon, char *locale_in, char *filter_in, int *nrec, char **err_msg)
 {
     try {
@@ -447,12 +476,20 @@ MTOKEN *match_addr( char *address_in, Grammar & grammar, Lexicon & lexicon, char
         Tokenizer tokenizer( lexicon );
         tokenizer.filter( InClass::asType( filter_in ) );
 
-        std::vector<Token> phrase = tokenizer.getTokens( Ustr );
+        std::vector<std::vector<Token> > phrases;
+        phrases.push_back( tokenizer.getTokens( Ustr ) );
+
+        auto alts = tokenizer.getAltTokens( phrases.back() );
+        for (const auto &a : alts)
+            phrases.push_back( a );
 
         Search search( grammar );
 
         std::vector<double> scores;
-        auto toks = search.searchAndReclassAll( phrase, scores );
+        std::vector<double> nrules;
+        auto toks = search.searchAndReclassAll( phrases );
+
+        std::sort( toks.begin(), toks.end(), sortByScoresDesc );
 
         MTOKEN * tokens = (MTOKEN *) calloc( sizeof(MTOKEN), toks.size() );
         if ( ! tokens ) {
@@ -462,8 +499,9 @@ MTOKEN *match_addr( char *address_in, Grammar & grammar, Lexicon & lexicon, char
 
         int i = 0;
         for ( const auto &t : toks ) {
-            tokens[i].tokens = strdup( t.c_str() );
-            tokens[i].score = scores[i];
+            tokens[i].tokens = strdup( t.matched.c_str() );
+            tokens[i].score = t.score;
+            tokens[i].nrules = t.nrules;
             ++i;
         }
 

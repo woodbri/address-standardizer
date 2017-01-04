@@ -94,13 +94,14 @@ bool Search::reclassTokens( std::vector<Token> &tokens, const SearchPath &result
 }
 
 
-std::vector<Token> Search::searchAndReclassBest( const std::vector<Token> &phrase, float &score ) {
+std::vector<Token> Search::searchAndReclassBest( const std::vector<Token> &phrase, float &score, std::string &matched, float &nrules ) {
     
     SearchPaths results = search( phrase );
     // if we failed to match against the grammar
     // set score to -1.0 and return an empty result
     if ( results.size() == 0 ) {
         score = -1.0;
+        nrules = -1.0;
         return std::vector<Token>();
     }
 
@@ -108,6 +109,7 @@ std::vector<Token> Search::searchAndReclassBest( const std::vector<Token> &phras
     // and select the record with the best average score
     int best = 0;
     float bestScore = 0.0;
+    float bestNrules = -1.0;
     int i = 0;
     for ( const auto &result : results ) {
         float sum = 0.0;
@@ -117,72 +119,92 @@ std::vector<Token> Search::searchAndReclassBest( const std::vector<Token> &phras
         if (sum > bestScore) {
             best = i;
             bestScore = sum;
+            bestNrules = static_cast<float>( result.rules.size() );
         }
         ++i;
     }
 
     score = bestScore;
     std::vector<Token> reclassed( phrase );
+    nrules = bestNrules;
 
     if ( not reclassTokens( reclassed, results[best] ) )
         score = -2.0;
+    else
+        matched = toString( reclassed );
 
     return reclassed;
 }
 
 
-std::vector<Token> Search::searchAndReclassBest( const std::vector<std::vector<Token> > &phrases, float &score ) {
+std::vector<Token> Search::searchAndReclassBest( const std::vector<std::vector<Token> > &phrases, float &score, std::string &matched, float &nrules ) {
     
     std::vector<Token> best;
     float bestScore = -1.;
+    float bestNrules = -1.;
+    std::string bestMatched;
 
     for ( auto &phrase : phrases ) {
         float thisScore = -1.;
-        auto result = searchAndReclassBest( phrase, thisScore );
+        float thisNrules = -1.;
+        std::string thisMatched;
+        auto result = searchAndReclassBest( phrase, thisScore, thisMatched, thisNrules );
         if ( thisScore > bestScore ) {
             bestScore = thisScore;
+            bestNrules = thisNrules;
             best = result;
+            bestMatched = thisMatched;
         }
     }
 
     score = bestScore;
+    matched = bestMatched;
+    nrules = bestNrules;
     return best;
 }
 
 
-std::vector<std::string> Search::searchAndReclassAll(const std::vector<Token> &phrase, std::vector<double> &scores) {
-    std::vector<std::string> tokens;
-    scores.clear();
+MatchResults Search::searchAndReclassAll(const std::vector<std::vector<Token> > &phrases ) {
+    MatchResults patterns;
     
-    SearchPaths results = search( phrase );
+    SearchPaths allResults;
+    for ( const auto &phrase : phrases ) {
+        SearchPaths results = search( phrase );
+        if ( results.size() == 0 )
+            continue;
+
+        // for each result compute the average score of the rules in the result
+        for ( const auto &result : results ) {
+            double sum = 0.0;
+            for ( const auto &rule : result.rules )
+                sum += rule.score();
+            sum /= static_cast<double>( result.rules.size() );
+
+            std::vector<Token> reclassed( phrase );
+
+            if ( not reclassTokens( reclassed, result ) )
+                sum = -2.0;
+
+            MatchResult pattern;
+            pattern.matched = toString( reclassed );
+            pattern.score = sum;
+            pattern.nrules = static_cast<double>( result.rules.size() );
+            patterns.push_back( pattern );
+
+        }
+    }
+
     // if we failed to match against the grammar
-    // set score to -1.0 and return an empty result
-    if ( results.size() == 0 ) {
-        scores.push_back( -1. );
-        tokens.push_back( std::string("Failed to match to grammar!") );
-        return tokens;
+    // set score to -1.0 and return an error result
+    if ( patterns.size() == 0 ) {
+        MatchResult pattern;
+        pattern.matched = std::string("Failed to match to grammar!");
+        pattern.score = -1.0;
+        pattern.nrules = -1.0;
+        patterns.push_back( pattern );
     }
 
-    // for each result compute the average score of the rules in the result
-    int i = 0;
-    for ( const auto &result : results ) {
-        double sum = 0.0;
-        for ( const auto &rule : result.rules )
-            sum += rule.score();
-        sum /= static_cast<double>( result.rules.size() );
-
-        std::vector<Token> reclassed( phrase );
-
-        if ( not reclassTokens( reclassed, result ) )
-            sum = -2.0;
-
-        tokens.push_back( toString( reclassed ) );
-        scores.push_back( sum );
-
-        ++i;
-    }
-
-    return tokens;
+    return patterns;
 }
 
 
