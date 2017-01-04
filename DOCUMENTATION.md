@@ -354,7 +354,7 @@ United States and Canada. (See the **data/sample** directory). These lexicons
 are only a starting place for users and will need to be adapted for your
 specific needs.
 
-Likewise there are starter grammars in the **data/grammar/** directory.
+Likewise there are starter grammars in the **data/sample/** directory.
 
 Files ending in **.txt|.lex|.gmr** can be used with the file loader classes and files ending in **.sql** can be loaded as tables in the database and passed into the stored procedure interfaces in PostgreSQL.
 
@@ -384,8 +384,8 @@ which would compile or recompile all the lexicons in the ``as_config`` table.
 
 We implemented Query-Level Caching of Lexicon and Grammar objects to speed up
 standardizing a whole table. You will not see any benefit on one-off queries
-but if you construct your queries like the follow, there is a significant
-performance boost.
+but if you construct your queries like the following, there is a significant
+performance boost when standardizing a table of addresses.
 
 For this example, assume that we have a table ``test_addresses`` with a column ``address`` and we want to standardize the text in ``address`` into a new table ``standardized_addresses`` that contains ``id`` from ``test_addresses``, the standardized fields followed by the ``test_addresses.address`` field.
 
