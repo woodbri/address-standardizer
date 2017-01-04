@@ -242,7 +242,7 @@ where:
 * &lt;InClass::Type> - a comma separated list of InClass::Type(s) for this entry.
 * &lt;InClass::AttachType> - a comma separated list of possible attachment types.
 
-See **inclass.h** for the list of <InClass::Type> and <InClass::AttachType> values. **DETACH** is used represent no attachments. In lex-german.txt you will find a good example of attachments with this entry:
+See **inclass.h** for the list of &lt;InClass::Type> and &lt;InClass::AttachType> values. **DETACH** is used represent no attachments. In lex-german.txt you will find a good example of attachments with this entry:
 
     LEXENTRY:   STRASSE STRASSE TYPE    ATT_SUF,DET_PRE,DET_SUF
     LEXENTRY:   STRAßE  STRASSE TYPE    ATT_SUF,DET_PRE,DET_SUF
@@ -276,7 +276,7 @@ recognized and classified.
 The grammar is made up of a collection of rules. There are two types of rules:
 
 1. meta rule that refers to other rules
-2. terminal rules that refer to a partial stream of <InClass::Type>
+2. terminal rules that refer to a partial stream of &lt;InClass::Type>
 
 The system currently requires the root rule to be named "ADDRESS", beyond that you can name your rules using only letters, numbers and '_'. References to rules require the preceeding '@' character, like "@STREET_ADDRESS" below to refer to the "[STREET_ADDRESS]" rule. Comment line begin with a '#' character and blank lines are ignored.
 
@@ -300,7 +300,7 @@ The meta rules look like the follow:
     @STREET_ADDRESS @MACRO
     @PLACENAME @STREET_ADDRESS @MACRO
 
-The "[ADDRESS]" is the rule name. The "@<name>" is a reference to another rule.
+The "[ADDRESS]" is the rule name. The "@&lt;name>" is a reference to another rule.
 This "[ADDRESS]" rule is saying an address is composed of matching the
 "STREET_ADDRESS" rule followed by matching the "MACRO" rule. Or by matching the
 "PLACENAME" rule followed by the "STREET_ADDRESS" rule followed by the "MACRO"
@@ -325,7 +325,7 @@ Terminal rules are constructed as:
 
     <InClass::Type> list '->' <OutClass::Type> list '->' <score>
 
-the number of items in two lists **must** be the same. The <score> can be
+the number of items in two lists **must** be the same. The &lt;score> can be
 considered the probability for this rule. When a string is parsed into tokens,
 any given token might have multiple classification. We enumerate all the
 possible combinations of token classes and then match each to the grammar. We
