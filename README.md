@@ -22,6 +22,12 @@ correctness or delivery point solutions.
 * unicode/\*  (from icu packages)
 * PostgreSQL server development for 9.2, 9.3, 9.4, 9.5, and/or 9.6
 
+### For Ubuntu/Debian
+
+```
+sudo apt-get install libicu-dev libicu52 libboost1.55-dev libboost-serialization1.55-dev libboost-serialization1.55.0 libboost-regex1.55-dev libboost-regex1.55.0
+```
+
 ## Build
 
 See file src/README.address\_standardizer
