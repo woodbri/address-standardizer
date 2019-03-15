@@ -29,6 +29,7 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
+#include <string>
 #include "token.h"
 #include "search.h"
 
@@ -153,7 +154,9 @@ BOOST_FIXTURE_TEST_CASE(SearchTest_2, TestFixture)
 
     Search s(G);
     float cost = 0.0;
-    auto mr = s.searchAndReclassBest( pat1, cost );
+    float bestNrules = -1.0;
+    std::string matched;
+    auto mr = s.searchAndReclassBest( pat1, cost, matched, bestNrules );
     //printf("s.searchAndReclassBest: cost: %.3f\n", cost);
     BOOST_CHECK_CLOSE( cost, 0.500, 0.001 );
 
