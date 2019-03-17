@@ -1,0 +1,19 @@
+--- /usr/lib/postgresql/11/lib/pgxs/src/Makefile.global-orig	2019-03-16 20:43:31.931817183 +0000
++++ /usr/lib/postgresql/11/lib/pgxs/src/Makefile.global	2019-03-16 20:47:26.241103824 +0000
+@@ -1018,7 +1018,7 @@
+ endif
+ 
+ ifndef COMPILE.cxx.bc
+-COMPILE.cxx.bc = $(CLANG) -xc++ -Wno-ignored-attributes $(BITCODE_CXXFLAGS) $(CPPFLAGS) -flto=thin -emit-llvm -c
++COMPILE.cxx.bc = $(CLANG) -xc++ -Wno-ignored-attributes $(BITCODE_CXXFLAGS) $(CPPFLAGS) -emit-llvm -c
+ endif
+ 
+ %.bc : %.c
+@@ -1026,6 +1026,7 @@
+ 
+ %.bc : %.cpp
+ 	$(COMPILE.cxx.bc) -o $@ $<
++	$(LLVM_BINPATH)/opt -module-summary -f $@ -o $@
+ 
+ # Install LLVM bitcode module (for JITing).
+ #

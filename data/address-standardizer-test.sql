@@ -1,4 +1,7 @@
 ﻿
+;
+\pset pager off
+
 drop table if exists test_data cascade;
 create table test_data (
     id serial not null primary key,
@@ -1005,8 +1008,8 @@ LEXENTRY:	XRD	XRD	TYPE	DET_SUF
 ');
 
 
-drop extension address_standardizer;
-create extension address_standardizer;
+drop extension if exists address_standardizer2;
+create extension address_standardizer2;
 
 -- select * from pg_backend_pid();
 

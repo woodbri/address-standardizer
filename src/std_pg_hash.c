@@ -31,6 +31,11 @@
 #endif
 
 
+/* -- boolean -- */
+#ifndef TRUE
+#define TRUE 1
+#define FALSE 0
+#endif
 
 #ifdef DEBUG
 #define SET_TIME(a) gettimeofday(&(a), NULL)
@@ -84,6 +89,7 @@ static StdHashEntry *GetStdHashEntry(MemoryContext mcxt);
 static void DeleteStdHashEntry(MemoryContext mcxt);
 
 /* Memory context cache function prototypes */
+/*
 static void StdCacheInit(MemoryContext context);
 static void StdCacheReset(MemoryContext context);
 static void StdCacheDelete(MemoryContext context);
@@ -92,6 +98,7 @@ static void StdCacheStats(MemoryContext context, int level);
 #ifdef MEMORY_CONTEXT_CHECKING
 static void StdCacheCheck(MemoryContext context);
 #endif
+*/
 
 static bool IsInStdPortalCache(StdPortalCache *STDCache,  char *lexicon, char *grammar);
 static STANDARDIZER *GetStdFromPortalCache(StdPortalCache *STDCache,  char *lexicon, char *grammar);
@@ -102,38 +109,6 @@ static StdPortalCache *GetStdPortalCache(FunctionCallInfo fcinfo);
 /* standardizer api functions */
 
 static STANDARDIZER *CreateStd(char *lexicon, char *grammar);
-
-
-/* Memory context definition must match the current version of PostgreSQL */
-static MemoryContextMethods StdCacheContextMethods =
-{
-    NULL,
-    NULL,
-    NULL,
-    StdCacheInit,
-    StdCacheReset,
-    StdCacheDelete,
-    NULL,
-    StdCacheIsEmpty,
-    StdCacheStats
-#ifdef MEMORY_CONTEXT_CHECKING
-    , StdCacheCheck
-#endif
-};
-
-
-static void
-StdCacheInit(MemoryContext context)
-{
-    /* NOP - initialized when first used. */
-}
-
-
-static void
-StdCacheReset(MemoryContext context)
-{
-    // NOP - Seems to be a required function
-}
 
 
 static void
@@ -152,8 +127,15 @@ std_free(STANDARDIZER *std)
 
 
 static void
+#if PGSQL_VERSION < 96
+
 StdCacheDelete(MemoryContext context)
 {
+#else
+StdCacheDelete(void *ptr)
+{
+    MemoryContext context = (MemoryContext)ptr;
+#endif
     StdHashEntry *she;
 
     DBG("Enter: StdCacheDelete");
@@ -170,6 +152,21 @@ StdCacheDelete(MemoryContext context)
         std_free(she->std);
 
     DeleteStdHashEntry(context);
+}
+
+#if PGSQL_VERSION < 96
+
+static void
+StdCacheInit(MemoryContext context)
+{
+    /* NOP - initialized when first used. */
+}
+
+
+static void
+StdCacheReset(MemoryContext context)
+{
+    // NOP - Seems to be a required function
 }
 
 
@@ -196,6 +193,26 @@ StdCacheCheck(MemoryContext context)
     // NOP - another reuired function
 }
 #endif
+
+
+/* Memory context definition must match the current version of PostgreSQL */
+static MemoryContextMethods StdCacheContextMethods =
+{
+    NULL,
+    NULL,
+    NULL,
+    StdCacheInit,
+    StdCacheReset,
+    StdCacheDelete,
+    NULL,
+    StdCacheIsEmpty,
+    StdCacheStats
+#ifdef MEMORY_CONTEXT_CHECKING
+    , StdCacheCheck
+#endif
+};
+
+#endif /* PGSQL_VERSION < 96 */
 
 
 uint32
@@ -285,13 +302,15 @@ IsInStdPortalCache(StdPortalCache *STDCache,  char *lexicon, char *grammar)
 {
     int i;
     bool ret = FALSE;
+    char *lex_md5;
+    char *gmr_md5;
 
     DBG("Enter: IsInStdPortalCache");
 
-    char *lex_md5 = getMd5( lexicon );
+    lex_md5 = getMd5( lexicon );
     DBG("lex_md5: %p", lex_md5);
 
-    char *gmr_md5 = getMd5( grammar );
+    gmr_md5 = getMd5( grammar );
     DBG("gmr_md5: %p", gmr_md5);
     if ( gmr_md5 == NULL )
         gmr_md5 = strdup("");
@@ -331,12 +350,14 @@ static STANDARDIZER *
 GetStdFromPortalCache(StdPortalCache *STDCache,  char *lexicon, char *grammar)
 {
     int i;
+    char *lex_md5;
+    char *gmr_md5;
     STANDARDIZER *ret = NULL;
 
     DBG("Enter: GetStdFromPortalCache");
 
-    char *lex_md5 = getMd5( lexicon );
-    char *gmr_md5 = getMd5( grammar );
+    lex_md5 = getMd5( lexicon );
+    gmr_md5 = getMd5( grammar );
     if ( gmr_md5 == NULL )
         gmr_md5 = strdup("");
 
@@ -397,6 +418,9 @@ AddToStdPortalCache(StdPortalCache *STDCache, char *lexicon, char * grammar)
     MemoryContext STDMemoryContext;
     MemoryContext old_context;
     STANDARDIZER *std = NULL;
+#if PGSQL_VERSION >= 96
+    MemoryContextCallback *callback;
+#endif
     char * lex_md5;
     char * gmr_md5;
 
@@ -426,10 +450,24 @@ AddToStdPortalCache(StdPortalCache *STDCache, char *lexicon, char * grammar)
 
     DBG("Adding item to STD cache ('%s', '%s') index %d", lex_md5, gmr_md5, STDCache->NextSlot);
 
+#if PGSQL_VERSION < 96
     STDMemoryContext = MemoryContextCreate(T_AllocSetContext, 8192,
                                            &StdCacheContextMethods,
                                            STDCache->StdCacheContext,
                                            "AddressStandardizer2 STD Memory Context");
+#else
+    STDMemoryContext = AllocSetContextCreate(STDCache->StdCacheContext,
+                                              "AddressStandardizer2 STD Memory Context",
+                                              ALLOCSET_SMALL_SIZES);
+    /* PgSQL comments suggest allocating calback in the context */
+    /* being managed, so that the callback object gets cleaned along with */
+    /* the context */
+    callback = MemoryContextAlloc(STDMemoryContext, sizeof(MemoryContextCallback));
+    callback->arg = (void*)(STDMemoryContext);
+    callback->func = StdCacheDelete;
+    MemoryContextRegisterResetCallback(STDMemoryContext, callback);
+#endif
+
 
     /* Create the backend hash if it doesn't already exist */
     DBG("Check if StdHash exists (%p)", (void*) StdHash);

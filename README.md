@@ -30,7 +30,11 @@ sudo apt-get install libicu-dev libicu52 libboost1.55-dev libboost-serialization
 
 ## Build
 
-See file src/README.address\_standardizer
+See file ``src/README.address\standardizer``
+
+## Getting Started
+
+See script ``tools/getting-started.sh``
 
 ## Funding Needed
 

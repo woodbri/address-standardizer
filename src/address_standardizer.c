@@ -461,7 +461,6 @@ Datum as_match(PG_FUNCTION_ARGS)
     char                *locale;
     char                *filter;
     MTOKEN              *tokens;
-    STANDARDIZER        *std;
     int                  i;
 
     DBG("Start as_match");

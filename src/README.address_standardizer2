@@ -11,18 +11,29 @@ The build process for this:
     cd address-standardizer/src
     make
     make -f Makefile.pg help
-    make PGVER=9.3 -f Makefile.pg
-    sudo make PGVER=9.3 -f Makefile.pg install
+    make PGVER=10 -f Makefile.pg
+    sudo make PGVER=10 -f Makefile.pg install
 
 There are multiple option for selecting which postgresql version you want if you have multiple versions installed.
 
-    make [PGVER=9.2|9.3|9.4|9.5]|[PG_CONFIG=/path/to/pg_config] clean|install
+    make [PGVER=9.2|9.3|9.4|9.5|9.6|10|11]|[PG_CONFIG=/path/to/pg_config] clean|install
 
-if you ignore both PGVER and PG_CONFIG the make file will look in your current PATH variable. Or you can change PGVER= 9.2, 9.3, 9.4, and 9.5, in which case the path will be set for Ubuntu to /usr/lib/postgresql/<PGVER>/bin/pg_config. Or you can set PG_CONFIG=/path/to/pg_config to use one in a different location.
+if you ignore both PGVER and PG_CONFIG the make file will look in your current PATH variable. Or you can change PGVER= 9.2, 9.3, 9.4, 9.5, 9.6, 10, and 11, in which case the path will be set for Ubuntu to /usr/lib/postgresql/<PGVER>/bin/pg_config. Or you can set PG_CONFIG=/path/to/pg_config to use one in a different location.
 
 There is a file src/tester/test-1.sql that you can load into a new database
 and it will load a test lexicon and grammar and standardize an address.
 
 More work needs to be done to create lexicons and grammars for specific data
 sets but the basic code is here. Please report issues and I'll try to help.
+
+# Issues
+
+## PostgreSQL 11
+
+On Ubuntu 16.04, PostgreSQL 11.2 needs a patch to ``/usr/lib/postgresql/11/lib/pgxs/src/Makefile.global`` to compile and install the PostgreSQL extension. Make a backup of this file then run:
+
+```
+cp /usr/lib/postgresql/11/lib/pgxs/src/Makefile.global /usr/lib/postgresql/11/lib/pgxs/src/Makefile.global-save
+patch /usr/lib/postgresql/11/lib/pgxs/src/Makefile.global pg11-Makefile.global.patch
+```
 

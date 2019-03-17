@@ -1,5 +1,8 @@
 *.swp
 *.so
+*.o
+*.d
+*.bc
 diff.txt
 data/.gitignore
 lex-serial*
