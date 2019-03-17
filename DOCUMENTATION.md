@@ -8,7 +8,7 @@ The Address Standardizer is a set of C++ classes designed to deal with the
 problem of standardizing street addresses for the purpose of geocoding.
 Geocoding is the process of matching an address to a reference set of streets.
 In more general terms, this library can be used for record linkage between data
-dataset be matching a record in one data set to record(s) in another data set.
+sets by matching a record in one data set to record(s) in another data set.
 
 Some of the key design features are:
 
