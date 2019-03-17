@@ -44,11 +44,11 @@ using icu::UnicodeString;
 
 std::string Utils::unaccentUTF8( const std::string &str ) {
     // UTF-8 std::string -> UTF-16 UnicodeString
-    UnicodeString source = UnicodeString::fromUTF8(StringPiece(str));
+    UnicodeString source = UnicodeString::fromUTF8(icu::StringPiece(str));
 
     // Transliterate UTF-16 UnicodeString
     UErrorCode status = U_ZERO_ERROR;
-    Transliterator *accentsConverter = Transliterator::createInstance(
+    icu::Transliterator *accentsConverter = icu::Transliterator::createInstance(
         "NFD; [:M:] Remove; NFC", UTRANS_FORWARD, status);
     accentsConverter->transliterate(source);
     // TODO: handle errors with status
@@ -63,9 +63,9 @@ std::string Utils::unaccentUTF8( const std::string &str ) {
 
 std::string Utils::upperCaseUTF8( const std::string &str, const std::string loc ) {
     // UTF-8 std::string -> UTF-16 UnicodeString
-    UnicodeString source = UnicodeString::fromUTF8(StringPiece(str));
+    UnicodeString source = UnicodeString::fromUTF8(icu::StringPiece(str));
 
-    Locale locale(loc.c_str());
+    icu::Locale locale(loc.c_str());
 
     // uppercase
     source.toUpper(locale);
@@ -82,12 +82,12 @@ std::string Utils::normalizeUTF8( const std::string &str, UErrorCode &errorCode)
     std::string result("ERROR");
 
     // UTF-8 std::string -> UTF-16 UnicodeString
-    UnicodeString source = UnicodeString::fromUTF8(StringPiece(str));
+    UnicodeString source = UnicodeString::fromUTF8(icu::StringPiece(str));
 
     errorCode = U_ZERO_ERROR;
 
     // get instance of normalizer
-    const Normalizer2 &norm(*Normalizer2::getNFCInstance( errorCode ));
+    const icu::Normalizer2 &norm(*icu::Normalizer2::getNFCInstance( errorCode ));
     if ( U_FAILURE(errorCode) )
         return result;
 
