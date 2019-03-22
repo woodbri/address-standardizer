@@ -7,12 +7,20 @@ else
 endif
 $(info 'PG_CONFIG=$(PG_CONFIG)' )
 PG_VERSION = $(shell $(PG_CONFIG) --version)
-PG_MAJOR = $(shell $(PG_CONFIG) --version | sed -e 's/^PostgreSQL \([0-9][0-9]*[.][0-9][0-9]*\).*$$/\1/gi')
+PG_VERSION_UNDEV = $(shell echo $(PG_VERSION) | sed -e 's/devel/.0/')
+ifneq "$(PG_VERSION)" "$(PG_VERSION_UNDEV)"
+    DEV_VERSION=1
+else
+    DEV_VESRION=0
+endif
+PG_MAJOR = $(shell echo $(PG_VERSION_UNDEV) | sed -e 's/^PostgreSQL \([0-9][0-9]*[.][0-9][0-9]*\).*$$/\1/gi')
 PGSQL_VERSION = $(shell echo $(PG_MAJOR) | sed -e 's/[.]//' )
 
 $(info 'PG_VERSION=$(PG_VERSION)')
+$(info 'PG_VERSION_UNDEV=$(PG_VERSION_UNDEV)')
 $(info 'PG_MAJOR=$(PG_MAJOR)')
 $(info 'PGSQL_VERSION=$(PGSQL_VERSION)')
+$(info 'DEV_VERSION=$(DEV_VERSION)')
 
 ifeq "$(PG_MAJOR)" '9.4'
     CONVERSION = -Werror=conversion
