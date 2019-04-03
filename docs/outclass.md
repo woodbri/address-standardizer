@@ -18,7 +18,7 @@ The full list of OutClass types is listed in the following table.
 | ------------- | ----------- |
 | BLDNG   | Unparsed building identifiers and types. |
 | HOUSE   | The civic address number. The '123' in '123 MAIN ST' |
-| PREDIR  | A directional modifier that precedes the street name. Example, the 'WEST' in '3715 TENTH AVENUE WEST'. |
+| PREDIR  | A directional modifier that precedes the street name. Example, the 'WEST' in '3715 WEST TENTH AVENUE'. |
 | QUALIF  | A pre or post modifier. Example, the 'OLD' in '3715 OLD HIGHWAY 99' or 'BUSINESS' in '1203 HIGHWAY 45 BUSINESS'. |
 | PRETYP  | A street type preceding the root street name. Example, the 'HIGHWAY' in '3715 HIGHWAY 99'. |
 | STREET  | The root street name, stripped of directional or type modifiers. Example, the 'TENTH' in '3715 WEST TENTH AVENUE'. |

@@ -11,7 +11,7 @@ example, *ST* can be classified as *TYPE* in the context of *STREET* or as
 against the grammar are we able to determine which context is most likely to be
 the context of usage for this particular address.
 
-The Token object as the following fields:
+The Token object has the following fields:
 
 * WORD - a word or phrase parsed from the address string
 * STDWORD - a standardized version of *WORD* based on the Lexicon or *WORD*

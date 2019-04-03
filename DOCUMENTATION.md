@@ -28,6 +28,9 @@ key component that can help in that task. Additionally, if you need to change
 the underlying data that is being matched for example by adding a new
 country to the standardizer or adding an new reference set, then this document
 will help explain the how it works and what you can do to make those changes.
+If you work with PostgreSQl database this provides and extension to the database
+and SQl wrappers for accessing this code. Alternatively for developer you can
+link this code directly into your C/C++ application and access it from there.
 
 ## How Does It Work?
 
@@ -627,4 +630,12 @@ global changes (ie: ones related to may addresses or a class of addresses)
 making adjustments to the grammar is better. I typically look at 1,000s if not
 1,000,000s of records when building a new Lexicon and Grammar.
 
+## See Also
+
+* [Overview](docs/overview.md)
+* [Token](docs/token.md)
+* [Lexicon](docs/lexicon.md)
+* [Grammar](docs/grammar.md)
+* [InClass::Type](docs/inclass.md)
+* [OutClass::Type](docs/outclass.md)
 

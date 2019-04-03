@@ -62,7 +62,7 @@ The list of input types is:
 | ATT_PRE   |  Attached prefix |
 | ATT_SUF   |  Attached suffix |
 
-You can use *DETACHED* or leave the field empty to indicate that the the token is not attached. *DET_PRE*, *DET_SUF*, *ATT_PRE*, *ATT_SUF* can be placed in a comma separated list ass appropriate to indicate the possible attachments for the token. For example *STRASSE* could have *DET_SUF,ATT_SUF* associated with it to indcate that it follows the street name and might be attached or not.
+You can use *DETACHED* or leave the field empty to indicate that the the token is not attached. *DET_PRE*, *DET_SUF*, *ATT_PRE*, *ATT_SUF* can be placed in a comma separated list as appropriate to indicate the possible attachments for the token. For example *STRASSE* could have *DET_SUF,ATT_SUF* associated with it to indcate that it follows the street name and might be attached or not.
 
 
 ## See Also

@@ -22,10 +22,10 @@ need to account for things like optional fields, maybe apartment numbers, etc.
 
 The first example might match many addresses in the US and Canada. The USPS has
 a document Pub. 28 that defines valid address structure and acceptable
-abbreviations the can be used to build the Lexicon.
+abbreviations that can be used to build the Lexicon.
 
 The second example might be used at the top level to match some European
-country addresses where the house number follows the streat name.
+country addresses where the house number follows the street name.
 
 The third example might be used by someone that is only working with a small
 subset of data covering a single city where there is no need to differentiate
@@ -59,7 +59,7 @@ tokens.
 The second example ``[house_number]`` has a different format and here we have
 to consume input tokens, ie: the tokens before the first '->'.
 
-The ``[ADDRESS]`` style section is referred to a *MetaSection* and the
+The ``[ADDRESS]`` style section is referred to as a *MetaSection* and the
 ``[house_number]`` section is referred to as a *RuleSection*. You can not mix
 *MetaSection* lines with *RuleSection* lines. In the *MetaSection* in the
 grammar file all references are preceded by an '@' character, so the example
