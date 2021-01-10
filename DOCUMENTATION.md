@@ -441,13 +441,42 @@ CREATE TABLE as_config
 );
 ```
 
-You might create your ``test_addresses`` table like:
+You might have a ``std_addresses`` that look like the following. Fields
+``building`` through ``unit`` are the output of ``as_standardize()``
+
+```
+create std_addresses as ( 
+    sid serial not null primary key,
+    id integer,     -- link to ``ref_addresses`` table
+    building text, 
+    house_num text, 
+    predir text, 
+    qual text, 
+    pretype text, 
+    name text, 
+    suftype text, 
+    sufdir text, 
+    ruralroute text, 
+    extra text, 
+    city text, 
+    prov text, 
+    country text, 
+    postcode text, 
+    box text, 
+    unit text, 
+    pattern text, -- this is the pattern of tokens that the address generated
+    dmetaphone character varying(4) -- first 4 characters of dmetaphone(name)
+                                    -- used for fuzzy search
+);
+```
+
+You might create your ``test_addresses`` table like the following. This can be simplified or eliminated if you only have data in a single country.
 
 ```
 CREATE TABLE test_addresses
 (
     id serial NOT NULL PRIMARY KEY,
-    address text,
+    address text, -- concatenation of address terms in ref_addresses
     locale text,
     countrycode character(2)
 );
