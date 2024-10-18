@@ -44,5 +44,5 @@ develop lexicons and rules addressing standards for every country that one
 might want to support.
 
 Please contact me if you are interested in this project and/or you can
-provide some amount of funding.  woodbri (at) imaptools (dot) com.
+provide some amount of funding.  stephenwoodbridge37 (at) gmail (dot) com.
 
